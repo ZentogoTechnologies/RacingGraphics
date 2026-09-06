@@ -1,6 +1,7 @@
 import { t } from '../i18n'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { ArrowLeft, Flag, Pencil, Trash2, ChevronUp, ChevronDown, ChevronsUpDown, Users, Loader2, ImagePlus, Scissors, X } from 'lucide-react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import ModuleHeader from '../components/shared/ModuleHeader'
 import Pagination from '../components/shared/Pagination'
 import ConfirmDialog from '../components/shared/ConfirmDialog'
@@ -33,6 +34,8 @@ function SortIcon({ columnKey, sortField, sortDirection, onSort }) {
 
 export default function VehiculosModule() {
   const toast = useToast()
+  const ubicacion = useLocation()
+  const navegar = useNavigate()
   const { puedeEscribir } = useAuth()
   const { disciplina } = useDisciplina()
 
@@ -190,6 +193,22 @@ export default function VehiculosModule() {
 
     setIsFormOpen(true)
   }
+
+  /* Se llega aquí desde la ficha de un piloto con un carro concreto:
+     `state.editarVehiculo`. Se pide por id en vez de buscarlo en la tabla
+     porque la tabla está paginada y filtrada, y el carro puede no estar en
+     la página que se ve. El state se borra en cuanto se usa: sin eso, un
+     recargón o volver atrás reabriría el formulario solo. */
+  useEffect(() => {
+    const id = ubicacion.state?.editarVehiculo
+    if (!id) return
+
+    navegar(ubicacion.pathname, { replace: true, state: null })
+
+    vehiculosApi.obtener(id)
+      .then(openEditForm)
+      .catch(err => toast.error('No se pudo abrir el vehículo', err.message))
+  }, [ubicacion.state])   // eslint-disable-line react-hooks/exhaustive-deps
 
   const alternarPiloto = (pilotId) => {
     setVehicleForm(f => {

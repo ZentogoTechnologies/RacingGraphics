@@ -316,5 +316,12 @@
   "El rol de dueño no se cambia desde aquí. Se asigna con el script": "The owner role is not changed here. It is assigned with the script",
   "Elige el evento y, si quieres, la tanda concreta. Puedes cambiarlo después.": "Choose the event and, if you want, the specific session. You can change it later.",
   "Gestión de carreras de pista, vueltas, clasificaciones y endurance.": "Track race management, laps, standings and endurance.",
-  "XML que el servidor alcanza ahora mismo. Pulsa uno para ponerlo en el campo de arriba.": "XML files the server can reach right now. Click one to put it in the field above."
+  "XML que el servidor alcanza ahora mismo. Pulsa uno para ponerlo en el campo de arriba.": "XML files the server can reach right now. Click one to put it in the field above.",
+  "SUS VEHÍCULOS": "THEIR VEHICLES",
+  "ninguno": "none",
+  "IR A VEHÍCULOS": "GO TO VEHICLES",
+  "Compartido con": "Shared with",
+  "Editar en Vehículos": "Edit in Vehicles",
+  "Tarjetas": "Cards",
+  "Tabla": "Table"
 }
