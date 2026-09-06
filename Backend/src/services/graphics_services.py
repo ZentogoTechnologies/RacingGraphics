@@ -60,6 +60,7 @@ TEMPLATES: dict[str, Template] = {
         Template("bg-green",   "Fondo Verde",    "background", 10, "html/14_green_background"),
         Template("bg-cyan",    "Fondo Cian",     "background", 10, "html/15_cian_background"),
         Template("bg-magenta", "Fondo Magenta",  "background", 10, "html/16_magenta_background"),
+        Template("bg-orange",  "Fondo Naranja",  "background", 10, "html/17_orange_background"),
 
         # ── Tótems (capa 20) ──────────────────────────────────
         Template("totem-completo",  "Tótem Nombre Completo", "totem", 20, "html/20_totem_fullname",  accepts_data=True),

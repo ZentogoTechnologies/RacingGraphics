@@ -85,6 +85,8 @@ const BACKGROUNDS = [
     icon: 'text-green-500',   border: 'border-green-500',   bgActive: 'bg-green-500/10',   dot: 'bg-green-500' },
   { id: 'bg-yellow',  label: 'Amarillo',  nombre: 'Fondo Amarillo', detalle: 'Fondo amarillo',   Icon: ColorSwatch,
     icon: 'text-yellow-400',  border: 'border-yellow-400',  bgActive: 'bg-yellow-400/10',  dot: 'bg-yellow-400' },
+  { id: 'bg-orange',  label: 'Naranja',   nombre: 'Fondo Naranja',  detalle: 'Fondo naranja',    Icon: ColorSwatch,
+    icon: 'text-orange-500',  border: 'border-orange-500',  bgActive: 'bg-orange-500/10',  dot: 'bg-orange-500' },
   { id: 'bg-magenta', label: 'Magenta',   nombre: 'Fondo Magenta',  detalle: 'Fondo magenta',    Icon: ColorSwatch,
     icon: 'text-fuchsia-500', border: 'border-fuchsia-500', bgActive: 'bg-fuchsia-500/10', dot: 'bg-fuchsia-500' },
 ]
