@@ -37,6 +37,11 @@
     --tf-morado:     #B72DFF;
     --tf-morado-bg:  rgba(94, 20, 138, .70);
 
+    /* Ámbar para una diferencia que sale negativa: alguien va por delante
+       en tiempo del que figura primero. Se separa del oro del líder, que
+       es amarillo, y no se confunde con el rojo del acento. */
+    --tf-ambar:      #FFA31A;
+
     /* Verde claro para el segundo piloto. Se separa bien del morado de la
        vuelta rápida y del oro del líder, que son los otros dos colores
        con significado propio en la torre. */
@@ -610,6 +615,22 @@
         0 1px 2px rgba(0,0,0,1),
         0 0 6px rgba(0,0,0,.9);
 }
+
+/* Diferencia negativa: este piloto va por delante en tiempo del que
+   figura primero. Pasa con una sanción —le bajan la posición pero no le
+   tocan el tiempo—, y también si el cronometrista ordenó la tabla a mano.
+
+   Se pinta en ámbar y no se escribe nada más porque el XML de MyLaps no
+   dice que haya sanción: no trae un campo para eso, los ocho `additional`
+   los usa quien inscribe para el país y la marca, y el `marker` vale lo
+   mismo en todas las filas. Lo único que sabemos es que esa cifra no es
+   una diferencia normal, y eso es lo que dice el color. Poner
+   "PENALIZADO" sería afirmar una causa que no consta. */
+.tf-dif.negativa{
+
+    color:var(--tf-ambar);
+}
+
 
 /* El primero no tiene contra quién medirse: en su fila la columna dice de
    qué diferencia se está hablando, y por eso va en texto y no en cifra. */

@@ -522,7 +522,18 @@ function torrePintarFilas(standings){
         }
 
         if (torreConfig.columna) {
-            columnas += `<div class="tf-dif">${torreEscapar(torreDiferencia(piloto, index))}</div>`;
+
+            const dif = torreDiferencia(piloto, index);
+
+            /* En ambar cuando sale negativa: este va por delante en tiempo
+               del que figura primero, que es lo que deja una sancion. El
+               color solo avisa de que la cifra no es normal; no dice que
+               haya sancion porque MyLaps no lo manda en ninguna parte. */
+            const negativa = String(dif).trim().charAt(0) === "-";
+
+            columnas += `<div class="tf-dif${negativa ? " negativa" : ""}">`
+                      + torreEscapar(dif)
+                      + `</div>`;
         }
 
         fila.innerHTML = columnas;
