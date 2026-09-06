@@ -206,7 +206,14 @@ export default function EventosModule() {
         }
       }
 
-      closeForm()
+      /* Se sigue en la ficha después de guardar, no se vuelve al listado.
+         Al dar de alta hay cosas que solo se pueden hacer con el registro ya
+         creado —subir su imagen, recortarle el fondo— y devolver a la lista
+         obligaba a buscarlo otra vez para entrar a editarlo.
+
+         El id se fija aquí: sin esto la ficha seguiría en modo alta y volver
+         a guardar crearía un registro repetido. */
+      setCurrentEditId(id)
       lista.recargar()
     } catch (err) {
       toast.error(currentEditId ? 'No se pudo actualizar' : 'No se pudo crear', err.message)
@@ -248,6 +255,10 @@ export default function EventosModule() {
 
   return (
     <div className="w-full animate-fade-in">
+      {/* El listado y la ficha no conviven: se ve uno u otro. Con los dos a
+          la vez la ficha quedaba apretada arriba y en un teléfono ni se
+          alcanzaba a ver entera. */}
+      {!isFormOpen && (
       <ModuleHeader
         entityName="eventos"
         searchText={lista.texto}
@@ -261,8 +272,24 @@ export default function EventosModule() {
         exportFileName="eventos"
         exportColumnMap={{ name: 'Evento', start_date: 'Inicio', end_date: 'Fin', location: 'Sede' }}
       />
+      )}
 
       {isFormOpen && (
+      <>
+        {/* Cabecera de la ficha. Sustituye a la del listado y da la vuelta
+            atrás, que es lo único que se puede hacer desde aquí. */}
+        <div className="flex items-center gap-3 mb-5">
+          <button
+            type="button" onClick={closeForm}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg border border-neutral-800 text-neutral-400 hover:border-neutral-600 hover:text-white transition-colors font-bold text-xs"
+          >
+            <ArrowLeft size={15}/> {t('VOLVER')}
+          </button>
+          <h3 className="text-lg font-black italic text-white">
+            {currentEditId ? t('Editar evento') : t('Nuevo evento')}
+          </h3>
+        </div>
+
         <form onSubmit={handleSave} className="bg-[#141414] p-6 rounded-xl border border-red-600/30 mb-6">
           {/* Dos pasos porque son dos decisiones distintas: primero qué
               categorías corren, y solo entonces tiene sentido preguntar
@@ -481,8 +508,10 @@ export default function EventosModule() {
             </div>
           </div>
         </form>
+      </>
       )}
 
+      {!isFormOpen && (
       <div className="bg-[#141414] rounded-xl border border-neutral-800 overflow-hidden">
         {/* Desplaza en horizontal en pantallas estrechas. Antes el
             envoltorio recortaba y desde el móvil no se llegaba a las
@@ -592,6 +621,7 @@ export default function EventosModule() {
           />
         )}
       </div>
+      )}
 
       <ConfirmDialog
         abierto={Boolean(porBorrar)}

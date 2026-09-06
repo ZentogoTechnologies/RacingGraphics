@@ -1,7 +1,7 @@
 import { t } from '../i18n'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
-  Pencil, Trash2, Plus, X, ChevronUp, ChevronDown, ChevronsUpDown, Loader2,
+  ArrowLeft, Pencil, Trash2, Plus, X, ChevronUp, ChevronDown, ChevronsUpDown, Loader2,
   Scissors, Upload, ImageIcon,
 } from 'lucide-react'
 import ModuleHeader from '../components/shared/ModuleHeader'
@@ -182,6 +182,8 @@ export default function CategoriasModule() {
       .map(s => ({ ...s, sub_category_name: s.sub_category_name.trim() }))
 
     try {
+      let id = currentEditId
+
       if (currentEditId) {
         // El category_id no viaja en el update: es la llave por la que se
         // busca el documento, no un campo editable.
@@ -203,11 +205,22 @@ export default function CategoriasModule() {
           description: categoryForm.description || null,
           sub_categories: subs,
         })
+        id = creada.category_id
         toast.exito('Categoría creada', `${creada.category_name} · ${etiquetaDisciplina}`)
         // Después de crear porque hasta ahora no había id al que asociarlo.
         if (logo) await subirLogo(creada.category_id)
       }
-      closeForm()
+      /* Se sigue en la ficha después de guardar, no se vuelve al listado.
+         Al dar de alta hay cosas que solo se pueden hacer con el registro ya
+         creado —subir su imagen, recortarle el fondo— y devolver a la lista
+         obligaba a buscarlo otra vez para entrar a editarlo.
+
+         El id se fija aquí: sin esto la ficha seguiría en modo alta y volver
+         a guardar crearía un registro repetido. */
+      setCurrentEditId(id)
+
+      // El logo ya subio; se suelta para que no vuelva a mandarse.
+      setLogo(null)
       lista.recargar()
     } catch (err) {
       // El formulario se queda abierto con lo escrito: si el guardado
@@ -233,6 +246,10 @@ export default function CategoriasModule() {
 
   return (
     <div className="w-full animate-fade-in">
+      {/* El listado y la ficha no conviven: se ve uno u otro. Con los dos a
+          la vez la ficha quedaba apretada arriba y en un teléfono ni se
+          alcanzaba a ver entera. */}
+      {!isFormOpen && (
       <ModuleHeader
         entityName="categorías"
         searchText={lista.texto}
@@ -246,8 +263,24 @@ export default function CategoriasModule() {
         exportFileName="categorias"
         exportColumnMap={{ category_name: 'Categoría', discipline: 'Disciplina', description: 'Descripción' }}
       />
+      )}
 
       {isFormOpen && (
+      <>
+        {/* Cabecera de la ficha. Sustituye a la del listado y da la vuelta
+            atrás, que es lo único que se puede hacer desde aquí. */}
+        <div className="flex items-center gap-3 mb-5">
+          <button
+            type="button" onClick={closeForm}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg border border-neutral-800 text-neutral-400 hover:border-neutral-600 hover:text-white transition-colors font-bold text-xs"
+          >
+            <ArrowLeft size={15}/> {t('VOLVER')}
+          </button>
+          <h3 className="text-lg font-black italic text-white">
+            {currentEditId ? t('Editar categoría') : t('Nueva categoría')}
+          </h3>
+        </div>
+
         <form onSubmit={handleSave} className="bg-[#141414] p-6 rounded-xl border border-red-600/30 mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-neutral-400 text-xs mb-1 uppercase">{t('Nombre')}</label>
@@ -376,8 +409,10 @@ export default function CategoriasModule() {
             </button>
           </div>
         </form>
+      </>
       )}
 
+      {!isFormOpen && (
       <div className="bg-[#141414] rounded-xl border border-neutral-800 overflow-hidden">
         {/* Desplaza en horizontal en pantallas estrechas. Antes el
             envoltorio recortaba y desde el móvil no se llegaba a las
@@ -456,6 +491,7 @@ export default function CategoriasModule() {
           />
         )}
       </div>
+      )}
 
       <ConfirmDialog
         abierto={Boolean(porBorrar)}

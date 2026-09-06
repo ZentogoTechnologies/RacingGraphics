@@ -1,6 +1,6 @@
 import { t } from '../i18n'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Pencil, Trash2, ChevronUp, ChevronDown, ChevronsUpDown, Loader2, Scissors, Upload, User, X } from 'lucide-react'
+import { ArrowLeft, Pencil, Trash2, ChevronUp, ChevronDown, ChevronsUpDown, Loader2, Scissors, Upload, User, X } from 'lucide-react'
 import ModuleHeader from '../components/shared/ModuleHeader'
 import Pagination from '../components/shared/Pagination'
 import ConfirmDialog from '../components/shared/ConfirmDialog'
@@ -207,7 +207,19 @@ export default function PilotosModule() {
           toast.error('El piloto se guardó, pero la foto no', err.message)
         }
       }
-      closeForm()
+      /* Se sigue en la ficha después de guardar, no se vuelve al listado.
+         Al dar de alta hay cosas que solo se pueden hacer con el piloto ya
+         creado —subirle la foto, recortarle el fondo— y devolver a la lista
+         obligaba a buscarlo otra vez para entrar a editarlo.
+
+         El id se fija aquí: sin esto la ficha seguiría en modo alta y volver
+         a guardar crearía un piloto repetido. */
+      setCurrentEditId(id)
+
+      // La foto ya subió; se suelta para que no vuelva a mandarse.
+      setFoto(null)
+      if (inputFoto.current) inputFoto.current.value = ''
+
       lista.recargar()
     } catch (err) {
       toast.error(currentEditId ? 'No se pudo actualizar' : 'No se pudo crear', err.message)
@@ -245,6 +257,10 @@ export default function PilotosModule() {
 
   return (
     <div className="w-full animate-fade-in">
+      {/* El listado y la ficha no conviven: se ve uno u otro. Con los dos a
+          la vez la ficha quedaba apretada arriba y en un teléfono ni se
+          alcanzaba a ver entera. */}
+      {!isFormOpen && (
       <ModuleHeader
         entityName="pilotos"
         searchText={lista.texto}
@@ -258,7 +274,9 @@ export default function PilotosModule() {
         exportFileName="pilotos"
         exportColumnMap={{ pilot_id: 'ID', name: 'Nombre', last_name: 'Apellido', nationality: 'Nacionalidad', team_brand: 'Equipo' }}
       />
+      )}
 
+      {!isFormOpen && (
       <div className="flex items-center gap-3 mb-4">
         <label className="text-xs uppercase tracking-wider text-neutral-500">{t('Categoría')}</label>
         <select
@@ -285,8 +303,24 @@ export default function PilotosModule() {
           <option value="false">{t('Inactivos')}</option>
         </select>
       </div>
+      )}
 
       {isFormOpen && (
+      <>
+        {/* Cabecera de la ficha. Sustituye a la del listado y da la vuelta
+            atrás, que es lo único que se puede hacer desde aquí. */}
+        <div className="flex items-center gap-3 mb-5">
+          <button
+            type="button" onClick={closeForm}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg border border-neutral-800 text-neutral-400 hover:border-neutral-600 hover:text-white transition-colors font-bold text-xs"
+          >
+            <ArrowLeft size={15}/> {t('VOLVER')}
+          </button>
+          <h3 className="text-lg font-black italic text-white">
+            {currentEditId ? t('Editar piloto') : t('Nuevo piloto')}
+          </h3>
+        </div>
+
         <form onSubmit={handleSave} className="bg-[#141414] p-6 rounded-xl border border-red-600/30 mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-neutral-400 text-xs mb-1 uppercase">{t('Nombre')}</label>
@@ -404,8 +438,10 @@ export default function PilotosModule() {
             </button>
           </div>
         </form>
+      </>
       )}
 
+      {!isFormOpen && (
       <div className="bg-[#141414] rounded-xl border border-neutral-800 overflow-hidden">
         {/* Desplaza en horizontal en pantallas estrechas. Antes el
             envoltorio recortaba y desde el móvil no se llegaba a las
@@ -510,6 +546,7 @@ export default function PilotosModule() {
           />
         )}
       </div>
+      )}
 
       <ConfirmDialog
         abierto={Boolean(porBorrar)}
