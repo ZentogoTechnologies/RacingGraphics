@@ -1,0 +1,488 @@
+@charset "UTF-8";
+
+/* ==========================================================================
+   DUELO DE DRAG
+
+   Dos carros enfrentados, en espejo, como la carta VS: la foto en el
+   extremo, y pegados a ella el nombre con el dorsal y el carro debajo.
+   Lo que cambia respecto a la carta VS es lo que el drag necesita y el
+   circuito no:
+
+     · cada lado dice su carril, izquierdo o derecho, porque en la pista
+       eso es lo que distingue a los dos y es como los llama el locutor;
+     · debajo van las tres cifras de la pasada —reacción, tiempo y
+       velocidad— en vez de la vuelta rápida y la última;
+     · el que gana se marca, que es el dato por el que existe la carta.
+
+   La cabecera dice de qué se está viendo: en DragWar solo el nombre,
+   porque no hay llaves ni categorías; en competencia, la categoría y la
+   ronda.
+========================================================================== */
+
+.duelo{
+
+    position:absolute;
+
+    left:50%;
+    bottom:40px;
+
+    display:flex;
+    flex-direction:column;
+
+    border-radius:10px;
+
+    overflow:hidden;
+
+    box-shadow:0 10px 30px rgba(0,0,0,.45);
+
+    font-family:var(--fuente-graficos);
+
+    background:url("../img/fondo.jpg") center/cover no-repeat;
+}
+
+/* Filo rojo en los dos extremos, la firma de la familia. En espejo para
+   que ningún lado pese más que el otro. */
+.duelo::before,
+.duelo::after{
+
+    content:"";
+
+    position:absolute;
+    top:0; bottom:0;
+
+    width:10px;
+
+    background:#FF0000;
+
+    z-index:6;
+}
+
+.duelo::before{ left:0; }
+.duelo::after { right:0; }
+
+
+/* ===================================
+   CABECERA
+=================================== */
+
+.duelo-cabecera{
+
+    height:44px;
+
+    flex:0 0 auto;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    background:rgba(0,0,0,.55);
+
+    border-bottom:1px solid rgba(255,255,255,.12);
+
+    z-index:4;
+}
+
+.duelo-cabecera span{
+
+    font-size:19px;
+    font-weight:800;
+
+    letter-spacing:3px;
+
+    text-transform:uppercase;
+
+    color:#FFFFFF;
+
+    text-shadow:2px 2px 0 rgba(0,0,0,.55);
+}
+
+/* Sin nada que decir la banda desaparece entera: una franja vacía se lee
+   como un rótulo que no cargó. */
+.duelo-cabecera.vacia{ display:none; }
+
+
+/* ===================================
+   CUERPO
+=================================== */
+
+.duelo-cuerpo{
+
+    display:flex;
+    align-items:center;
+
+    height:186px;
+}
+
+
+/* ===================================
+   UN LADO
+=================================== */
+
+.duelo-lado{
+
+    display:flex;
+    align-items:stretch;
+
+    height:100%;
+
+    position:relative;
+}
+
+/* El derecho es el izquierdo del revés. */
+.duelo-lado.der{ flex-direction:row-reverse; }
+
+
+/* ── Foto ── */
+
+.duelo-foto{
+
+    width:150px;
+
+    flex:0 0 auto;
+
+    background:#000;
+
+    overflow:hidden;
+
+    position:relative;
+    z-index:3;
+}
+
+.duelo-foto img{
+
+    width:100%;
+    height:100%;
+
+    object-fit:cover;
+
+    /* Los retratos vienen de medio cuerpo: encuadrando arriba, la cara
+       queda donde tiene que quedar. */
+    object-position:top center;
+}
+
+
+/* ── Datos ── */
+
+.duelo-datos{
+
+    padding:0 26px;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+
+    gap:5px;
+
+    min-width:330px;
+}
+
+.duelo-lado.der .duelo-datos{
+
+    align-items:flex-end;
+
+    text-align:right;
+}
+
+
+/* ── Carril ── */
+
+/* Va arriba del todo y en pequeño: dice de qué lado de la pista sale
+   este, que es como se llaman entre ellos, pero no compite con el nombre. */
+.duelo-carril{
+
+    font-size:11px;
+    font-weight:800;
+
+    letter-spacing:2.4px;
+
+    text-transform:uppercase;
+
+    color:#9E9E9E;
+
+    white-space:nowrap;
+}
+
+
+/* ── Nombre ── */
+
+.duelo-nombre-fila{
+
+    display:flex;
+    align-items:baseline;
+
+    gap:14px;
+
+    white-space:nowrap;
+}
+
+.duelo-lado.der .duelo-nombre-fila{ flex-direction:row-reverse; }
+
+.duelo-nombre{
+
+    font-size:29px;
+    font-weight:800;
+
+    line-height:1;
+
+    color:#FFFFFF;
+
+    text-transform:uppercase;
+
+    text-shadow:2px 2px 0 rgba(0,0,0,.55);
+}
+
+.duelo-dorsal{
+
+    font-size:32px;
+    font-weight:900;
+
+    line-height:1;
+
+    color:#FF3B45;
+
+    text-shadow:2px 2px 0 rgba(0,0,0,.55);
+}
+
+/* Sin dorsal no se deja el hueco: en drag hay carros sin número pintado
+   y un "#" suelto se lee como un dato que no cargó. */
+.duelo-dorsal:empty{ display:none; }
+
+
+/* ── Carro ── */
+
+.duelo-carro{
+
+    font-size:17px;
+    font-weight:600;
+
+    line-height:1.15;
+
+    color:#D9D9D9;
+
+    text-transform:uppercase;
+
+    letter-spacing:.4px;
+
+    white-space:nowrap;
+
+    text-shadow:1px 1px 0 rgba(0,0,0,.5);
+}
+
+.duelo-carro .marca{
+
+    color:#FFFFFF;
+
+    font-weight:800;
+}
+
+
+/* ===================================
+   LAS CIFRAS DE LA PASADA
+
+   Las tres en una fila, cada una con su rótulo encima. En fila y no
+   apiladas porque son tres y apiladas empujarían la carta a lo alto de
+   la pantalla; una al lado de otra caben en el ancho que ya hay.
+=================================== */
+
+.duelo-cifras{
+
+    display:flex;
+
+    gap:20px;
+
+    margin-top:3px;
+}
+
+.duelo-lado.der .duelo-cifras{ flex-direction:row-reverse; }
+
+.duelo-cifra{
+
+    display:flex;
+    flex-direction:column;
+
+    /* Ancho suficiente para la velocidad con su unidad pegada, que es la
+       mas larga de las tres. Sin esto "180.4 km/h" se partia en dos
+       lineas y descuadraba la fila entera. */
+    min-width:96px;
+}
+
+.duelo-lado.der .duelo-cifra{ align-items:flex-end; }
+
+.duelo-cifra .rotulo{
+
+    font-size:9px;
+    font-weight:700;
+
+    letter-spacing:1.4px;
+
+    text-transform:uppercase;
+
+    color:#9E9E9E;
+
+    margin-bottom:1px;
+}
+
+.duelo-cifra .dato{
+
+    font-size:20px;
+    font-weight:800;
+
+    line-height:1;
+
+    color:#FFFFFF;
+
+    text-shadow:1px 1px 0 rgba(0,0,0,.5);
+
+    /* Cifras de ancho fijo: sin esto los tiempos de los dos lados no
+       quedan alineados y la comparación se lee peor. */
+    font-variant-numeric:tabular-nums;
+
+    white-space:nowrap;
+}
+
+/* La reacción negativa es salida quemada: el que se fue antes del verde
+   queda descalificado aunque su tiempo sea el mejor. En rojo porque es
+   la única cifra de la carta que cambia quién gana. */
+.duelo-cifra .dato.quemada{ color:#FF3B45; }
+
+
+/* ===================================
+   EL GANADOR
+
+   Se marca el lado entero y no solo una palabra: de lejos y en un
+   televisor, un fondo que cambia se ve antes que un rótulo que hay que
+   leer.
+=================================== */
+
+.duelo-lado.gana{
+
+    background:linear-gradient(180deg,
+        rgba(0,190,80,.20) 0%,
+        rgba(0,190,80,.06) 100%);
+}
+
+.duelo-lado.gana::after{
+
+    content:"";
+
+    position:absolute;
+    left:0; right:0; bottom:0;
+
+    height:4px;
+
+    background:#00BE50;
+}
+
+.duelo-etiqueta{
+
+    display:none;
+
+    align-self:flex-start;
+
+    margin-top:2px;
+    padding:2px 9px;
+
+    border-radius:3px;
+
+    background:#00BE50;
+
+    font-size:10px;
+    font-weight:900;
+
+    letter-spacing:2px;
+
+    text-transform:uppercase;
+
+    color:#04220F;
+}
+
+.duelo-lado.der .duelo-etiqueta{ align-self:flex-end; }
+
+.duelo-lado.gana .duelo-etiqueta{ display:block; }
+
+
+/* ===================================
+   EL HUECO DEL MEDIO
+=================================== */
+
+.duelo-centro{
+
+    width:80px;
+
+    flex:0 0 auto;
+
+    align-self:stretch;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.duelo-centro span{
+
+    width:2px;
+    height:118px;
+
+    background:linear-gradient(180deg,
+        transparent 0%,
+        rgba(255,255,255,.55) 22%,
+        rgba(255,255,255,.55) 78%,
+        transparent 100%);
+}
+
+
+/* ==========================================================================
+   ENTRADA: LOS DOS SE SEPARAN
+
+   La misma que la carta VS, y a propósito: son la misma idea —dos pilotos
+   enfrentados— y entrar igual las emparenta.
+
+   Las dos caras entran juntas en el centro y desde ahí se abren hacia sus
+   lados. No se mueven las fotos: se encoge lo que va entre ellas. Como la
+   carta está centrada, al quedarse sin contenido intermedio las caras se
+   juntan solas, y al recuperarlo se separan por simetría. Así no hay nada
+   que medir, que es donde falla hacerlo con transforms: CasparCG llama a
+   play() antes de que el navegador haya hecho el diseño.
+========================================================================== */
+
+.duelo.juntas .duelo-datos,
+.duelo.juntas .duelo-centro,
+.duelo.juntas .duelo-cabecera{
+
+    max-width:0;
+    min-width:0;
+
+    padding-left:0;
+    padding-right:0;
+
+    opacity:0;
+
+    overflow:hidden;
+}
+
+.duelo.abriendo .duelo-datos,
+.duelo.abriendo .duelo-centro,
+.duelo.abriendo .duelo-cabecera{
+
+    /* Un tope holgado y no el ancho exacto: max-width necesita un número
+       para animarse, y pasarse solo termina la transición antes de tiempo,
+       cosa que no se nota. Quedarse corto sí cortaría un nombre largo. */
+    max-width:760px;
+
+    opacity:1;
+
+    transition:max-width .75s cubic-bezier(.22,.61,.36,1),
+               padding   .75s cubic-bezier(.22,.61,.36,1),
+               /* El texto espera a que haya hueco donde caber. */
+               opacity   .40s ease .30s;
+}
+
+/* Las caras, por encima: si el texto quedara delante se vería asomar por
+   encima de ellas mientras se abre el hueco. */
+.duelo.juntas .duelo-foto,
+.duelo.abriendo .duelo-foto{
+
+    position:relative;
+
+    z-index:4;
+}

@@ -164,6 +164,20 @@ async def _payload(template, pilot_id: Optional[int], data: Optional[dict],
         base = await build_vs_payload(pilot_id, pilot_id_2)
         return {**base, **(data or {})}
 
+    # El duelo de drag: dos pilotos, uno por carril. DragWar y competencia
+    # comparten armador porque comparten arte; lo que las distingue —la
+    # cabecera, la ronda— lo escribe el panel y llega en `data`, igual que
+    # las cifras de la pasada, que hasta que Race America esté conectado se
+    # teclean a mano.
+    if template.graphic_id in ("dragwar", "competencia"):
+        if pilot_id is None or pilot_id_2 is None:
+            raise HTTPException(400, "El duelo necesita los dos carriles")
+
+        from src.services.graphics_services import build_drag_payload
+
+        base = await build_drag_payload(pilot_id, pilot_id_2)
+        return {**base, **(data or {})}
+
     if pilot_id is None:
         return data
 

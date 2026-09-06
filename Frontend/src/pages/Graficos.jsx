@@ -1,7 +1,8 @@
 import { t } from '../i18n'
 import { useEffect, useMemo, useState } from 'react'
 import SelectorCarrera from '../components/graphics/SelectorCarrera'
-import FormularioDrag from '../components/graphics/FormularioDrag'
+import SelectorPiloto, { CLASE_CAMPO } from '../components/graphics/SelectorPiloto'
+import FormularioDuelo from '../components/graphics/FormularioDuelo'
 import { useCarrera } from '../context/CarreraContext'
 import { useDisciplina } from '../context/DisciplinaContext'
 import {
@@ -9,7 +10,7 @@ import {
   SquareUser, Contact, ListOrdered, Crown, ArrowUpDown, LayoutGrid,
   Radio, PowerOff, Search, Eye, EyeOff, Loader2, Eraser, AlertTriangle, X, MessageSquare,
   Users, RefreshCw, Play, Pause, RotateCcw, Timer, Plus, Minus, Check,
-  Wrench, Droplets, Ban, Table2, Lock, Repeat, Tag,
+  Wrench, Droplets, Ban, Table2, Lock, Repeat, Tag, Swords,
 } from 'lucide-react'
 import {
   playGraphic, updateGraphic, clearGroup, clearAll, getState, getPilots, getCategories,
@@ -176,16 +177,30 @@ const GRILLAS = [
 // ni vueltas que contar, así que estos gráficos no derivan de los del
 // circuito.
 //
+// Dos modalidades y un gráfico en cada una. El arte es el mismo —dos
+// carros enfrentados, sus cifras y quién ganó— porque lo que se cuenta es
+// lo mismo; lo que cambia es la cabecera, y eso son datos.
+//
+// DragWar es libre: cualquiera corre contra cualquiera, sin llaves ni
+// premiación, así que su gráfico no pregunta categoría ni ronda. La
+// competencia va por categorías de índice y por rondas, y las dice.
+//
 // Va aquí y no más abajo: GRAFICOS lo usa justo debajo, y declararlo
 // después dejaba el módulo entero sin cargar. No es un error de sintaxis,
 // así que el build pasaba limpio y la aplicación no arrancaba.
-const DRAG = [
-  { id: 'drag-resultado', label: 'Resultado', nombre: 'Resultado de la Pasada',
-    detalle: 'Reacción, tiempo y velocidad de los dos carriles', Icon: Timer, ...ROJO },
+const DRAGWAR = [
+  { id: 'dragwar', label: 'Duelo', nombre: 'Duelo DragWar',
+    detalle: 'Los dos carriles, sus cifras y quién ganó', Icon: Swords, ...ROJO },
+]
+
+const COMPETENCIA = [
+  { id: 'competencia', label: 'Duelo', nombre: 'Duelo de Competencia',
+    detalle: 'Categoría, ronda, los dos carriles y quién ganó', Icon: Swords, ...ROJO },
 ]
 
 // Catálogo plano, para resolver un botón por su id.
-const GRAFICOS = [...BACKGROUNDS, ...BANDERAS, ...MISCELANEOS, ...TOTEMS, ...FICHAS, ...GRILLAS, ...DRAG]
+const GRAFICOS = [...BACKGROUNDS, ...BANDERAS, ...MISCELANEOS, ...TOTEMS, ...FICHAS,
+                  ...GRILLAS, ...DRAGWAR, ...COMPETENCIA]
 
 // Misma grilla en las tres secciones para que las columnas queden alineadas.
 const GRID = 'grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3'
@@ -229,129 +244,11 @@ const REQUIERE_DATOS = {
   'reportero':      'narrador',  // idem; cambia el rótulo del arte
   'ficha-corta':    'piloto',    // sale del registro de pilotos
   'carta-vs':       'duelo',     // dos pilotos enfrentados
-  'drag-resultado': 'drag',      // se escribe a mano: tres cifras por carril
+  // Los dos duelos usan el mismo formulario; la modalidad decide si
+  // pregunta categoria y ronda o no.
+  'dragwar':        'duelo-drag',
+  'competencia':    'duelo-drag',
   'categoria':      'categoria',  // se elige cuál de las del evento
-}
-
-// Clase de los campos de texto del panel. Vive fuera del componente porque
-// la usan tanto el formulario como el selector de pilotos.
-const CLASE_CAMPO =
-  'w-full bg-[#0a0a0a] border border-neutral-800 rounded p-2 focus:border-red-600 focus:outline-none text-white'
-
-// ─── Selector de piloto ───────────────────────────────────────
-// Filtro por categoría, buscador y lista. Se usa tal cual en la carta del
-// piloto y dos veces en la carta VS: con 117 pilotos, un desplegable suelto
-// obliga a recorrer la lista entera, y acotar por categoría deja a mano los
-// pocos que de verdad corren esa tanda.
-function SelectorPiloto({
-  etiqueta, pilotos, categorias, valor, onElegir, onQuitar, excluir = null,
-}) {
-  const [busqueda,  setBusqueda]  = useState('')
-  const [categoria, setCategoria] = useState(null)   // null = todas
-
-  // El que ya está en el otro lado no se ofrece: enfrentar a alguien
-  // consigo mismo no dice nada.
-  const disponibles = excluir === null
-    ? pilotos
-    : pilotos.filter(p => p.id !== excluir)
-
-  // Solo las categorías que tienen pilotos: no sirve un filtro que deja la
-  // lista vacía.
-  const conPilotos = categorias.filter(c =>
-    disponibles.some(p => p.categorias.includes(c.id))
-  )
-
-  const porCategoria = categoria === null
-    ? disponibles
-    : disponibles.filter(p => p.categorias.includes(categoria))
-
-  const filtrados = porCategoria.filter(p =>
-    `${p.nombre} ${p.apellido}`.toLowerCase().includes(busqueda.toLowerCase())
-  )
-
-  const elegido = pilotos.find(p => p.id === valor) || null
-
-  return (
-    <div>
-      <label className="block text-neutral-400 text-xs mb-1 uppercase">
-        {t(etiqueta)}
-      </label>
-
-      {elegido ? (
-        <div className="flex items-center justify-between gap-3 bg-[#0a0a0a] border border-red-600/40 rounded p-2">
-          <span className="text-white font-semibold text-sm truncate">
-            {elegido.nombre} <span className="uppercase">{elegido.apellido}</span>
-          </span>
-          <button
-            type="button"
-            onClick={() => { onQuitar(); setBusqueda('') }}
-            className="text-neutral-400 hover:text-white text-xs font-bold flex-shrink-0"
-          >
-            {t('CAMBIAR')}
-          </button>
-        </div>
-      ) : (
-        <>
-          {/* Primero la categoría: acota la lista antes de buscar */}
-          {conPilotos.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-3">
-              {[{ id: null, nombre: 'Todas' }, ...conPilotos].map(c => {
-                const activa = categoria === c.id
-                const cuantos = c.id === null
-                  ? disponibles.length
-                  : disponibles.filter(p => p.categorias.includes(c.id)).length
-                return (
-                  <button
-                    key={c.id ?? 'todas'} type="button"
-                    onClick={() => { setCategoria(c.id); setBusqueda('') }}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-bold transition-colors ${
-                      activa
-                        ? 'border-red-600 bg-red-600/15 text-white'
-                        : 'border-neutral-800 bg-[#0a0a0a] text-neutral-400 hover:border-neutral-600 hover:text-neutral-200'
-                    }`}
-                  >
-                    {c.nombre}
-                    <span className={activa ? 'text-red-400' : 'text-neutral-600'}>
-                      {cuantos}
-                    </span>
-                  </button>
-                )
-              })}
-            </div>
-          )}
-
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" size={16} />
-            <input
-              type="text" value={busqueda} placeholder={t('Buscar piloto...')}
-              onChange={e => setBusqueda(e.target.value)}
-              className={`${CLASE_CAMPO} pl-9`}
-            />
-          </div>
-
-          <div className="mt-2 max-h-44 overflow-y-auto rounded border border-neutral-800 divide-y divide-neutral-800/60">
-            {disponibles.length === 0 ? (
-              <p className="p-3 text-neutral-500 text-sm">
-                {t('No hay pilotos registrados todavía.')}
-              </p>
-            ) : filtrados.length === 0 ? (
-              <p className="p-3 text-neutral-500 text-sm">{t('Sin coincidencias.')}</p>
-            ) : (
-              filtrados.map(p => (
-                <button
-                  key={p.id} type="button"
-                  onClick={() => onElegir(p)}
-                  className="w-full text-left px-3 py-2 text-sm text-neutral-300 hover:bg-neutral-800 hover:text-white transition-colors"
-                >
-                  {p.nombre} <span className="uppercase">{p.apellido}</span>
-                </button>
-              ))
-            )}
-          </div>
-        </>
-      )}
-    </div>
-  )
 }
 
 // ─── Formulario en línea ──────────────────────────────────────
@@ -584,7 +481,10 @@ const SECCIONES = {
   totems:      { titulo: 'Tótems',          grupo: 'totem',      capa: 20, items: TOTEMS },
   banderas:    { titulo: 'Banderas',        grupo: 'flag',       capa: 30, items: BANDERAS },
   grilla:      { titulo: 'Grilla',          grupo: 'grid',       capa: 40, items: GRILLAS },
-  drag:        { titulo: 'Drag',            grupo: 'drag',       capa: 45, items: DRAG },
+  // Las dos comparten capa: no puede haber dos duelos al aire a la vez,
+  // y sacar uno tiene que tumbar el otro.
+  dragwar:     { titulo: 'DragWar',         grupo: 'drag',       capa: 45, items: DRAGWAR },
+  competencia: { titulo: 'Competencia',     grupo: 'drag',       capa: 45, items: COMPETENCIA },
   fichas:      { titulo: 'Fichas',          grupo: 'pilot',      capa: 50, items: FICHAS },
   miscelaneos: { titulo: 'Misceláneos',     grupo: 'misc',       capa: 60, items: MISCELANEOS },
   resultados:  { titulo: 'Resultados',      grupo: 'results',    capa: 70, items: RESULTADOS },
@@ -867,14 +767,20 @@ const TABS = [
     ],
   },
   { id: 'grilla',  titulo: 'Grilla',  secciones: [SECCIONES.grilla] },
+  /* Dos pestañas y no una de drag con dos botones dentro: son dos
+     competiciones distintas que se corren en momentos distintos de la
+     jornada, y quien opera está en una o en la otra, no saltando entre
+     las dos. Cada una recuerda por su cuenta lo que tiene al aire. */
   {
-    /* El drag no se grafica como el circuito: no hay vueltas ni tótem de
-       clasificación, sino tiempos de reacción, velocidad final y llaves de
-       eliminación. Sus gráficos están por hacer; la pestaña existe ya para
-       que el sitio esté decidido y no aparezca luego colgando al final. */
-    id: 'drag',
-    titulo: 'Drag',
-    secciones: [SECCIONES.drag],
+    id: 'dragwar',
+    titulo: 'DragWar',
+    secciones: [SECCIONES.dragwar],
+    disciplina: 'drag',
+  },
+  {
+    id: 'competencia',
+    titulo: 'Competencia',
+    secciones: [SECCIONES.competencia],
     disciplina: 'drag',
   },
 ]
@@ -887,7 +793,8 @@ const DISCIPLINA_DE_TAB = {
   // En drag no hay parrilla de partida: se corre por llaves de
   // eliminacion, de dos en dos, y el orden lo decide cada ronda.
   grilla:   'circuito',
-  drag:     'drag',
+  dragwar:     'drag',
+  competencia: 'drag',
 }
 
 // Todos los botones de una pestaña, sin importar en qué sección estén.
@@ -1423,16 +1330,6 @@ export default function GraficosModule() {
         </div>
 
         {/* Una sección por capa, cada una con su propio botón de limpiar */}
-        {tabActual.secciones.length === 0 && (
-          <div className="bg-[#141414] rounded-xl border border-neutral-800 p-6">
-            <p className="text-neutral-500 text-sm">
-              Los gráficos de drag están por hacer: tiempos de reacción,
-              velocidad final y llaves de eliminación. La pestaña ya está aquí
-              para que el sitio quede decidido.
-            </p>
-          </div>
-        )}
-
         {tabActual.secciones.map((seccion, i) => {
           const ocupadaPor = alAire[seccion.grupo] || null
           return (
@@ -1584,26 +1481,29 @@ export default function GraficosModule() {
           />
         )}
 
-        {/* El drag lleva formulario propio: son dos carriles con sus cifras
-            y no encaja con el de los demás, que giran alrededor de elegir un
-            piloto de la base. */}
+        {/* El duelo lleva formulario propio: son dos carriles con sus
+            cifras escritas a mano, y no encaja con el de los demás, que
+            giran alrededor de elegir un piloto y ya. */}
         {itemDelForm && itemsDe(tabActual).includes(itemDelForm)
-          && REQUIERE_DATOS[itemDelForm.id] === 'drag' && (
-          <FormularioDrag
+          && REQUIERE_DATOS[itemDelForm.id] === 'duelo-drag' && (
+          <FormularioDuelo
             item={itemDelForm}
+            modalidad={itemDelForm.id}
             pilotos={pilotosRegistrados}
+            categorias={categorias}
+            carrera={carrera}
             alAire={estaAlAire(itemDelForm)}
             ocupado={ocupado}
             onMostrar={(datos) => {
-              // Si ya está al aire, refresca sin recargarlo: en drag las
-              // cifras llegan una detrás de otra y recargar la plantilla
-              // haría parpadear el gráfico en cada pasada.
+              // Si ya está al aire, refresca sin recargarlo: el ganador se
+              // marca cuando la pasada ya terminó y el gráfico lleva rato
+              // puesto. Recargarlo lo haría entrar otra vez desde abajo.
               if (estaAlAire(itemDelForm)) {
                 return ejecutar(itemDelForm.id,
-                  () => updateGraphic(itemDelForm.id, { data: datos }),
+                  () => updateGraphic(itemDelForm.id, datos),
                   () => {})
               }
-              return alternar(itemDelForm.id, { data: datos })
+              return alternar(itemDelForm.id, datos)
             }}
             onOcultar={() => alternar(itemDelForm.id)}
           />
@@ -1611,7 +1511,7 @@ export default function GraficosModule() {
 
         {/* El formulario solo aparece si su botón vive en la pestaña abierta */}
         {itemDelForm && itemsDe(tabActual).includes(itemDelForm)
-          && REQUIERE_DATOS[itemDelForm.id] !== 'drag' && (
+          && REQUIERE_DATOS[itemDelForm.id] !== 'duelo-drag' && (
           <FormularioPersonal
             item={itemDelForm}
             tipo={REQUIERE_DATOS[itemDelForm.id]}

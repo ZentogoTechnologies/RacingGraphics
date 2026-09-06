@@ -4,8 +4,25 @@
     {
       "name": "frontend",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev", "--prefix", "Frontend"],
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--prefix",
+        "Frontend"
+      ],
       "port": 5173
+    },
+    {
+      "name": "plantillas",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "5174",
+        "--directory",
+        "Casparcg/template"
+      ],
+      "port": 5174
     }
   ]
 }

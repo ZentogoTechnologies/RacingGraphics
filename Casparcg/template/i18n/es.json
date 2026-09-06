@@ -49,12 +49,13 @@
     "reportero": "REPORTERO"
   },
   "drag": {
-    "resultado": "Resultado de la pasada",
     "reaccion": "Reacción",
     "tiempo": "Tiempo",
     "velocidad": "Velocidad",
-    "carril": "Carril",
-    "gana": "Gana",
-    "ronda": "Ronda"
+    "carril_izquierdo": "Carril izquierdo",
+    "carril_derecho": "Carril derecho",
+    "ganador": "Ganador",
+    "ronda": "Ronda",
+    "dragwar": "Drag War"
   }
 }

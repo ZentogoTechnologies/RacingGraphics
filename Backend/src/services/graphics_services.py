@@ -92,11 +92,17 @@ TEMPLATES: dict[str, Template] = {
         Template("grilla-fotos", "Grilla con Fotos",    "grid", 40, "html/41_starting_grid_foto",  accepts_data=True),
 
         # ── Fichas de piloto (capa 50) ────────────────────────
-        # ── Drag ──
-        # Cada pasada se cuenta sola: no hay clasificación que actualizar
-        # ni vueltas que contar, así que estos gráficos no derivan de los
-        # del circuito.
-        Template("drag-resultado", "Resultado de la Pasada", "drag", 45, "html/80_drag_result", accepts_data=True),
+        # ── Drag (capa 45) ────────────────────────────────────
+        # Las dos modalidades comparten arte: en las dos son dos carros
+        # enfrentados, sus cifras y quién ganó. Lo único que cambia es la
+        # cabecera —en DragWar la modalidad, en competencia la categoría y
+        # la ronda—, y eso viaja en los datos, no en otro HTML.
+        #
+        # Son dos entradas y no una porque el panel las lista en dos
+        # pestañas distintas y cada una recuerda por su cuenta si está al
+        # aire. Comparten capa: no puede haber dos duelos a la vez.
+        Template("dragwar",     "DragWar",     "drag", 45, "html/80_drag_duelo", accepts_data=True),
+        Template("competencia", "Competencia", "drag", 45, "html/80_drag_duelo", accepts_data=True),
 
         Template("ficha-corta",    "Carta",          "pilot", 50, "html/51_pilot_card_short",    accepts_data=True),
         # Dos pilotos frente a frente: nombre, dorsal y foto, nada más.
@@ -542,3 +548,69 @@ async def build_vs_payload(pilot_a: int, pilot_b: int) -> dict:
         }
 
     return {**await uno(pilot_a, "a"), **await uno(pilot_b, "b")}
+
+
+async def build_drag_payload(pilot_a: int, pilot_b: int) -> dict:
+    """
+    Los dos carros de un duelo de drag, uno por carril.
+
+    Nombre, dorsal, carro y foto de cada uno. Las cifras de la pasada
+    —reacción, tiempo y velocidad— no salen de aquí: se escriben en el
+    panel y viajan en `data`. Race America no está conectado todavía, y
+    hasta que lo esté esto tiene que funcionar solo: son dos carros y tres
+    cifras cada uno, teclearlo es viable.
+
+    Tampoco se pregunta a MyLaps, como sí hace la carta VS. MyLaps
+    cronometra la pista de circuito; en la de drag no hay nada que leer, y
+    preguntar solo añadiría una espera y unos tiempos de otra carrera.
+
+    Se manda todo aunque venga vacío: omitir un campo deja en pantalla el
+    del duelo anterior.
+    """
+
+    async def uno(pilot_id: int, sufijo: str) -> dict:
+        pilot = await Pilot.find_one(Pilot.pilot_id == pilot_id)
+        if pilot is None:
+            raise HTTPException(404, f"Piloto {pilot_id} no encontrado")
+
+        # El carro de drag y no uno cualquiera: quien corre en las dos
+        # disciplinas tiene uno en cada una, y sacar el de circuito en un
+        # duelo de drag pondría al aire una marca que no es la que está en
+        # la pista.
+        vehicle = await _vehiculo_de_drag(pilot)
+
+        dorsal = ""
+        if vehicle is not None:
+            # En drag el dorsal es opcional: hay carros sin número pintado.
+            dorsal = vehicle.display_number or (
+                str(vehicle.number) if vehicle.number is not None else ""
+            )
+
+        return {
+            f"name_{sufijo}": pilot.name or "",
+            f"last_name_{sufijo}": pilot.last_name or "",
+            f"number_{sufijo}": dorsal,
+            f"brand_{sufijo}": (vehicle.brand or "") if vehicle else "",
+            f"model_{sufijo}": (vehicle.model or "") if vehicle else "",
+            f"photo_{sufijo}": pilot_photo_url(pilot.pilot_id, pilot.photo),
+        }
+
+    return {**await uno(pilot_a, "a"), **await uno(pilot_b, "b")}
+
+
+async def _vehiculo_de_drag(pilot: Pilot) -> Vehicle | None:
+    """El carro de drag del piloto, o cualquiera suyo si no tiene uno.
+
+    Se resuelve por la categoría, que es donde vive la disciplina: el
+    vehículo no la lleva encima. Si no tiene ninguno de drag se devuelve el
+    primero que tenga en vez de nada: mejor la marca de su otro carro que
+    un hueco, y el panel deja corregirlo a mano.
+    """
+    de_drag = await Category.find(Category.discipline == "drag").to_list()
+    ids_drag = {c.category_id for c in de_drag}
+
+    suyos = await Vehicle.find({"pilots.$id": pilot.id}).to_list()
+    if not suyos:
+        return None
+
+    return next((v for v in suyos if v.category_id in ids_drag), suyos[0])

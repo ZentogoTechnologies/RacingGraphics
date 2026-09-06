@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Duelo de Drag</title>
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/animaciones.css">
+    <link rel="stylesheet" href="../css/drag_duelo.css">
+    <script src="../js/idioma_activo.js"></script>
+    <script src="../js/i18n.js"></script>
+</head>
+<body>
+
+    <!-- La misma plantilla sirve para DragWar y para competencia. Lo único
+         que las separa es lo que dice la cabecera: en DragWar el nombre de
+         la modalidad, y en competencia la categoría y la ronda. El arte es
+         el mismo porque lo que se cuenta es lo mismo: dos carros, sus
+         cifras y quién ganó. -->
+
+    <div class="duelo" id="duelo">
+
+        <div class="duelo-cabecera" id="cabecera"><span id="cabeceraTexto">DRAG WAR</span></div>
+
+        <div class="duelo-cuerpo">
+
+            <div class="duelo-lado izq" id="ladoA">
+                <div class="duelo-foto"><img id="fotoA" src="" alt=""></div>
+                <div class="duelo-datos">
+                    <div class="duelo-carril" data-t="drag.carril_izquierdo">CARRIL IZQUIERDO</div>
+                    <div class="duelo-nombre-fila">
+                        <span class="duelo-nombre" id="nombreA">ROBERTO REYNA</span>
+                        <span class="duelo-dorsal" id="dorsalA">#17</span>
+                    </div>
+                    <div class="duelo-carro" id="carroA">
+                        <span class="marca">HONDA</span> CIVIC TYPE R
+                    </div>
+                    <div class="duelo-cifras">
+                        <div class="duelo-cifra">
+                            <span class="rotulo" data-t="drag.reaccion">Reacción</span>
+                            <span class="dato" id="rtA">0.045</span>
+                        </div>
+                        <div class="duelo-cifra">
+                            <span class="rotulo" data-t="drag.tiempo">Tiempo</span>
+                            <span class="dato" id="etA">12.348</span>
+                        </div>
+                        <div class="duelo-cifra">
+                            <span class="rotulo" data-t="drag.velocidad">Velocidad</span>
+                            <span class="dato" id="velA">180.4</span>
+                        </div>
+                    </div>
+                    <div class="duelo-etiqueta" data-t="drag.ganador">Ganador</div>
+                </div>
+            </div>
+
+            <div class="duelo-centro"><span></span></div>
+
+            <div class="duelo-lado der" id="ladoB">
+                <div class="duelo-foto"><img id="fotoB" src="" alt=""></div>
+                <div class="duelo-datos">
+                    <div class="duelo-carril" data-t="drag.carril_derecho">CARRIL DERECHO</div>
+                    <div class="duelo-nombre-fila">
+                        <span class="duelo-nombre" id="nombreB">LUIS MOTO MOTO</span>
+                        <span class="duelo-dorsal" id="dorsalB">#69</span>
+                    </div>
+                    <div class="duelo-carro" id="carroB">
+                        <span class="marca">TOYOTA</span> COROLLA GR
+                    </div>
+                    <div class="duelo-cifras">
+                        <div class="duelo-cifra">
+                            <span class="rotulo" data-t="drag.reaccion">Reacción</span>
+                            <span class="dato" id="rtB">0.512</span>
+                        </div>
+                        <div class="duelo-cifra">
+                            <span class="rotulo" data-t="drag.tiempo">Tiempo</span>
+                            <span class="dato" id="etB">11.982</span>
+                        </div>
+                        <div class="duelo-cifra">
+                            <span class="rotulo" data-t="drag.velocidad">Velocidad</span>
+                            <span class="dato" id="velB">190.1</span>
+                        </div>
+                    </div>
+                    <div class="duelo-etiqueta" data-t="drag.ganador">Ganador</div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+<script>
+
+function txt(id,v){ const e=document.getElementById(id); if(e&&v!==undefined) e.textContent=v; }
+
+function carro(id, marca, modelo){
+    const e=document.getElementById(id); if(!e) return;
+    const m=(marca||"").toUpperCase(), mo=(modelo||"").toUpperCase();
+    e.innerHTML = m ? `<span class="marca">${m}</span> ${mo}` : mo;
+}
+
+function foto(id,url){
+    const e=document.getElementById(id); if(!e||url===undefined) return;
+    if(url){ e.src=url; e.style.visibility="visible"; }
+    else   { e.removeAttribute("src"); e.style.visibility="hidden"; }
+}
+
+function nombre(n,a){ return [n,a].filter(Boolean).join(" ").toUpperCase(); }
+
+/* Una cifra que no se ha escrito sale como guion y no en blanco: el hueco
+   vacio se lee como que la carta se rompio, y estas se teclean a mano
+   mientras no haya conexion con el cronometraje. */
+function cifra(id, valor){
+    const e = document.getElementById(id); if(!e || valor===undefined) return;
+    const v = (valor === null ? "" : String(valor)).trim();
+    e.textContent = v || "--";
+
+    /* Reaccion negativa es salida quemada: se fue antes del verde y queda
+       descalificado aunque su tiempo sea el mejor. Se pinta en rojo porque
+       es la unica cifra que cambia quien gana. */
+    e.classList.toggle("quemada", id.startsWith("rt") && v.startsWith("-"));
+}
+
+function update(data){
+    try{
+        const d = typeof data==="string" ? JSON.parse(data) : (data||{});
+
+        /* La cabecera dice de que va: "DRAG WAR", o la categoria y la
+           ronda. Sin texto la banda desaparece entera. */
+        if(d.header !== undefined){
+            const texto = (d.header || "").trim();
+            txt("cabeceraTexto", texto);
+            document.getElementById("cabecera").classList.toggle("vacia", !texto);
+        }
+
+        for(const s of ["a","b"]){
+            const S=s.toUpperCase();
+
+            if(d["name_"+s]!==undefined||d["last_name_"+s]!==undefined)
+                txt("nombre"+S, nombre(d["name_"+s], d["last_name_"+s]));
+
+            if(d["number_"+s]!==undefined)
+                txt("dorsal"+S, d["number_"+s] ? "#"+d["number_"+s] : "");
+
+            if(d["brand_"+s]!==undefined||d["model_"+s]!==undefined)
+                carro("carro"+S, d["brand_"+s], d["model_"+s]);
+
+            cifra("rt"+S,  d["rt_"+s]);
+            cifra("et"+S,  d["et_"+s]);
+            cifra("vel"+S, d["speed_"+s]);
+
+            foto("foto"+S, d["photo_"+s]);
+        }
+
+        /* Quien gana. Vacio es una pasada que todavia no ha terminado: la
+           carta sirve igual para presentar el enfrentamiento antes de que
+           salgan, y para dar el resultado despues, sin cambiar de grafico.
+           Basta un UPDATE con el ganador puesto. */
+        if(d.winner !== undefined){
+            const gana = (d.winner || "").toLowerCase();
+            document.getElementById("ladoA").classList.toggle("gana", gana === "a");
+            document.getElementById("ladoB").classList.toggle("gana", gana === "b");
+        }
+    }catch(e){}
+}
+
+
+/* ==========================================================================
+   ENTRADA
+
+   La misma que la carta VS: las dos caras entran juntas en el centro y
+   desde ahi se abren hacia sus lados, descubriendo lo que va en medio.
+   Lo que se mueve no son las fotos sino lo que hay entre ellas, asi que no
+   hay nada que medir; CasparCG llama a play() cuando el navegador aun no
+   ha hecho el diseño y cualquier medida sale mal.
+========================================================================== */
+
+function play(){
+
+    const carta = document.getElementById("duelo");
+
+    carta.style.transform = "translateX(-50%)";
+    carta.style.animation = "slideUp .5s ease forwards";
+
+    carta.classList.remove("abriendo");
+    carta.classList.add("juntas");
+
+    cuandoEsten(carta.querySelectorAll(".duelo-foto img"), () => {
+        setTimeout(() => {
+            /* Dos fotogramas para que el navegador registre el estado
+               cerrado antes de soltarlo, o se salta la transicion. */
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+                carta.classList.add("abriendo");
+            }));
+        }, 620);
+    });
+}
+
+function stop(){
+
+    const carta = document.getElementById("duelo");
+    carta.style.animation = "slideDown .5s ease forwards";
+
+    setTimeout(() => {
+        carta.classList.remove("juntas", "abriendo");
+    }, 500);
+}
+
+
+/* Llama a `seguir` cuando todas las imagenes hayan cargado, y en todo caso
+   al cabo de un segundo y medio: una foto que no llegue no puede dejar la
+   carta congelada a medio entrar. */
+function cuandoEsten(imagenes, seguir){
+
+    const lista = Array.from(imagenes).filter(im => im.getAttribute("src"));
+
+    let pendientes = lista.filter(im => !im.complete).length;
+    let hecho = false;
+
+    const listo = () => {
+        if (hecho) return;
+        hecho = true;
+        seguir();
+    };
+
+    if (!pendientes) { listo(); return; }
+
+    lista.forEach(im => {
+        if (im.complete) return;
+        const marcar = () => { if (--pendientes <= 0) listo(); };
+        im.addEventListener("load", marcar, { once: true });
+        im.addEventListener("error", marcar, { once: true });
+    });
+
+    setTimeout(listo, 1500);
+}
+
+if(!window.__casparcg){ play(); }
+
+</script>
+
+</body>
+</html>
