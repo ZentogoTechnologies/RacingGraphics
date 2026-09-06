@@ -18,7 +18,6 @@
             <div class="vs-datos">
                 <div class="vs-nombre-fila">
                     <span class="vs-nombre" id="nombreA">ROBERTO REYNA</span>
-                    <span class="vs-dorsal" id="dorsalA">#17</span>
                 </div>
                 <div class="vs-carro" id="carroA">
                     <span class="marca">HONDA</span> CIVIC TYPE R
@@ -39,7 +38,6 @@
             <div class="vs-datos">
                 <div class="vs-nombre-fila">
                     <span class="vs-nombre" id="nombreB">LUIS MOTO MOTO</span>
-                    <span class="vs-dorsal" id="dorsalB">#69</span>
                 </div>
                 <div class="vs-carro" id="carroB">
                     <span class="marca">TOYOTA</span> COROLLA GR
@@ -79,8 +77,6 @@ function update(data){
             const S=s.toUpperCase();
             if(d["name_"+s]!==undefined||d["last_name_"+s]!==undefined)
                 txt("nombre"+S, nombre(d["name_"+s], d["last_name_"+s]));
-            if(d["number_"+s]!==undefined)
-                txt("dorsal"+S, d["number_"+s] ? "#"+d["number_"+s] : "");
             if(d["brand_"+s]!==undefined||d["model_"+s]!==undefined)
                 carro("carro"+S, d["brand_"+s], d["model_"+s]);
             /* Sin cronometraje se pone un guion y no se deja en blanco:

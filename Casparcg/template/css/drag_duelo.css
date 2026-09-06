@@ -171,6 +171,13 @@
     flex-direction:column;
     justify-content:center;
 
+    /* Alto el del contenido, no el del lado. El lado estira a sus hijos y
+       esta caja acababa midiendo los 186px enteros aunque el texto ocupara
+       bastante menos; al agrandar al ganador un 15% se salia por abajo y
+       la carta, que recorta, se lo comia. Centrada a mano queda igual de
+       centrada y el zoom cabe. */
+    align-self:center;
+
     gap:5px;
 
     min-width:330px;
@@ -236,21 +243,9 @@
     text-shadow:2px 2px 0 rgba(0,0,0,.55);
 }
 
-.duelo-dorsal{
-
-    font-size:32px;
-    font-weight:900;
-
-    line-height:1;
-
-    color:#FF3B45;
-
-    text-shadow:2px 2px 0 rgba(0,0,0,.55);
-}
-
-/* Sin dorsal no se deja el hueco: en drag hay carros sin número pintado
-   y un "#" suelto se lee como un dato que no cargó. */
-.duelo-dorsal:empty{ display:none; }
+/* El dorsal se quito de la carta. En drag hay carros sin numero pintado,
+   asi que la mitad de las veces no decia nada, y lo que se busca saber
+   aqui es quien gano, cuanto hizo y en que carril iba. */
 
 
 /* ── Carro ── */
@@ -305,32 +300,37 @@
     display:flex;
     flex-direction:column;
 
-    /* Ancho suficiente para la velocidad con su unidad pegada, que es la
-       mas larga de las tres. Sin esto "180.4 km/h" se partia en dos
-       lineas y descuadraba la fila entera. */
-    min-width:96px;
+    /* Ya no hay que dar de si para "180.4 km/h": queda solo el tiempo. */
+    min-width:0;
 }
 
 .duelo-lado.der .duelo-cifra{ align-items:flex-end; }
 
+/* Ahora que es la unica cifra puede pesar lo que le toca. El rotulo, en
+   blanco y legible; antes iba a 9px en gris, que servia cuando competia
+   con otras dos y ahora solo se veia pequeño. */
 .duelo-cifra .rotulo{
 
-    font-size:9px;
-    font-weight:700;
+    font-size:14px;
+    font-weight:800;
 
-    letter-spacing:1.4px;
+    letter-spacing:2px;
 
     text-transform:uppercase;
 
-    color:#9E9E9E;
+    color:#FFFFFF;
 
-    margin-bottom:1px;
+    text-shadow:1px 1px 2px rgba(0,0,0,.8);
+
+    margin-bottom:2px;
 }
 
 .duelo-cifra .dato{
 
-    font-size:20px;
-    font-weight:800;
+    /* El dato de la carta: quien gano, cuanto hizo y en que carril. El
+       cuanto se lee desde el sofa o no sirve. */
+    font-size:34px;
+    font-weight:900;
 
     line-height:1;
 
@@ -367,25 +367,23 @@
 
 }
 
-/* El recuadro verde, dibujado encima de todo el lado.
+/* Dos lineas verdes, arriba y abajo del lado que gana. Un recuadro
+   completo encajonaba la cara y hacia la carta mas pesada de lo que pide
+   un dato tan simple; dos lineas subrayan sin encerrar.
 
-   Va en una capa aparte y no como borde ni como sombra interior. Como
-   borde ocuparia sitio y correria las dos caras, que estan medidas para
-   quedar en los extremos. Como sombra interior se lo comia la foto, que
-   tiene fondo negro y va por encima: el marco moria justo donde empieza
-   la cara y parecia recortado a media pieza.
-
-   Asi rodea el lado entero, foto incluida, sin mover nada de sitio. */
+   Van en una capa aparte y no como borde: como borde ocuparian sitio y
+   correrian las dos caras, que estan medidas para quedar en los extremos.
+   Y por encima de la foto, que tiene fondo negro y si no se las comeria
+   justo donde empieza la cara. */
 .duelo-lado.gana::after{
 
     content:"";
 
     position:absolute;
-    inset:0;
+    left:0; right:0; top:0; bottom:0;
 
-    border:3px solid #00BE50;
-
-    border-radius:2px;
+    border-top:4px solid #00BE50;
+    border-bottom:4px solid #00BE50;
 
     /* Por encima de la foto, que va en la 3 y en la 4 cuando la carta se
        esta abriendo. */
@@ -403,7 +401,7 @@
    zoom solo acompaña. */
 .duelo-lado.gana .duelo-datos{
 
-    transform:scale(1.06);
+    transform:scale(1.15);
 
     transition:transform .35s cubic-bezier(.34,1.3,.64,1);
 }

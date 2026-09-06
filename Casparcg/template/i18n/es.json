@@ -34,7 +34,8 @@
     "penalizado": "Penalizado"
   },
   "banderas": {
-    "safety_car": "Safety car"
+    "safety_car": "Safety car",
+    "una_vuelta": "1 LAP"
   },
   "clima": {
     "sensacion": "SENSACIÓN",

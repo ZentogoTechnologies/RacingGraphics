@@ -154,17 +154,8 @@
     text-shadow:2px 2px 0 rgba(0,0,0,.55);
 }
 
-.vs-dorsal{
-
-    font-size:34px;
-    font-weight:900;
-
-    line-height:1;
-
-    color:#FF3B45;
-
-    text-shadow:2px 2px 0 rgba(0,0,0,.55);
-}
+/* El dorsal se quito de la carta: lo que se compara aqui son dos pilotos
+   y sus tiempos, y el numero no anadia nada a esa lectura. */
 
 
 .vs-carro{

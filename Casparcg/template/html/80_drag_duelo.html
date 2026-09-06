@@ -29,7 +29,6 @@
                     <div class="duelo-carril" data-t="drag.carril_izquierdo">CARRIL IZQUIERDO</div>
                     <div class="duelo-nombre-fila">
                         <span class="duelo-nombre" id="nombreA">ROBERTO REYNA</span>
-                        <span class="duelo-dorsal" id="dorsalA">#17</span>
                     </div>
                     <div class="duelo-carro" id="carroA">
                         <span class="marca">HONDA</span> CIVIC TYPE R
@@ -56,7 +55,6 @@
                     <div class="duelo-carril" data-t="drag.carril_derecho">CARRIL DERECHO</div>
                     <div class="duelo-nombre-fila">
                         <span class="duelo-nombre" id="nombreB">LUIS MOTO MOTO</span>
-                        <span class="duelo-dorsal" id="dorsalB">#69</span>
                     </div>
                     <div class="duelo-carro" id="carroB">
                         <span class="marca">TOYOTA</span> COROLLA GR
@@ -128,9 +126,6 @@ function update(data){
 
             if(d["name_"+s]!==undefined||d["last_name_"+s]!==undefined)
                 txt("nombre"+S, nombre(d["name_"+s], d["last_name_"+s]));
-
-            if(d["number_"+s]!==undefined)
-                txt("dorsal"+S, d["number_"+s] ? "#"+d["number_"+s] : "");
 
             if(d["brand_"+s]!==undefined||d["model_"+s]!==undefined)
                 carro("carro"+S, d["brand_"+s], d["model_"+s]);

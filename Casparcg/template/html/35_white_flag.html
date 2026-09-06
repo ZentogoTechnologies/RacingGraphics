@@ -18,7 +18,9 @@
     </div>
 
     <div class="bandera-panel blanca" id="panel">
-        <div class="bandera-caja"></div>
+        <div class="bandera-caja">
+            <span class="rotulo" data-t="banderas.una_vuelta">1 LAP</span>
+        </div>
     </div>
 
 </div>
@@ -31,9 +33,11 @@
    El panel entero es la bandera: se despliega desde el logo y ocupa el
    resto de la franja con su color o su dibujo.
 
-   Va sin texto. Una bandera se reconoce por su diseño y el rótulo repetía
-   lo que ya se ve. El safety car es la excepción, porque ahí no hay una
-   bandera reglamentaria que lo identifique.
+   Lleva rótulo. Las demás van sin él: una bandera se reconoce por su
+   diseño y el texto repetiría lo que ya se ve. Esta y el safety car son
+   las dos excepciones, y por el mismo motivo: un panel blanco liso no
+   dice cuántas vueltas quedan, igual que un panel amarillo no dice que
+   haya coche de seguridad en pista.
 
    Mide lo mismo que la torre porque se dibuja sobre su cabecera: la
    medida sale de torre_medidas.css, que es de donde la toma el tótem.
@@ -59,7 +63,8 @@ function stop(){
 }
 
 function update(data){
-    /* Solo el safety car lleva rótulo, así que solo él lo acepta al vuelo. */
+    /* El rótulo se puede cambiar al vuelo: "1 LAP" es lo normal, pero
+       queda la puerta abierta a "2 LAPS" o a lo que haga falta. */
     try {
         const d = typeof data === "string" ? JSON.parse(data) : (data || {});
         const rotulo = document.querySelector(".rotulo");
