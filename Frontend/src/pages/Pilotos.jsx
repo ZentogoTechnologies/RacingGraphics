@@ -4,6 +4,7 @@ import { ArrowLeft, Pencil, Trash2, ChevronUp, ChevronDown, ChevronsUpDown, Load
 import ModuleHeader from '../components/shared/ModuleHeader'
 import Pagination from '../components/shared/Pagination'
 import ConfirmDialog from '../components/shared/ConfirmDialog'
+import CarrosDelPiloto from '../components/pilots/CarrosDelPiloto'
 import {
   borrarFotoPiloto, categoriasApi, pilotosApi, quitarFondoPiloto,
   subirFotoPiloto, urlFotoPiloto,
@@ -496,6 +497,13 @@ export default function PilotosModule() {
             </button>
           </div>
         </form>
+
+        {currentEditId && (
+          <CarrosDelPiloto
+            pilotId={currentEditId}
+            disciplinas={pilotForm.discipline}
+          />
+        )}
       </>
       )}
 

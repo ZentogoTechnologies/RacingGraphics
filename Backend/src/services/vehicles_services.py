@@ -132,6 +132,7 @@ class VehicleService:
         limit: Optional[int] = None,
         sub_category_id: Optional[str] = None,
         pilot: Optional[str] = None,
+        pilot_id: Optional[int] = None,
     ) -> Page[VehicleResponse]:
         filtros = [filtro_busqueda(search, self.BUSCABLES)]
 
@@ -173,6 +174,16 @@ class VehicleService:
                 return Page(items=[], total=0, skip=skip, limit=limit)
 
             filtros.append({"pilots.$id": {"$in": [p.id for p in encontrados]}})
+
+        # Por id, exacto. El filtro `pilot` de arriba busca por nombre y
+        # sirve para la caja de búsqueda, pero para la ficha de un piloto
+        # concreto no vale: dos corredores pueden compartir apellido y
+        # saldrían los carros de los dos.
+        if pilot_id is not None:
+            corredor = await Pilot.find_one(Pilot.pilot_id == int(pilot_id))
+            if corredor is None:
+                return Page(items=[], total=0, skip=skip, limit=limit)
+            filtros.append({"pilots.$id": corredor.id})
 
         query = combinar(*filtros)
 
