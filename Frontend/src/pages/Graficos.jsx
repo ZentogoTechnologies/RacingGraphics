@@ -10,7 +10,7 @@ import {
   SquareUser, Contact, ListOrdered, Crown, ArrowUpDown, LayoutGrid,
   Radio, PowerOff, Search, Eye, EyeOff, Loader2, Eraser, AlertTriangle, X, MessageSquare,
   Users, RefreshCw, Play, Pause, RotateCcw, Timer, Plus, Minus, Check,
-  Wrench, Droplets, Ban, Table2, Lock, Repeat, Tag, Swords,
+  Wrench, Droplets, Ban, Table2, Lock, Repeat, Tag, Swords, Watch,
 } from 'lucide-react'
 import {
   playGraphic, updateGraphic, clearGroup, clearAll, getState, getPilots, getCategories,
@@ -840,6 +840,9 @@ export default function GraficosModule() {
   // piloto se consulta al cronometraje porque la franja solo puede
   // abrirse bajo su fila, y a veces no está entre los que se ven.
   const [mejorVuelta,   setMejorVuelta]   = useState(false)
+  // El recuadro morado del canto derecho. Sale encendido porque así lo
+  // pinta la plantilla: el panel refleja lo que hay, no lo impone.
+  const [cronoRapida,   setCronoRapida]   = useState(true)
   const [rapido,        setRapido]        = useState(null)
 
   // Segundo piloto, el de la franja verde. Se elige de los que están en
@@ -1082,6 +1085,24 @@ export default function GraficosModule() {
       () => setMejorVuelta(abrir))
   }
 
+  /* Enciende o apaga el recuadro morado de la vuelta rápida, el que va
+     pegado al canto derecho del tótem. Va por UPDATE, como la franja: el
+     gráfico ya está puesto y solo se le cambia un dato.
+
+     Es un interruptor aparte del de la franja aunque los dos hablen de la
+     vuelta rápida: uno dice de quién es y la otra enseña los tiempos, y
+     hay momentos en que se quiere lo uno sin lo otro. */
+  const alternarCronoRapida = () => {
+    const totem = alAire.totem
+    if (!totem) return
+
+    const encender = !cronoRapida
+
+    ejecutar('crono-rapida',
+      () => updateGraphic(totem, { data: { crono: encender } }),
+      () => setCronoRapida(encender))
+  }
+
   // Abre la franja verde bajo el piloto elegido, o la cierra mandando
   // null. Va por UPDATE, igual que la de la vuelta rápida.
   const elegirComparado = (dorsal) => {
@@ -1098,7 +1119,12 @@ export default function GraficosModule() {
   // Sacar un tótem de aire deja las dos franjas cerradas; si no, al volver
   // a ponerlo los botones dirían "abierta" y estarían cerradas.
   useEffect(() => {
-    if (!alAire.totem) { setMejorVuelta(false); setComparar(null); setListaAbierta(false) }
+    if (!alAire.totem) {
+      setMejorVuelta(false); setComparar(null); setListaAbierta(false)
+      // La plantilla nace con el recuadro encendido: el panel vuelve ahí
+      // o al sacar el tótem otra vez diría que está apagado sin estarlo.
+      setCronoRapida(true)
+    }
   }, [alAire.totem])
 
   // CLEAR del canal entero: vacía las seis capas de una vez.
@@ -1377,6 +1403,26 @@ export default function GraficosModule() {
                       ? <Loader2 size={13} className="animate-spin" />
                       : <Timer size={13} />}
                     {mejorVuelta ? 'Ocultar mejor vuelta' : 'Mejor vuelta'}
+                  </button>
+
+                  {/* El recuadro morado del canto derecho, que señala a
+                      quién pertenece la vuelta rápida de la tanda. Aparte
+                      del botón de la franja a propósito: uno dice de quién
+                      es y la otra enseña los tiempos. */}
+                  <button
+                    type="button"
+                    onClick={alternarCronoRapida}
+                    disabled={!alAire.totem || !rapido || ocupado}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border font-bold text-[11px] uppercase tracking-wider transition-all disabled:opacity-30 disabled:cursor-not-allowed ${
+                      cronoRapida
+                        ? 'border-purple-500 bg-purple-500/15 text-purple-300'
+                        : 'border-neutral-700 text-neutral-300 hover:border-purple-500 hover:text-purple-300'
+                    }`}
+                  >
+                    {pendiente === 'crono-rapida'
+                      ? <Loader2 size={13} className="animate-spin" />
+                      : <Watch size={13} />}
+                    {cronoRapida ? t('Ocultar cronómetro') : t('Cronómetro')}
                   </button>
 
                   {/* Segundo piloto, para comparar dos tiempos a la vez. Se

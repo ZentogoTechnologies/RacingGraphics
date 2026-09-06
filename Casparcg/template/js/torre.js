@@ -43,6 +43,11 @@ let torreConfig = {
     // interfaz con un UPDATE; no se abre solo.
     mejorVuelta: false,
 
+    /* El recuadro morado de la vuelta rápida, pegado al canto derecho.
+       Encendido de fábrica: es un dato de la tanda y estaba siempre. Se
+       apaga desde el panel cuando el arte de al lado estorba. */
+    crono: true,
+
     // Dorsal de un segundo piloto del que también se abre su franja, en
     // verde. Sirve para comparar dos tiempos en pantalla a la vez.
     comparar: null,
@@ -189,9 +194,10 @@ function torreColocarCrono(){
     const fila = torreCuerpo && torreCuerpo.querySelector(".tf-fila.vuelta-rapida");
     const torre = torreElemento;
 
-    /* Sin vuelta rápida marcada, o con la torre fuera del aire, no hay
-       nada que señalar. Se esconde en vez de dejarlo donde estaba. */
-    if (!fila || !torre) {
+    /* Sin vuelta rápida marcada, con la torre fuera del aire, o apagado
+       desde el panel, no hay nada que señalar. Se esconde en vez de
+       dejarlo donde estaba. */
+    if (!fila || !torre || !torreConfig.crono) {
         caja.classList.remove("visible");
         torreCronoDonde = "";
         return false;
@@ -682,6 +688,14 @@ function actualizarTorre(data){
             torreConfig.mejorVuelta = Boolean(d.mejor_vuelta);
             torreElemento.classList.toggle("mejor-vuelta", torreConfig.mejorVuelta);
             /* La franja empuja las filas de abajo mientras se abre. */
+            torreSeguirCrono();
+        }
+
+        /* El recuadro morado de la vuelta rápida. Es un interruptor
+           aparte de la franja: son dos cosas distintas —uno dice de quién
+           es, la otra enseña los tiempos— y se quieren por separado. */
+        if (d.crono !== undefined) {
+            torreConfig.crono = Boolean(d.crono);
             torreSeguirCrono();
         }
 
