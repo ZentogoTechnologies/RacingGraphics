@@ -66,6 +66,10 @@
     <div class="rs-pie">
         <span id="pieIzq">Autódromo Panamá</span>
         <span class="rs-leyenda"><span class="rs-punto"></span> Vuelta rápida de la tanda</span>
+        <span class="rs-leyenda oculta" id="leyendaPena">
+            <span class="rs-marca-pena">P</span>
+            <span data-t="resultados.penalizado">Penalizado</span>
+        </span>
     </div>
 
 </div>
@@ -124,13 +128,25 @@ function pintarFilas(standings){
 
     cuerpo.innerHTML = "";
 
+    /* Si nadie esta sancionado, la leyenda del pie no se dibuja: explicar
+       una marca que no aparece en la tabla se lee como un dato que falta. */
+    let hayPena = false;
+
     standings.forEach((p, index) => {
 
         const fila = document.createElement("tr");
 
+        /* Penalizado: su diferencia con el primero sale negativa, o sea que
+           hizo mejor tiempo y aun asi esta clasificado por detras. Eso es
+           lo que deja una sancion, y es lo unico deducible: MyLaps no
+           manda las sanciones en ningun campo. */
+        const penalizado = String(p.leader || "").trim().charAt(0) === "-";
+        if (penalizado) hayPena = true;
+
         const clases = [];
         if (index === 0) clases.push("lider");
         if (p.is_best_lap) clases.push("vuelta-rapida");
+        if (penalizado) clases.push("penalizado");
         fila.className = clases.join(" ");
 
         const logo = p.brand_logo
@@ -142,7 +158,7 @@ function pintarFilas(standings){
         const intervalo = index === 0 ? "—" : oVacio(p.interval);
 
         fila.innerHTML = `
-            <td class="rs-pos">${escapar(p.position)}</td>
+            <td class="rs-pos">${escapar(p.position)}${penalizado ? '<span class="rs-pena">P</span>' : ""}</td>
             <td class="rs-dorsal"><span>${escapar(p.number)}</span></td>
             <td class="rs-marca">${logo}</td>
             <td class="rs-piloto">${escapar(p.full_name)}</td>
@@ -156,6 +172,9 @@ function pintarFilas(standings){
 
         cuerpo.appendChild(fila);
     });
+
+    const leyenda = document.getElementById("leyendaPena");
+    if (leyenda) leyenda.classList.toggle("oculta", !hayPena);
 }
 
 

@@ -20,6 +20,11 @@
     --rs-morado:     #B72DFF;
     --rs-morado-bg:  rgba(74, 16, 110, .92);
 
+    /* Ámbar de penalización, el mismo que usa el tótem. Se separa del oro
+       del líder, que es amarillo, y del rojo del acento. */
+    --rs-ambar:      #FFA31A;
+    --rs-ambar-bg:   rgba(120, 70, 4, .55);
+
     --rs-tenue:      rgba(255,255,255,.42);
 }
 
@@ -290,6 +295,68 @@
     background:var(--rs-morado-bg);
 }
 
+/* Penalizado: su tiempo es mejor que el del que figura primero, y aun así
+   está clasificado por detrás. Eso es lo que deja una sanción —le bajan la
+   posición pero no le tocan el tiempo—, y es lo único que se puede deducir
+   del XML: MyLaps no manda las sanciones por ninguna parte.
+
+   Va por debajo de la vuelta rápida en el orden de las reglas: un piloto
+   puede tener las dos —le pasó a Pinto/Pflucker— y entre "es el más
+   rápido" y "está sancionado", en un cuadro de resultados manda lo
+   segundo, que es lo que explica por qué está donde está.
+
+   Se marca el filo izquierdo y no la fila entera: el fondo ya lo usan el
+   líder y la vuelta rápida, y con tres fondos compitiendo no se lee
+   ninguno. */
+.rs-tabla tbody tr.penalizado{
+
+    box-shadow:inset 5px 0 0 var(--rs-ambar);
+}
+
+.rs-tabla tbody tr.penalizado.vuelta-rapida{
+
+    background:var(--rs-morado-bg);
+}
+
+/* La marca junto a la posición. Una letra y no un icono: se lee en un
+   televisor a tres metros, que es de donde se mira esto. */
+.rs-pena{
+
+    display:inline-block;
+
+    margin-left:5px;
+
+    padding:1px 4px;
+
+    border-radius:3px;
+
+    background:var(--rs-ambar);
+
+    font-size:10px;
+    font-weight:900;
+
+    letter-spacing:.5px;
+
+    color:#2A1700;
+
+    vertical-align:middle;
+}
+
+/* Las dos diferencias del sancionado, en ámbar: son las que salen
+   negativas y las que hacen preguntarse qué pasa en esa fila. */
+tr.penalizado .rs-num{
+
+    color:var(--rs-ambar);
+}
+
+/* Salvo las vueltas y la última, que no tienen nada que ver con la
+   sanción y en ámbar dirían que sí. */
+tr.penalizado .rs-num.tenue{
+
+    color:var(--rs-tenue);
+}
+
+
 /* ── Columnas ── */
 
 .rs-pos{
@@ -443,6 +510,28 @@ tr.vuelta-rapida .rs-best{
 
     gap:7px;
 }
+
+/* La leyenda de la sanción solo se dibuja cuando hay alguien sancionado.
+   Una leyenda de algo que no está en la tabla se lee como un dato que
+   falta. */
+.rs-leyenda.oculta{ display:none; }
+
+.rs-marca-pena{
+
+    display:inline-block;
+
+    padding:1px 4px;
+
+    border-radius:3px;
+
+    background:var(--rs-ambar);
+
+    font-size:10px;
+    font-weight:900;
+
+    color:#2A1700;
+}
+
 
 .rs-punto{
 

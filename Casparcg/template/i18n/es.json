@@ -30,7 +30,8 @@
     "piloto": "Piloto",
     "vueltas": "Vueltas",
     "mejor": "Mejor",
-    "ultima": "Última"
+    "ultima": "Última",
+    "penalizado": "Penalizado"
   },
   "banderas": {
     "safety_car": "Safety car"
