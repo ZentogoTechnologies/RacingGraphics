@@ -4,7 +4,10 @@ from src.models.pilots_model import Pilot
 
 class Vehicle(Document):
     vehicle_id: int
-    number: int # dorsal, como numero: 44
+    # Opcional: en drag no siempre hay dorsal. Se corre por parejas, el
+    # cronometraje va por carril y muchos carros no llevan numero pintado.
+    # En circuito si lo hay siempre, y es el formulario quien lo exige.
+    number: Optional[int] = None # dorsal, como numero: 44
     display_number: Optional[str] = None
     # El dorsal tal cual esta pintado en el carro. No es cosmetico: los
     # ceros a la izquierda distinguen carros distintos ('44' es K. King y

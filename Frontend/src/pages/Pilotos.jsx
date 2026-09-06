@@ -1,10 +1,12 @@
-import { t } from '../i18n'
+import { idiomaDeAhora, t } from '../i18n'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { ArrowLeft, Pencil, Trash2, ChevronUp, ChevronDown, ChevronsUpDown, Loader2, Scissors, Upload, User, X } from 'lucide-react'
 import ModuleHeader from '../components/shared/ModuleHeader'
 import Pagination from '../components/shared/Pagination'
 import ConfirmDialog from '../components/shared/ConfirmDialog'
 import CarrosDelPiloto from '../components/pilots/CarrosDelPiloto'
+import SelectorPais, { Bandera } from '../components/shared/SelectorPais'
+import { nombrePais } from '../data/paises'
 import {
   borrarFotoPiloto, categoriasApi, pilotosApi, quitarFondoPiloto,
   subirFotoPiloto, urlFotoPiloto,
@@ -289,7 +291,11 @@ export default function PilotosModule() {
         onFormToggle={handleFormToggle}
         addButtonLabel="NUEVO PILOTO"
         puedeCrear={puedeEscribir}
-        exportData={() => pilotosApi.listar({ ...filtros, search: lista.texto || undefined, sort_by: lista.sortBy, sort_dir: lista.sortDir }).then(p => p.items)}
+        // El archivo sale con el nombre del pais, no con el codigo: lo lee
+        // gente, no el programa. El codigo es como se guarda, no como se
+        // enseña.
+        exportData={() => pilotosApi.listar({ ...filtros, search: lista.texto || undefined, sort_by: lista.sortBy, sort_dir: lista.sortDir })
+          .then(p => p.items.map(x => ({ ...x, nationality: nombrePais(x.nationality, idiomaDeAhora()) })))}
         onExportError={m => toast.error('No se pudo exportar', m)}
         exportFileName="pilotos"
         exportColumnMap={{ pilot_id: 'ID', name: 'Nombre', last_name: 'Apellido', nationality: 'Nacionalidad', team_brand: 'Equipo' }}
@@ -356,9 +362,13 @@ export default function PilotosModule() {
           </div>
           <div>
             <label className="block text-neutral-400 text-xs mb-1 uppercase">{t('Nacionalidad')}</label>
-            <input type="text" value={pilotForm.nationality} placeholder="Panama"
-              onChange={e => setPilotForm({ ...pilotForm, nationality: e.target.value })}
-              className="w-full bg-[#0a0a0a] border border-neutral-800 rounded p-2 focus:border-red-600 focus:outline-none text-white"/>
+            {/* De una lista y no escrita: antes convivian "Panama",
+                "Panama" y "PANAMA" como si fueran tres paises, y ninguna
+                encontraba su bandera. Se guarda el codigo ISO. */}
+            <SelectorPais
+              valor={pilotForm.nationality}
+              onChange={codigo => setPilotForm({ ...pilotForm, nationality: codigo })}
+            />
           </div>
           <div>
             <label className="block text-neutral-400 text-xs mb-1 uppercase">{t('Equipo')}</label>
@@ -554,7 +564,11 @@ export default function PilotosModule() {
                     </div>
                   </div>
                 </td>
-                <td className="p-4 text-neutral-300 text-sm">{piloto.nationality || <span className="text-neutral-600">—</span>}</td>
+                <td className="p-4 text-neutral-300 text-sm">
+                  {piloto.nationality
+                    ? <Bandera codigo={piloto.nationality} />
+                    : <span className="text-neutral-600">—</span>}
+                </td>
                 <td className="p-4 text-neutral-300 text-sm">{piloto.team_brand || <span className="text-neutral-600">—</span>}</td>
                 <td className="p-4">
                   <div className="flex flex-wrap gap-1">

@@ -221,6 +221,18 @@ CSS_TIPOGRAFIA = RAIZ / "Casparcg" / "template" / "css" / "tipografia_activa.css
 # panel pueda enseñar cada letra antes de elegirla.
 CARPETA_FUENTES = RAIZ / "Casparcg" / "template" / "fonts"
 
+# Las banderas de los paises. Viven junto a la plantilla porque es quien
+# las pinta al aire —las lee por file://, sin pasar por el backend— y el
+# panel las ve en /media/banderas. Un solo archivo por pais, no dos.
+CARPETA_BANDERAS = RAIZ / "Casparcg" / "template" / "img" / "banderas"
+
+# Los codigos que de verdad tienen bandera en disco. Se leen una vez al
+# arrancar: son 255 archivos y preguntarselo al disco en cada alta de
+# piloto seria pagar una lectura por tecleo.
+PAISES_CON_BANDERA = frozenset(
+    p.stem.lower() for p in CARPETA_BANDERAS.glob("*.svg")
+)
+
 # El respaldo no es decorativo: si la fuente no cargara, Segoe UI y Arial
 # son lo único seguro en cualquier Windows.
 RESPALDO = '"Segoe UI", Arial, sans-serif'

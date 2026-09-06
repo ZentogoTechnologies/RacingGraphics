@@ -55,7 +55,12 @@ class VehicleService:
             id=str(vehicle.id),
             vehicle_id=vehicle.vehicle_id,
             number=vehicle.number,
-            display_number=vehicle.display_number or str(vehicle.number),
+            # Sin dorsal en pantalla se usa el numero; sin ninguno de los
+            # dos se queda vacio en vez de poner "None" al aire.
+            display_number=(
+                vehicle.display_number
+                or (str(vehicle.number) if vehicle.number is not None else None)
+            ),
             brand=vehicle.brand,
             model=vehicle.model,
             color=vehicle.color,

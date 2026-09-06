@@ -299,7 +299,9 @@ async def build_pilot_payload(
 
     nombre = " ".join(x for x in (pilot.name, pilot.last_name) if x)
 
-    numero = str(vehicle.number) if vehicle else ""
+    # Sin dorsal se manda vacio, no "None": en drag hay carros sin numero
+    # y la carta esconde el hueco en vez de escribir la palabra.
+    numero = str(vehicle.number) if vehicle and vehicle.number is not None else ""
     carro = " ".join(x for x in ((vehicle.brand if vehicle else None),
                                  (vehicle.model if vehicle else None)) if x)
 
@@ -519,7 +521,7 @@ async def build_vs_payload(pilot_a: int, pilot_b: int) -> dict:
 
         vehicle = await Vehicle.find_one({"pilots.$id": pilot.id})
 
-        dorsal = str(vehicle.number) if vehicle else ""
+        dorsal = str(vehicle.number) if vehicle and vehicle.number is not None else ""
 
         # Se cruza por dorsal y no por piloto: cuando dos pilotos comparten
         # carro, MyLaps cronometra el carro, así que el dorsal es lo único

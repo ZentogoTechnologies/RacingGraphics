@@ -51,7 +51,7 @@
                     </div>
                     <div class="info-block">
                         <div class="label" data-t="carta.pais">PAÍS</div>
-                        <div class="value" id="country">Canada</div>
+                        <img class="bandera" id="country" src="../img/banderas/pa.svg">
                     </div>
                 </div>
 
@@ -82,10 +82,14 @@ function update(data){
         document.getElementById("pilotName").textContent =
             data.pilot_name;
 
+    /* Sin dorsal no se pinta ni la almohadilla. En drag hay carros sin
+       numero, y un "#" solo se lee como un dato que no cargo. */
     if(data.car_number !== undefined){
 
-        document.getElementById("carNumber").textContent =
-            "#" + data.car_number;
+        const el = document.getElementById("carNumber");
+
+        el.textContent = data.car_number ? "#" + data.car_number : "";
+        el.style.display = data.car_number ? "block" : "none";
     }
 
     if(data.category !== undefined)
@@ -110,9 +114,24 @@ function update(data){
         document.getElementById("team").textContent =
             data.team;
 
-    if(data.country !== undefined)
-        document.getElementById("country").textContent =
-            data.country;
+    /* El pais llega como codigo ISO ("pa") y se pinta como bandera, no
+       como palabra: se lee de un vistazo y no hay que traducirla ni
+       preocuparse de que "Republica Dominicana" no quepa en la carta.
+
+       La bandera se lee del disco, junto a la plantilla. No pasa por el
+       backend como la foto del piloto: si el backend se cae, la carta
+       sigue saliendo con su bandera. */
+    if(data.country !== undefined){
+
+        const el = document.getElementById("country");
+        const codigo = (data.country || "").toLowerCase();
+
+        el.src = codigo ? "../img/banderas/" + codigo + ".svg" : "";
+
+        /* Sin pais se esconde el bloque entero, etiqueta incluida: una
+           etiqueta sola se lee como un fallo de carga. */
+        el.closest(".info-block").style.display = codigo ? "flex" : "none";
+    }
 
     if(data.brand_logo !== undefined)
         document.getElementById("brandLogo").src =

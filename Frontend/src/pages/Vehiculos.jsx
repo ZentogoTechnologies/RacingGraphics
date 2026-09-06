@@ -39,6 +39,10 @@ export default function VehiculosModule() {
   const { puedeEscribir } = useAuth()
   const { disciplina } = useDisciplina()
 
+  // El drag pide menos: no hay cronometraje que cruzar por dorsal, asi
+  // que el numero y el color dejan de ser obligatorios.
+  const esDrag = disciplina === 'drag'
+
   const [categoriaFiltro, setCategoriaFiltro] = useState('')
   const [subFiltro,       setSubFiltro]       = useState('')
   const [pilotoFiltro,    setPilotoFiltro]    = useState('')
@@ -172,7 +176,9 @@ export default function VehiculosModule() {
   const openEditForm = (vehiculo) => {
     setVehicleForm({
       vehicle_id: vehiculo.vehicle_id,
-      number: vehiculo.number,
+      // Sin dorsal el input necesita '' y no null: con null React lo
+      // pasa de controlado a no controlado y avisa por consola.
+      number: vehiculo.number ?? '',
       display_number: vehiculo.display_number || '',
       brand: vehiculo.brand || '',
       model: vehiculo.model || '',
@@ -230,7 +236,11 @@ export default function VehiculosModule() {
     setGuardando(true)
 
     const cuerpo = {
-      number: Number(vehicleForm.number),
+      // Vacio es null y no 0: un carro sin dorsal no es el carro numero 0,
+      // y Number('') da 0 sin avisar.
+      number: vehicleForm.number === '' || vehicleForm.number === null
+        ? null
+        : Number(vehicleForm.number),
       // Si se deja vacío, el backend lo rellena con el número. Importa
       // porque los ceros a la izquierda distinguen carros ('044' != '44').
       display_number: vehicleForm.display_number || null,
@@ -242,7 +252,10 @@ export default function VehiculosModule() {
       pilot_ids: vehicleForm.pilot_ids,
     }
 
-    const etiqueta = `#${vehicleForm.number} ${vehicleForm.brand} ${vehicleForm.model}`.trim()
+    const etiqueta = [
+      vehicleForm.number !== '' ? `#${vehicleForm.number}` : '',
+      vehicleForm.brand, vehicleForm.model,
+    ].filter(Boolean).join(' ').trim()
 
     try {
       let id = currentEditId
@@ -293,7 +306,10 @@ export default function VehiculosModule() {
 
     try {
       await vehiculosApi.eliminar(vehiculo.vehicle_id)
-      toast.exito('Vehículo eliminado', `#${vehiculo.number} ${vehiculo.brand || ''}`.trim())
+      toast.exito('Vehículo eliminado', [
+        vehiculo.number != null ? `#${vehiculo.number}` : '',
+        vehiculo.brand || '',
+      ].filter(Boolean).join(' ').trim())
       lista.recargar()
     } catch (err) {
       toast.error('No se pudo eliminar', err.message)
@@ -399,19 +415,39 @@ export default function VehiculosModule() {
         <form onSubmit={handleSave} className="bg-[#141414] p-6 rounded-xl border border-red-600/30 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-              <label className="block text-neutral-400 text-xs mb-1 uppercase">{t('Dorsal')}</label>
-              <input required type="number" min="0" value={vehicleForm.number}
+              <label className="block text-neutral-400 text-xs mb-1 uppercase">
+                {t('Dorsal')}
+                {esDrag && <span className="text-neutral-600 normal-case"> · {t('opcional')}</span>}
+              </label>
+              {/* En circuito es obligatorio: es la unica llave que ata una
+                  fila del cronometraje con este carro. En drag no hay
+                  cronometraje que cruzar y muchos no llevan numero. */}
+              <input required={!esDrag} type="number" min="0" value={vehicleForm.number}
                 onChange={e => setVehicleForm({ ...vehicleForm, number: e.target.value })}
                 className="w-full bg-[#0a0a0a] border border-neutral-800 rounded p-2 focus:border-red-600 focus:outline-none text-white"/>
             </div>
+
+            {/* El segundo dorsal solo en circuito. Existe porque MyLaps
+                distingue '44' de '044' —son dos carros— y el numero como
+                entero los junta en uno. En drag no hay MyLaps: preguntar
+                dos veces por el mismo dato solo confunde. */}
+            {!esDrag && (
+              <div>
+                <label className="block text-neutral-400 text-xs mb-1 uppercase">{t('Dorsal en pantalla')}</label>
+                <input type="text" value={vehicleForm.display_number} placeholder={vehicleForm.number || 'igual al dorsal'}
+                  onChange={e => setVehicleForm({ ...vehicleForm, display_number: e.target.value })}
+                  className="w-full bg-[#0a0a0a] border border-neutral-800 rounded p-2 focus:border-red-600 focus:outline-none text-white"/>
+                <p className="text-[11px] text-neutral-600 mt-1">
+                  {t('Tal cual está pintado, con sus ceros: 044')}
+                </p>
+              </div>
+            )}
+
             <div>
-              <label className="block text-neutral-400 text-xs mb-1 uppercase">{t('Dorsal en pantalla')}</label>
-              <input type="text" value={vehicleForm.display_number} placeholder={vehicleForm.number || 'igual al dorsal'}
-                onChange={e => setVehicleForm({ ...vehicleForm, display_number: e.target.value })}
-                className="w-full bg-[#0a0a0a] border border-neutral-800 rounded p-2 focus:border-red-600 focus:outline-none text-white"/>
-            </div>
-            <div>
-              <label className="block text-neutral-400 text-xs mb-1 uppercase">{t('Color')}</label>
+              <label className="block text-neutral-400 text-xs mb-1 uppercase">
+                {t('Color')}
+                {esDrag && <span className="text-neutral-600 normal-case"> · {t('opcional')}</span>}
+              </label>
               <input type="text" value={vehicleForm.color}
                 onChange={e => setVehicleForm({ ...vehicleForm, color: e.target.value })}
                 className="w-full bg-[#0a0a0a] border border-neutral-800 rounded p-2 focus:border-red-600 focus:outline-none text-white"/>
@@ -623,7 +659,8 @@ export default function VehiculosModule() {
               <tr key={vehiculo.vehicle_id} className="border-b border-neutral-800/50 hover:bg-neutral-800/30">
                 <td className="p-4">
                   <span className="inline-flex items-center justify-center min-w-[42px] h-9 px-2 rounded bg-neutral-800 text-white font-black font-mono">
-                    {vehiculo.display_number || vehiculo.number}
+                    {vehiculo.display_number || vehiculo.number
+                      || <span className="text-neutral-600">—</span>}
                   </span>
                 </td>
                 <td className="p-4">

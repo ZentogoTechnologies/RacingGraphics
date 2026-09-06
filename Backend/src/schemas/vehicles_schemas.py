@@ -5,7 +5,8 @@ class VehicleCreate(BaseModel):
     # Opcional: lo pone el servicio. `number` es el dorsal de carrera y ese
     # sí lo escribe quien inscribe; este es solo la clave interna.
     vehicle_id: Optional[int] = None
-    number: int
+    # Sin dorsal se puede: en drag no todos los carros llevan numero.
+    number: Optional[int] = None
     display_number: Optional[str] = None
     brand: Optional[str] = None
     model: Optional[str] = None
@@ -34,7 +35,7 @@ class VehicleUpdate(BaseModel):
 class VehicleResponse(BaseModel):
     id: str = Field(alias="_id")
     vehicle_id: int
-    number: int
+    number: Optional[int] = None
     display_number: Optional[str] = None
     brand: Optional[str] = None
     model: Optional[str] = None

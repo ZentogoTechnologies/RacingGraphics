@@ -121,6 +121,17 @@ app.mount(
     name="fonts",
 )
 
+# Las banderas de los paises. Mismo archivo que sale al aire: la plantilla
+# lo lee del disco y el panel por HTTP, sin copiarlo dos veces. Abierto
+# igual que /public: son banderas, no hay nada que proteger.
+from src.services.settings_services import CARPETA_BANDERAS
+
+app.mount(
+    "/media/banderas",
+    StaticFiles(directory=CARPETA_BANDERAS),
+    name="banderas",
+)
+
 # Todo lo que toca la base o manda al aire exige un JWT válido. La
 # dependencia se declara aquí y no dentro de cada router para que la
 # política de acceso se lea de un vistazo en un solo lugar.

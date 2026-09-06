@@ -83,7 +83,10 @@ class EventService:
                 category_id=i.category_id,
                 sub_category_id=i.sub_category_id,
                 numero=v.number if v else None,
-                display_number=(v.display_number or str(v.number)) if v else None,
+                display_number=(
+                    (v.display_number or (str(v.number) if v.number is not None else None))
+                    if v else None
+                ),
                 brand=v.brand if v else None,
                 model=v.model if v else None,
                 category_name=cat.category_name if cat else None,
@@ -164,7 +167,8 @@ class EventService:
                 raise HTTPException(
                     status_code=400,
                     detail=(
-                        f"El vehículo {v.number} corre en una categoría que no está "
+                        f"El vehículo {v.display_number or v.number or v.vehicle_id} "
+                        "corre en una categoría que no está "
                         "entre las del evento"
                     ),
                 )
@@ -179,7 +183,7 @@ class EventService:
                     status_code=400,
                     detail=(
                         f"Los pilotos {sorted(ajenos)} no están asignados al "
-                        f"vehículo {v.number}"
+                        f"vehículo {v.display_number or v.number or v.vehicle_id}"
                     ),
                 )
 

@@ -205,3 +205,26 @@
    precisión de la de arriba, no un dato del mismo rango. */
 /* .subvalue se retiró: la subcategoría pasó a bloque propio con su
    etiqueta, en la primera fila. */
+
+/* ==================================================
+   BANDERA DEL PAÍS
+================================================== */
+
+/* El país sale como bandera y no como palabra. Ocupa lo que ocupaba el
+   texto, así que la fila de abajo no se mueve.
+
+   El borde no es adorno: hay banderas con el borde blanco —Japón, Corea,
+   Suiza— que sin él se derraman sobre el fondo de la carta. */
+.bandera{
+    height:22px;
+    width:auto;
+
+    /* Alineada con la línea base del texto de al lado, que es lo que
+       hacía el .value al que sustituye. */
+    margin-top:1px;
+
+    border:1px solid rgba(255,255,255,.25);
+    border-radius:2px;
+
+    object-fit:cover;
+}
