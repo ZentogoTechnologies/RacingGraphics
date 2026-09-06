@@ -253,7 +253,10 @@
 
     text-transform:uppercase;
 
-    color:var(--rs-tenue);
+    /* En blanco y no apagados. Son los nombres de las columnas: si no se
+       leen, no se sabe qué es cada cifra. Al 42% se perdían contra el
+       negro de la cabecera en cuanto la señal pasaba por el video. */
+    color:#FFFFFF;
 
     text-align:left;
 
@@ -294,6 +297,15 @@
 
     background:var(--rs-morado-bg);
 }
+
+/* Las vueltas, en blanco. Es el dato que dice si alguien está doblado, y
+   apagado no se leía. La última vuelta sí se queda tenue: es de apoyo y
+   compite con la mejor, que es la que se mira. */
+.rs-num.vts{
+
+    color:#FFFFFF;
+}
+
 
 /* Penalizado: su tiempo es mejor que el del que figura primero, y aun así
    está clasificado por detrás. Eso es lo que deja una sanción —le bajan la
@@ -350,10 +362,15 @@ tr.penalizado .rs-num{
 }
 
 /* Salvo las vueltas y la última, que no tienen nada que ver con la
-   sanción y en ámbar dirían que sí. */
+   sanción y en ámbar dirían que sí. Cada una se queda en su color. */
 tr.penalizado .rs-num.tenue{
 
     color:var(--rs-tenue);
+}
+
+tr.penalizado .rs-num.vts{
+
+    color:#FFFFFF;
 }
 
 
@@ -481,13 +498,17 @@ tr.vuelta-rapida .rs-best{
    PIE
 =================================== */
 
+/* El pie es solo la leyenda: qué significan el punto morado y la P. El
+   nombre de la pista se quitó —lo dice la cabecera, y el XML lo manda
+   abreviado como "Autodromo AP"—, así que las dos entradas van juntas a
+   la izquierda en vez de repartidas a los dos extremos. */
 .rs-pie{
 
     display:flex;
 
     align-items:center;
 
-    justify-content:space-between;
+    gap:30px;
 
     padding:9px 22px;
 
@@ -499,7 +520,8 @@ tr.vuelta-rapida .rs-best{
 
     text-transform:uppercase;
 
-    color:var(--rs-tenue);
+    /* En blanco: explica dos marcas del cuadro y apagado no se leía. */
+    color:#FFFFFF;
 }
 
 .rs-leyenda{

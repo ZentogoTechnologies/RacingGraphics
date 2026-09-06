@@ -64,7 +64,6 @@
     </table>
 
     <div class="rs-pie">
-        <span id="pieIzq">Autódromo Panamá</span>
         <span class="rs-leyenda"><span class="rs-punto"></span> Vuelta rápida de la tanda</span>
         <span class="rs-leyenda oculta" id="leyendaPena">
             <span class="rs-marca-pena">P</span>
@@ -163,7 +162,7 @@ function pintarFilas(standings){
             <td class="rs-marca">${logo}</td>
             <td class="rs-piloto">${escapar(p.full_name)}</td>
             <td class="rs-equipo">${oVacio(p.brand)}</td>
-            <td class="rs-num tenue">${oVacio(p.laps)}</td>
+            <td class="rs-num vts">${oVacio(p.laps)}</td>
             <td class="rs-num">${lider}</td>
             <td class="rs-num">${intervalo}</td>
             <td class="rs-num tenue">${oVacio(p.last_time)}</td>
@@ -201,7 +200,6 @@ function pintarCabecera(d){
     const hoy = new Date();
     poner("fecha", `${String(hoy.getDate()).padStart(2,"0")} ${MESES[hoy.getMonth()]} ${hoy.getFullYear()}`);
 
-    poner("pieIzq", d.track || "Autódromo Panamá");
 }
 
 
