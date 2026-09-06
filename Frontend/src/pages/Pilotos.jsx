@@ -13,13 +13,21 @@ import { useToast } from '../context/ToastContext'
 import { useAuth } from '../context/AuthContext'
 import { useDisciplina } from '../context/DisciplinaContext'
 
-// Sin discipline: la hereda del selector global. Si el formulario dejara
-// elegirla, crear un piloto de la otra disciplina solo serviría para que
-// desapareciera de la lista al guardarlo.
+// La disciplina se elige en la ficha y no se hereda del selector global.
+// El mismo piloto corre en circuito y en drag, y heredarla obligaba a
+// duplicarlo o a perderla al editar desde la otra.
 const EMPTY_PILOT = {
   name: '', last_name: '', nationality: '',
-  team_brand: '', category_ids: [],
+  team_brand: '', category_ids: [], discipline: [],
 }
+
+// Un piloto es una persona, no una inscripción: el mismo corre en circuito
+// y en drag sin duplicar su ficha ni su foto. El modelo ya guardaba una
+// lista; lo que faltaba era poder marcarla.
+const DISCIPLINAS_PILOTO = [
+  { valor: 'circuito', etiqueta: 'Circuito' },
+  { valor: 'drag',     etiqueta: 'Drag' },
+]
 
 function SortIcon({ columnKey, sortField, sortDirection, onSort }) {
   const isActive = sortField === columnKey
@@ -100,7 +108,12 @@ export default function PilotosModule() {
     if (inputFoto.current) inputFoto.current.value = ''
   }
 
-  const openAddForm  = () => { setPilotForm(EMPTY_PILOT); setCurrentEditId(null); limpiarFoto(); setIsFormOpen(true) }
+  const openAddForm  = () => {
+    // Marcada la disciplina abierta: es de la que se está dando de alta.
+    // Se puede añadir la otra sin salir de aquí.
+    setPilotForm({ ...EMPTY_PILOT, discipline: [disciplina] })
+    setCurrentEditId(null); limpiarFoto(); setIsFormOpen(true)
+  }
   const closeForm    = () => { setIsFormOpen(false); setCurrentEditId(null); setPilotForm(EMPTY_PILOT); limpiarFoto() }
   const handleFormToggle = () => isFormOpen ? closeForm() : openAddForm()
 
@@ -112,6 +125,9 @@ export default function PilotosModule() {
       nationality: piloto.nationality || '',
       team_brand: piloto.team_brand || '',
       category_ids: piloto.categories || [],
+      // Las que ya tiene, no la que se está viendo: editar desde circuito
+      // no puede borrarle drag.
+      discipline: piloto.discipline || [],
     })
     setCurrentEditId(piloto.pilot_id)
     setFoto(null)
@@ -180,7 +196,10 @@ export default function PilotosModule() {
       nationality: pilotForm.nationality || null,
       team_brand: pilotForm.team_brand || null,
       category_ids: pilotForm.category_ids,
-      discipline: [disciplina],
+      /* Lo marcado en la ficha. Antes iba [disciplina], la que estuviera
+         abierta, y eso borraba la otra sin avisar: editar a alguien desde
+         circuito para cambiarle el equipo lo sacaba de drag. */
+      discipline: pilotForm.discipline,
     }
 
     try {
@@ -407,6 +426,45 @@ export default function PilotosModule() {
             </div>
           </div>
 
+          {/* Dónde corre. Va antes de las categorías porque las condiciona:
+              las que se ofrecen debajo son las de la disciplina que se esté
+              viendo, y un piloto puede tener de las dos. */}
+          <div className="col-span-full">
+            <label className="block text-neutral-400 text-xs mb-2 uppercase">
+              {t('Corre en')}
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {DISCIPLINAS_PILOTO.map(d => {
+                const activa = pilotForm.discipline.includes(d.valor)
+                return (
+                  <button
+                    key={d.valor} type="button"
+                    onClick={() => setPilotForm(f => ({
+                      ...f,
+                      discipline: activa
+                        ? f.discipline.filter(x => x !== d.valor)
+                        : [...f.discipline, d.valor],
+                    }))}
+                    className={`px-4 py-2 rounded-full border text-xs font-bold transition-colors ${
+                      activa
+                        ? 'border-red-600 bg-red-600/15 text-white'
+                        : 'border-neutral-800 bg-[#0a0a0a] text-neutral-500 hover:border-neutral-600 hover:text-neutral-300'
+                    }`}
+                  >
+                    {t(d.etiqueta)}
+                  </button>
+                )
+              })}
+            </div>
+            {pilotForm.discipline.length === 0 && (
+              // Sin ninguna marcada no saldría en ninguna lista, y quien lo
+              // dio de alta no entendería por qué desapareció.
+              <p className="text-[11px] text-red-400 mt-2">
+                Marca al menos una: sin disciplina el piloto no aparece en ningún listado.
+              </p>
+            )}
+          </div>
+
           <div className="col-span-full">
             <label className="block text-neutral-400 text-xs mb-2 uppercase">{t('Categorías')}</label>
             <div className="flex flex-wrap gap-2">
@@ -431,7 +489,7 @@ export default function PilotosModule() {
 
           <div className="col-span-full flex justify-end gap-3 mt-2">
             <button type="button" onClick={closeForm} className="px-6 py-2 rounded border border-neutral-700 text-neutral-400 hover:text-white hover:border-neutral-500 transition-colors font-bold">{t('CANCELAR')}</button>
-            <button type="submit" disabled={guardando}
+            <button type="submit" disabled={guardando || pilotForm.discipline.length === 0}
               className="bg-white text-black font-bold py-2 px-8 rounded hover:bg-neutral-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2">
               {guardando && <Loader2 size={16} className="animate-spin"/>}
               {currentEditId ? 'ACTUALIZAR' : 'GUARDAR'}
