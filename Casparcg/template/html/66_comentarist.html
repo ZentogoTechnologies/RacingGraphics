@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="../css/narrator.css">
     <script src="../js/idioma_activo.js"></script>
     <script src="../js/i18n.js"></script>
+    <script src="../js/entrada.js"></script>
 </head>
 
 <body>
@@ -100,17 +101,25 @@
 
         function play() {
 
-            const widget = document.getElementById("narrator");
-            const panel  = document.querySelector(".narrator-info");
+            /* Se espera a que la tipografia este cargada y las imagenes
+               completas antes de desplegar. Sin esto la barra se abria
+               vacia y el logo aparecia de golpe a mitad de la animacion;
+               el clima se veia bien porque es la unica sin imagenes. Hay
+               tope: si algo no llega, la barra sale igual sin esa pieza. */
+            entradaCuandoListo(document.body, () => {
 
-            widget.style.animation = "slideUp .5s ease forwards";
+                const widget = document.getElementById("narrator");
+                const panel  = document.querySelector(".narrator-info");
 
-            /* El panel espera a que el conjunto termine de subir: si se
-               abren a la vez, el texto sale volando en diagonal en vez de
-               desplegarse desde el logo. */
-            setTimeout(() => {
-                panel.style.animation = "expandPanel .6s ease forwards";
-            }, 500);
+                widget.style.animation = "slideUp .5s ease forwards";
+
+                /* El panel espera a que el conjunto termine de subir: si
+                   se abren a la vez, el texto sale volando en diagonal en
+                   vez de desplegarse desde el logo. */
+                setTimeout(() => {
+                    panel.style.animation = "expandPanel .6s ease forwards";
+                }, 500);
+            });
         }
 
         function stop() {

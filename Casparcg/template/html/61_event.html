@@ -13,6 +13,7 @@
 
     <script src="../js/idioma_activo.js"></script>
     <script src="../js/i18n.js"></script>
+    <script src="../js/entrada.js"></script>
 </head>
 
 <body>
@@ -185,23 +186,26 @@ function update(data){
 
 function play(){
 
-    ajustarPanel();
+    /* Se espera a que la tipografia este cargada y las imagenes
+       completas antes de desplegar. Sin esto la barra se abria vacia y
+       el logo aparecia de golpe a mitad de la animacion; el clima se veia
+       bien porque es la unica sin imagenes. Hay tope: si algo no llega,
+       la barra sale igual sin esa pieza. */
+    entradaCuandoListo(document.body, () => {
 
-    const widget =
-        document.getElementById("overlay");
+        /* Se mide despues de tener la tipografia: con la de respaldo el
+           nombre ocupa otra cosa y el ancho salia mal. */
+        ajustarPanel();
 
-    const panel =
-        document.getElementById("eventPanel");
+        const widget = document.getElementById("overlay");
+        const panel  = document.getElementById("eventPanel");
 
-    widget.style.animation =
-        "slideUp .5s ease forwards";
+        widget.style.animation = "slideUp .5s ease forwards";
 
-    setTimeout(() => {
-
-        panel.style.animation =
-            "expandPanel .6s ease forwards";
-
-    },500);
+        setTimeout(() => {
+            panel.style.animation = "expandPanel .6s ease forwards";
+        }, 500);
+    });
 }
 
 function stop(){

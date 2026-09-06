@@ -13,6 +13,7 @@
 
     <script src="../js/idioma_activo.js"></script>
     <script src="../js/i18n.js"></script>
+    <script src="../js/entrada.js"></script>
 </head>
 
 <body>
@@ -188,21 +189,22 @@ function update(data){
 
 function play(){
 
-    const widget =
-        document.getElementById("socialMedia");
+    /* Se espera a que la tipografia este cargada y las imagenes
+       completas antes de desplegar. Sin esto la barra se abria vacia y
+       el logo aparecia de golpe a mitad de la animacion; el clima se veia
+       bien porque es la unica sin imagenes. Hay tope: si algo no llega,
+       la barra sale igual sin esa pieza. */
+    entradaCuandoListo(document.body, () => {
 
-    const panel =
-        document.getElementById("infoPanelSocialMedia");
+        const widget = document.getElementById("socialMedia");
+        const panel  = document.getElementById("infoPanelSocialMedia");
 
-    widget.style.animation =
-        "slideUp .5s ease forwards";
+        widget.style.animation = "slideUp .5s ease forwards";
 
-    setTimeout(() => {
-
-        panel.style.animation =
-            "expandPanel .6s ease forwards";
-
-    },500);
+        setTimeout(() => {
+            panel.style.animation = "expandPanel .6s ease forwards";
+        }, 500);
+    });
 }
 
 function stop(){
