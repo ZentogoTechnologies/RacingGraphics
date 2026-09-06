@@ -244,6 +244,7 @@ function update(data){
 
 
 function play(){
+    entradaCancelarAuto();
 
     /* Se espera a que la tipografia este cargada y las imagenes
        completas antes de desplegar. Sin esto la barra se abria vacia y
@@ -281,8 +282,12 @@ function stop(){
 }
 
 
+/* Arranque automatico solo para verlo en un navegador. Dentro de
+   CasparCG el CG ADD llama a play() antes de que salte, y play() lo
+   cancela: sin esto la barra salia primero con el texto de relleno
+   y volvia a entrar al llegar los datos, que es el amague. */
 window.onload = function(){
-    play();
+    entradaAutoNavegador(play);
 };
 
 </script>

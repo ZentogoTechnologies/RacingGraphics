@@ -63,10 +63,16 @@
        lados y acaba montándose encima del logo. */
     justify-content:flex-start;
 
-    /* El ancho lo calcula la plantilla según lo que mida el nombre y lo
-       deja aquí. El valor de reserva es el de siempre, para que un fallo
-       de medida no deje el panel en cero. */
-    width:var(--panel-w, 700px);
+    /* Nace cerrado. El ancho al que se abre lo calcula la plantilla segun
+       lo que mida el nombre y lo deja en --panel-w, que es hasta donde
+       llega expandPanel y donde se queda al terminar.
+
+       Antes aqui ponia `width: var(--panel-w, 700px)` y ese era el amague:
+       la barra se pintaba ya abierta del todo, se veia asi un instante y
+       entonces arrancaba la animacion, que empieza en cero. Aparecia,
+       desaparecia y volvia a aparecer. El clima y las redes no lo hacian
+       porque se quedan con el `width:0` de global.css. */
+    width:0;
 
     overflow:hidden;
 

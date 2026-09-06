@@ -84,3 +84,48 @@ function entradaCuandoListo(raiz, seguir, tope){
        hace entrar la barra ya mismo. */
     menos();
 }
+
+
+/* ==========================================================================
+   EL ARRANQUE AUTOMÁTICO DEL NAVEGADOR
+
+   Las plantillas se abren también a mano en un navegador, para verlas sin
+   levantar CasparCG. Ahí no hay quien llame a play(), así que arrancaban
+   solas con `window.onload = play`.
+
+   Eso es lo que producía el amague. Dentro de CasparCG el CG ADD trae los
+   datos y llama él mismo a update() y a play(), pero la página termina de
+   cargar ANTES de que llegue ese comando: el arranque automático se
+   adelantaba, la barra salía con el texto de relleno —"Nombre del
+   evento"— y volvía a entrar un instante después con los datos de verdad.
+   Dos entradas seguidas, la primera en falso.
+
+   Ahora el arranque automático espera, y la primera llamada a play() lo
+   cancela. Dentro de CasparCG nunca llega a dispararse; en un navegador,
+   donde nadie llama a play(), salta al cumplirse el plazo y la plantilla
+   se ve igual que antes.
+========================================================================== */
+
+/* Margen que se le da a CasparCG para mandar su CG ADD. Tres cuartos de
+   segundo: de sobra para un comando local, y en un navegador no se hace
+   esperar. */
+var ENTRADA_AUTO = 750;
+
+var entradaTemporizador = null;
+
+
+function entradaAutoNavegador(arrancar){
+
+    entradaTemporizador = setTimeout(arrancar, ENTRADA_AUTO);
+}
+
+
+/* Lo llama play() en su primera línea: si el arranque viene de fuera, el
+   automático sobra. */
+function entradaCancelarAuto(){
+
+    if (entradaTemporizador !== null) {
+        clearTimeout(entradaTemporizador);
+        entradaTemporizador = null;
+    }
+}

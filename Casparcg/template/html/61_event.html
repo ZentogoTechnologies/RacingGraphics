@@ -90,6 +90,12 @@ const RELLENO    = 70;      /* los 35px de padding a cada lado */
 const CUERPO_MAX = 50;
 const CUERPO_MIN = 30;
 
+/* Lo que se ven los dos logos juntos antes de separarse, contado desde
+   que la barra empieza a subir. Medio segundo lo tarda en subir, asi que
+   quedan unos ocho decimos de logos quietos: bastante para reconocer los
+   dos, poco para que parezca que se colgo. */
+const ESPERA_LOGOS = 1300;
+
 
 function ajustarPanel(){
 
@@ -185,6 +191,7 @@ function update(data){
 }
 
 function play(){
+    entradaCancelarAuto();
 
     /* Se espera a que la tipografia este cargada y las imagenes
        completas antes de desplegar. Sin esto la barra se abria vacia y
@@ -200,11 +207,29 @@ function play(){
         const widget = document.getElementById("overlay");
         const panel  = document.getElementById("eventPanel");
 
+        /* ==================================================================
+           LOS DOS LOGOS PRIMERO, Y DESPUES SE ABREN
+
+           Sube la barra con el panel del medio cerrado, asi que lo que
+           aparece son los dos logos pegados: el del autodromo y el del
+           campeonato, uno junto al otro como una sola pieza. Se les deja
+           un momento para mirarlos y entonces se abre el panel de en
+           medio, que los empuja a sus lados y descubre el nombre.
+
+           No se mueve ningun logo: crece lo que va entre ellos. Como la
+           barra esta centrada en pantalla, al ganar ancho el medio los dos
+           extremos se separan solos y por simetria. Asi no hay nada que
+           medir, que es donde falla hacerlo moviendo cada pieza: CasparCG
+           llama a play() cuando el navegador todavia no ha hecho el
+           diseño y cualquier medida sale mal.
+        ================================================================== */
+
         widget.style.animation = "slideUp .5s ease forwards";
 
         setTimeout(() => {
-            panel.style.animation = "expandPanel .6s ease forwards";
-        }, 500);
+            panel.style.animation =
+                "expandPanel .75s cubic-bezier(.22,.61,.36,1) forwards";
+        }, ESPERA_LOGOS);
     });
 }
 
@@ -227,9 +252,12 @@ function stop(){
     },500);
 }
 
+/* Arranque automatico solo para verlo en un navegador. Dentro de
+   CasparCG el CG ADD llama a play() antes de que salte, y play() lo
+   cancela: sin esto la barra salia primero con el texto de relleno
+   y volvia a entrar al llegar los datos, que es el amague. */
 window.onload = function(){
-
-    play();
+    entradaAutoNavegador(play);
 };
 
 </script>
