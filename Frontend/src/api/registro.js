@@ -180,6 +180,13 @@ export const quitarSesion = (eventId, numeroOrden) =>
 
 export const leerAjustes = () => pedir('/settings/')
 
+/* Carpetas y XML del servidor, para llegar al current.xml navegando. Sin
+   ruta devuelve las unidades de disco. Es el disco del servidor, no el de
+   quien mira el panel: un <input type=file> del navegador entrega el
+   archivo pero nunca su ruta, y la ruta es justo lo que se guarda. */
+export const explorarRutaXml = (ruta) =>
+  pedir(`/settings/timing/explorar${ruta ? `?ruta=${encodeURIComponent(ruta)}` : ''}`)
+
 export const probarRutaXml = (ruta) =>
   pedir('/settings/timing/probar', { method: 'POST', body: { timing_xml_path: ruta } })
 

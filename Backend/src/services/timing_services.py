@@ -456,6 +456,110 @@ def leer_xml(ruta: str | None = None) -> dict:
     return {"labels": labels, "filas": filas, "modificado": archivo.stat().st_mtime}
 
 
+def _segundos(texto: str) -> float | None:
+    """Una diferencia de MyLaps en segundos, o None si no es un tiempo.
+
+    Llegan como "8.001" y, a partir del minuto, como "1:12.353". Las que
+    dicen "1 Lap" o "2 Laps" no son un tiempo y devuelven None: a un coche
+    doblado no se le mide la diferencia en segundos.
+    """
+    crudo = (texto or "").strip()
+    if not crudo:
+        return None
+
+    signo = -1.0 if crudo.startswith("-") else 1.0
+    crudo = crudo.lstrip("+-").strip()
+
+    partes = crudo.split(":")
+    try:
+        valor = 0.0
+        for parte in partes:
+            valor = valor * 60 + float(parte)
+    except ValueError:
+        return None
+
+    return signo * valor
+
+
+def _como_tiempo(segundos: float) -> str:
+    """De vuelta al formato de MyLaps: "8.001", "1:12.353", "-8.001"."""
+    signo = "-" if segundos < 0 else ""
+    resto = abs(segundos)
+
+    minutos = int(resto // 60)
+    if minutos:
+        return f"{signo}{minutos}:{resto - minutos * 60:06.3f}"
+    return f"{signo}{resto:.3f}"
+
+
+def _reencuadrar_diferencias(standings: list[dict]) -> None:
+    """Pone las diferencias contra el primero de la clasificación.
+
+    MyLaps no las calcula contra quien va primero sino contra el coche más
+    rápido, y no siempre son el mismo: con una sanción, el más rápido puede
+    quedar clasificado segundo. Cuando eso pasa MyLaps deja en blanco al
+    sancionado —él es la referencia, su diferencia es cero— y le pone una
+    diferencia al que sí va primero. En pantalla salían los dos en blanco:
+    el de arriba porque el tótem le borra el valor por ser el primero, y el
+    otro porque venía vacío de origen.
+
+    Se vio en el Heat 3 de Prospec: el 47 tenía el mejor tiempo total
+    —22:10.320 contra 22:18.321— pero figuraba segundo, así que MyLaps le
+    daba los 8.001 al primero y a él nada.
+
+    Aquí se restan todas contra la del primero. El primero queda en cero
+    —el tótem escribe entonces su etiqueta— y quien vaya por delante en
+    tiempo sale en negativo, que es lo que de verdad pasa: va delante en la
+    pista y detrás en la clasificación.
+
+    Lo normal es que el más rápido sea el primero. Entonces su diferencia
+    ya viene vacía, la base es cero y esto no toca nada.
+    """
+    if not standings:
+        return
+
+    # Vacío no es "no se sabe" sino cero: es la fila que MyLaps usa de
+    # referencia. Los doblados —"1 Lap"— sí son un desconocido en segundos.
+    def contra_referencia(fila):
+        crudo = (fila.get("leader") or "").strip()
+        return 0.0 if not crudo else _segundos(crudo)
+
+    base = contra_referencia(standings[0])
+    if base is None or base == 0:
+        return
+
+    for fila in standings:
+        valor = contra_referencia(fila)
+
+        # A los doblados no se les toca: "1 Lap" no es un número de
+        # segundos que se pueda restar, y decir cuántas vueltas lleva de
+        # menos informa más que cualquier tiempo.
+        if valor is None:
+            continue
+
+        nuevo = valor - base
+        fila["leader"] = "" if abs(nuevo) < 0.0005 else _como_tiempo(nuevo)
+
+    # El intervalo es contra quien va justo encima en esta misma lista. El
+    # de MyLaps era contra el de delante en su orden, que ya no es este.
+    anterior = None
+    for indice, fila in enumerate(standings):
+        crudo = (fila.get("leader") or "").strip()
+        actual = 0.0 if not crudo else _segundos(crudo)
+
+        if indice == 0:
+            # El primero no tiene a nadie encima contra quien medirse.
+            fila["interval"] = ""
+        elif actual is not None and anterior is not None:
+            resta = actual - anterior
+            fila["interval"] = "" if abs(resta) < 0.0005 else _como_tiempo(resta)
+        # Si falta alguno de los dos se deja lo que mandara MyLaps: al
+        # menos dice cuántas vueltas van de diferencia.
+
+        if actual is not None:
+            anterior = actual
+
+
 async def obtener_clasificacion(limite: int = 10, ruta: str | None = None) -> dict:
     """
     Clasificación lista para las plantillas, con los nombres de la base.
@@ -551,6 +655,12 @@ async def obtener_clasificacion(limite: int = 10, ruta: str | None = None) -> di
             "brand": marca,
             "brand_logo": marca_logo,
         })
+
+    # Las diferencias de MyLaps van contra el coche más rápido, que con
+    # una sanción de por medio no es el que va primero. Se reencuadran
+    # contra el primero de la clasificación, que es de quien habla el
+    # rótulo del tótem.
+    _reencuadrar_diferencias(standings)
 
     # Vuelta rápida de la tanda. MyLaps la manda en la cabecera como
     # "23 - JOSIMAR JEAN FRANCOIS", así que se compara por el dorsal, que

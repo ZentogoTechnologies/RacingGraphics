@@ -19,12 +19,16 @@
        y en muchos televisores el borde queda fuera de la zona segura. */
     --tf-margen:         34px;
 
-    /* Medido, no elegido a ojo. Lo que de verdad manda es la fila con la
-       columna de tiempos abierta: posicion 30 + marca 44 + dorsal 35 +
-       el nombre corto mas largo que hay en la base —A. VAN DER STRATEN,
-       139px— + cronometro 18 + diferencia 66 = 332. La cabecera necesita
-       308 (caja del logo 118 + MOTO VELOCIDAD a 22px, 174). Con 340
-       entran las dos y sobran ocho pixeles.
+    /* Medido, no elegido a ojo. Ahora lo que manda es la cabecera: caja
+       del logo 118 + MOTO VELOCIDAD a 22px, 174 = 308. La fila con la
+       columna de tiempos abierta pide menos: posicion 30 + marca 44 +
+       dorsal 35 + el nombre corto mas largo que hay en la base
+       —A. VAN DER STRATEN, 139px— + diferencia 66 = 314.
+
+       Antes la fila pedia 332 porque llevaba una columna de 18px para el
+       cronometro de la vuelta rapida. Se llevaba ese ancho en las veinte
+       filas para adornar una sola; ahora el cronometro va fuera, pegado
+       al borde derecho, y esos 18px se los quedan los nombres.
 
        El totem va encima de la carrera, asi que cada pixel de ancho tapa
        pista. */

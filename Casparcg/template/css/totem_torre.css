@@ -504,45 +504,68 @@
 /* Columna fija a la derecha del dorsal. Se reserva el hueco en todas las
    filas, tengan cronómetro o no, para que los dorsales queden alineados
    entre sí y la marca caiga siempre en la misma vertical. */
-.tf-crono-col{
+/* ==========================================================================
+   EL CRONÓMETRO DE LA VUELTA RÁPIDA
 
-    width:18px;
+   Un recuadro morado pegado al borde derecho de la torre, a la altura de
+   quien la tiene. Como en la torre de televisión: se ve de quién es sin
+   leer nada, solo por dónde está.
 
-    flex:0 0 auto;
+   Fuera de la torre y no dentro de la fila. Dentro se llevaba 18px de
+   ancho en las veinte filas para adornar una sola, y el tótem va encima
+   de la carrera: cada pixel de ancho tapa pista.
 
-    display:flex;
+   Lo coloca torre.js midiendo dónde ha quedado la fila. Aquí solo va cómo
+   se ve; el dónde no se puede escribir en CSS porque la fila se mueve
+   cuando se abren las franjas.
+========================================================================== */
+
+.tf-crono-fuera{
+
+    position:fixed;
+
+    /* Cuadrado: el alto lo pone la fila que señala y el ancho lo iguala,
+       para que el icono quede centrado y no estirado. */
+    width:var(--tf-alto-fila);
+
+    display:none;
 
     align-items:center;
     justify-content:center;
 
-    margin-right:8px;
+    background:var(--tf-morado);
+
+    /* Solo las esquinas de fuera: las de dentro tienen que morir contra
+       el canto de la torre, o se ve una junta entre las dos piezas. */
+    border-radius:0 5px 5px 0;
+
+    box-shadow:4px 4px 14px rgba(0,0,0,.5);
+
+    /* Por encima de la torre: si quedara debajo, la sombra de la torre le
+       caería encima y el morado saldría sucio. */
+    z-index:20;
+
+    pointer-events:none;
 }
 
-.tf-crono{
+.tf-crono-fuera.visible{ display:flex; }
 
-    display:inline-flex;
+.tf-crono-fuera svg{
 
-    align-items:center;
-
-    flex:0 0 auto;
-}
-
-.tf-crono svg{
-
-    width:15px;
-    height:15px;
+    width:19px;
+    height:19px;
 
     display:block;
 
-    stroke:var(--tf-morado);
+    /* Blanco sobre el morado, no morado sobre negro: aquí el color ya lo
+       pone el fondo y el icono tiene que recortarse contra él. */
+    stroke:#FFFFFF;
 
     stroke-width:1.9;
 
     stroke-linecap:round;
 
     fill:none;
-
-    filter:drop-shadow(0 1px 2px rgba(0,0,0,1));
 }
 
 

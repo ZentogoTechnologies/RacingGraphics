@@ -12,6 +12,7 @@ import { reconectarCasparcg } from '../api/graphics'
 import Trazados from '../components/settings/Trazados'
 import { useToast } from '../context/ToastContext'
 import { useIdioma } from '../context/IdiomaContext'
+import ExploradorXml from '../components/settings/ExploradorXml'
 
 
 // ─── Pestañas ─────────────────────────────────────────────────
@@ -170,6 +171,7 @@ export default function AjustesModule() {
   const [ruta,      setRuta]      = useState('')
   const [aplicada,  setAplicada]  = useState('')
   const [estado,    setEstado]    = useState(null)   // estado de la ruta aplicada
+  const [explorando, setExplorando] = useState(false)
   const [prueba,    setPrueba]    = useState(null)   // resultado de "probar"
   const [detectados, setDetectados] = useState([])
 
@@ -360,6 +362,19 @@ export default function AjustesModule() {
             spellCheck={false}
             className="flex-1 bg-[#0a0a0a] border border-neutral-800 rounded p-2.5 font-mono text-sm focus:border-red-600 focus:outline-none text-white"
           />
+          {/* Examinar el disco DEL SERVIDOR. El selector de archivos del
+              navegador no vale: entrega el archivo pero nunca su ruta, y
+              es la ruta lo que hay que guardar. */}
+          <button
+            onClick={() => setExplorando(v => !v)}
+            className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border transition-colors font-bold text-sm whitespace-nowrap ${
+              explorando
+                ? 'border-red-600 bg-red-600/10 text-red-400'
+                : 'border-neutral-700 text-neutral-300 hover:border-neutral-500 hover:text-white'}`}
+          >
+            <FolderSearch size={16}/>
+            {t('EXAMINAR')}
+          </button>
           <button
             onClick={probar} disabled={probando || !ruta.trim()}
             className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-neutral-700 text-neutral-300 hover:border-blue-500 hover:text-blue-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors font-bold text-sm whitespace-nowrap"
@@ -376,10 +391,17 @@ export default function AjustesModule() {
           </button>
         </div>
 
-        {/* La ruta se escribe, no se examina: el navegador solo entrega el
-            nombre del archivo y nunca su ruta en disco, y quien lee el XML
-            es el backend, que puede estar en otra máquina. */}
-        <p className="text-xs text-neutral-600 mb-5">
+        {explorando && (
+          <ExploradorXml
+            rutaInicial={ruta}
+            onElegir={r => { setRuta(r); setPrueba(null); setExplorando(false) }}
+            onCerrar={() => setExplorando(false)}
+          />
+        )}
+
+        {/* Se navega el disco del servidor, no el de quien mira el panel:
+            el XML lo lee el backend, que puede estar en otra máquina. */}
+        <p className="text-xs text-neutral-600 mt-3 mb-5">
           {t('Es una ruta del servidor donde corre el backend, no de tu equipo.')}
         </p>
 

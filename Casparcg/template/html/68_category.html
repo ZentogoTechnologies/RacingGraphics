@@ -102,8 +102,8 @@
 const ANCHO_MIN  = 700;
 const ANCHO_MAX  = 1180;
 const RELLENO    = 70;      /* los 35px de padding a cada lado */
-const CUERPO_MAX = 58;
-const CUERPO_MIN = 34;
+const CUERPO_MAX = 50;
+const CUERPO_MIN = 30;
 
 
 function escapar(texto){
@@ -140,14 +140,39 @@ function ajustarPanel(){
         nombre.style.fontSize = cuerpo + "px";
     }
 
+    /* Las subcategorias, en una linea mientras quepan. Cuando no caben ni
+       con la barra al ancho maximo se reparten en dos, que es mejor que
+       seguir achicando la letra: con siete subcategorias acabaria tan
+       pequeña que no se leeria en television.
+
+       Se prueba primero en una linea y se mide; solo si se pasa se
+       reparte. Al reves —dejarlas siempre en dos— una categoria con dos
+       subcategorias saldria con una linea a medias y un hueco debajo. */
+    if (subs) {
+
+        subs.classList.remove("dos-lineas");
+        subs.style.maxWidth = "";
+
+        if (subs.scrollWidth > DISPONIBLE) {
+            subs.classList.add("dos-lineas");
+            subs.style.maxWidth = DISPONIBLE + "px";
+        }
+    }
+
     /* Manda la más ancha de las tres líneas: con pocas subcategorías el
        nombre es la más larga, pero "Pro · Amateur · Equipos por Color"
        puede pasarlo de largo. */
     const etiqueta = document.getElementById("label");
 
+    /* Repartidas en dos lineas ya no miden lo que ocupan sino el tope que
+       se les dio, y ese tope es el ancho maximo de la barra. */
+    const anchoSubs = !subs
+        ? 0
+        : (subs.classList.contains("dos-lineas") ? DISPONIBLE : subs.scrollWidth);
+
     const texto = Math.max(
         nombre.scrollWidth,
-        subs ? subs.scrollWidth : 0,
+        anchoSubs,
         etiqueta ? etiqueta.scrollWidth : 0);
 
     const total = Math.min(

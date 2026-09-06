@@ -7,13 +7,47 @@
 
 
 /* ==================================================
+   ALTO DE LA BARRA
+
+   Era de 150px fijos, heredados del panel del clima, con overflow:hidden
+   para poder animar el ancho. El clima lleva dos líneas y cabía; la carta
+   de categoría lleva tres —etiqueta, nombre y subcategorías— y la tercera
+   se salía por abajo y aparecía cortada. Se medía: 181px de contenido en
+   un panel de 150.
+
+   Ahora el alto lo pone lo que haya dentro, con un mínimo para que la
+   carta de evento, que lleva dos líneas, no quede más flaca que antes.
+   El recorte sigue siendo horizontal, que es lo que necesita la entrada.
+
+   `stretch` en la barra es lo que mantiene los tres bloques —logo,
+   panel y logo del campeonato— del mismo alto. Con `center`, al crecer
+   el panel del medio los otros dos se quedaban cortos y la barra parecía
+   tres piezas sueltas.
+================================================== */
+
+.overlay{
+
+    align-items:stretch;
+}
+
+.logo-box,
+.info-panel{
+
+    height:auto;
+
+    /* Un punto por debajo de los 150 de antes: se pidió achicarlas. */
+    min-height:132px;
+}
+
+
+/* ==================================================
    LOGO
 ================================================== */
 
 .logo-box img{
 
-    max-width:140px;
-    max-height:110px;
+    max-width:124px;
+    max-height:96px;
 
     object-fit:contain;
 }
@@ -59,7 +93,7 @@
 
     white-space:nowrap;
 
-    padding:20px 35px;
+    padding:16px 35px;
 
     display:flex;
     flex-direction:column;
@@ -99,7 +133,7 @@
     align-items:center;
     justify-content:center;
 
-    padding:12px 18px;
+    padding:10px 16px;
 
     /* Fondo propio: al estar fuera del panel necesita el suyo para no
        quedar flotando sobre el video. Se remata la esquina derecha, que
@@ -116,7 +150,7 @@
 
     /* Alto fijo y ancho libre: así un logo cuadrado y uno apaisado se ven
        igual de grandes, que es lo que el ojo compara. */
-    height:78px;
+    height:68px;
     width:auto;
 
     max-width:284px;
@@ -131,7 +165,7 @@
 
 .event-label{
 
-    font-size:22px;
+    font-size:19px;
     font-weight:600;
 
     letter-spacing:3px;
@@ -152,7 +186,7 @@
     overflow:hidden;
     text-overflow:ellipsis;
 
-    font-size:58px;
+    font-size:50px;
     font-weight:900;
 
     line-height:1;

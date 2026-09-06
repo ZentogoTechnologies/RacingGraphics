@@ -8,6 +8,7 @@ se refresca al arrancar y cada vez que alguien lo cambia.
 
 import io
 import json
+import os
 import shutil
 from pathlib import Path
 from typing import Optional
@@ -168,6 +169,143 @@ def revisar_ruta(ruta: str) -> dict:
         "tanda": etiquetas.get("runname"),
         "grupo": etiquetas.get("groupname"),
         "filas": len(datos.get("filas", [])),
+    }
+
+
+# Cuántas entradas se devuelven por carpeta. Una carpeta de Windows con
+# miles de archivos no se navega en una lista: se llega a ella escribiendo
+# la ruta, no bajando desde la raíz.
+TOPE_ENTRADAS = 400
+
+
+def unidades() -> list[dict]:
+    """Las unidades de disco montadas, para empezar a navegar por algún sitio.
+
+    En Windows se prueban las 26 letras. Probar es lo único que funciona:
+    una unidad de red asignada puede estar en la lista del sistema y no
+    responder, y lo que importa aquí es si se puede entrar.
+    """
+    encontradas = []
+
+    if os.name != "nt":
+        return [{"ruta": "/", "nombre": "/"}]
+
+    for letra in "CDEFGHIJKLMNOPQRSTUVWXYZAB":
+        raiz = Path(f"{letra}:/")
+        try:
+            if raiz.exists():
+                encontradas.append({"ruta": str(raiz), "nombre": f"{letra}:"})
+        except OSError:
+            # Una unidad de red caída lanza en vez de decir que no existe.
+            continue
+
+    return encontradas
+
+
+def explorar(ruta: Optional[str]) -> dict:
+    """Lo que hay en una carpeta del servidor: subcarpetas y XML.
+
+    Existe porque la ruta del cronometraje es del servidor, no del equipo
+    desde el que se abre el panel: un selector de archivos del navegador
+    entrega el nombre y el contenido, nunca la ruta en disco, y esa ruta es
+    justo lo que hay que guardar. Así que el servidor enseña sus carpetas y
+    quien opera navega hasta el archivo.
+
+    Solo se listan carpetas y archivos .xml, y nunca se devuelve el
+    contenido de ninguno: esto sirve para encontrar el current.xml, no para
+    leer el disco del servidor desde el navegador.
+    """
+    crudo = (ruta or "").strip()
+
+    if not crudo:
+        return {
+            "ruta": None,
+            "padre": None,
+            "unidades": unidades(),
+            "carpetas": [],
+            "archivos": [],
+            "detalle": None,
+        }
+
+    aqui = Path(crudo)
+
+    # Al pulsar sobre un XML de la lista la ruta que vuelve es la del
+    # archivo: se abre su carpeta, que es lo que se esperaba.
+    if aqui.is_file():
+        aqui = aqui.parent
+
+    if not aqui.exists():
+        return {
+            "ruta": str(aqui),
+            "padre": str(aqui.parent) if aqui.parent != aqui else None,
+            "unidades": unidades(),
+            "carpetas": [],
+            "archivos": [],
+            "detalle": f"No existe {aqui}. ¿Está conectada la unidad?",
+        }
+
+    carpetas, archivos = [], []
+    detalle = None
+
+    try:
+        entradas = sorted(
+            aqui.iterdir(),
+            key=lambda e: (not e.is_dir(), e.name.lower()),
+        )
+    except PermissionError:
+        return {
+            "ruta": str(aqui),
+            "padre": str(aqui.parent) if aqui.parent != aqui else None,
+            "unidades": unidades(),
+            "carpetas": [],
+            "archivos": [],
+            "detalle": "Sin permiso para leer esta carpeta",
+        }
+    except OSError as e:
+        return {
+            "ruta": str(aqui),
+            "padre": str(aqui.parent) if aqui.parent != aqui else None,
+            "unidades": unidades(),
+            "carpetas": [],
+            "archivos": [],
+            "detalle": f"No se pudo leer: {type(e).__name__}",
+        }
+
+    if len(entradas) > TOPE_ENTRADAS:
+        detalle = (
+            f"La carpeta tiene {len(entradas)} elementos; se muestran los "
+            f"primeros {TOPE_ENTRADAS}. Escribe la ruta completa si no está."
+        )
+        entradas = entradas[:TOPE_ENTRADAS]
+
+    for entrada in entradas:
+        try:
+            if entrada.is_dir():
+                # Las ocultas y las del sistema estorban más que ayudan.
+                if entrada.name.startswith((".", "$")):
+                    continue
+                carpetas.append({"ruta": str(entrada), "nombre": entrada.name})
+
+            elif entrada.suffix.lower() == ".xml":
+                info = entrada.stat()
+                archivos.append({
+                    "ruta": str(entrada),
+                    "nombre": entrada.name,
+                    "tamano": info.st_size,
+                    "modificado": info.st_mtime,
+                })
+        except OSError:
+            # Un archivo que desaparece entre el listado y el stat no puede
+            # tumbar la carpeta entera.
+            continue
+
+    return {
+        "ruta": str(aqui),
+        "padre": str(aqui.parent) if aqui.parent != aqui else None,
+        "unidades": unidades(),
+        "carpetas": carpetas,
+        "archivos": archivos,
+        "detalle": detalle,
     }
 
 

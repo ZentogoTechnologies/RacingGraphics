@@ -8,7 +8,8 @@ from src.services.settings_services import (
     IDIOMAS, TIPOGRAFIAS, fuente_actual, guardar_fuente,
     guardar_idioma, idioma_actual, textos_de,
     guardar_logo_cliente, guardar_ruta_timing, logo_cliente_actual,
-    marcar_logo_cliente, restaurar_logo_fabrica, revisar_ruta, ruta_timing,
+    explorar, marcar_logo_cliente, restaurar_logo_fabrica, revisar_ruta,
+    ruta_timing,
     url_logo_cliente, xml_detectados,
 )
 from src.services.tracks_services import ruta_plantilla, trazados_service
@@ -34,6 +35,19 @@ async def leer_ajustes():
         "client_logo": await logo_cliente_actual(),
         "client_logo_url": url_logo_cliente(),
     }
+
+
+@ajustes.get("/timing/explorar", tags=["Settings"], dependencies=[Depends(puede_escribir)])
+async def explorar_carpeta(ruta: Optional[str] = None):
+    """
+    Carpetas y XML del servidor, para llegar al current.xml navegando
+
+    Sin `ruta` devuelve las unidades de disco. La ruta es la del servidor
+    donde corre el backend, que es el que lee el archivo: el selector de
+    archivos del navegador nunca entrega una ruta en disco, y es la ruta lo
+    que hay que guardar.
+    """
+    return explorar(ruta)
 
 
 @ajustes.post("/timing/probar", tags=["Settings"], dependencies=[Depends(puede_escribir)])

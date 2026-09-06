@@ -143,6 +143,135 @@ function torreNombre(piloto){
 
    Va dibujado y no como carácter: los emojis de reloj se ven distintos en
    cada máquina y no se pueden teñir. Este hereda el morado del CSS. */
+/* ==========================================================================
+   EL CRONÓMETRO DE LA VUELTA RÁPIDA
+
+   Un recuadro morado pegado al borde derecho de la torre, a la altura de
+   quien tiene la vuelta rápida. Como en la torre de televisión: se ve de
+   quién es sin leer nada, solo por dónde está.
+
+   Va FUERA de la torre y no dentro de la fila. Dentro se comía 18px de
+   ancho en las veinte filas para adornar una sola, y el tótem va encima
+   de la carrera: cada pixel de ancho tapa pista.
+
+   No puede colgar de la torre porque la torre recorta lo que se sale
+   —de eso vive su entrada, el arte bajando desde arriba—, así que vive
+   suelto en el documento y se coloca midiendo dónde ha quedado la fila.
+   Medir es más fiable que calcular: entre medias se abren las franjas de
+   la vuelta rápida y del piloto comparado, que empujan las filas hacia
+   abajo, y el número de fila ya no dice a qué altura está.
+========================================================================== */
+
+let torreCronoCaja   = null;
+let torreCronoTemp   = null;
+let torreCronoDonde  = "";   /* donde se dejo, para saber si se movio */
+let torreCronoQuieto = 0;    /* vueltas seguidas sin moverse */
+
+
+function torreCronoElemento(){
+
+    if (torreCronoCaja) return torreCronoCaja;
+
+    torreCronoCaja = document.createElement("div");
+    torreCronoCaja.className = "tf-crono-fuera";
+    torreCronoCaja.innerHTML = torreCronometro();
+
+    document.body.appendChild(torreCronoCaja);
+
+    return torreCronoCaja;
+}
+
+
+function torreColocarCrono(){
+
+    const caja = torreCronoElemento();
+
+    const fila = torreCuerpo && torreCuerpo.querySelector(".tf-fila.vuelta-rapida");
+    const torre = torreElemento;
+
+    /* Sin vuelta rápida marcada, o con la torre fuera del aire, no hay
+       nada que señalar. Se esconde en vez de dejarlo donde estaba. */
+    if (!fila || !torre) {
+        caja.classList.remove("visible");
+        torreCronoDonde = "";
+        return false;
+    }
+
+    const f = fila.getBoundingClientRect();
+    const t = torre.getBoundingClientRect();
+
+    /* Con la torre a medio entrar la fila todavía no tiene alto: pintar
+       el recuadro ahí lo deja como una raya en el aire. */
+    if (f.height <= 0 || t.width <= 0) {
+        caja.classList.remove("visible");
+        torreCronoDonde = "";
+        return false;
+    }
+
+    caja.style.left   = `${t.right}px`;
+    caja.style.top    = `${f.top}px`;
+    caja.style.height = `${f.height}px`;
+
+    caja.classList.add("visible");
+
+    const donde = `${t.right}|${f.top}|${f.height}`;
+    const movido = donde !== torreCronoDonde;
+    torreCronoDonde = donde;
+
+    return movido;
+}
+
+
+/* Se coloca ya y ademas se sigue mientras se mueva.
+
+   Lo primero es colocarlo de una vez, sin esperar a ningun fotograma. El
+   seguimiento va con setTimeout y no con requestAnimationFrame porque rAF
+   solo corre si la pagina se esta pintando, y estas plantillas viven en
+   un navegador sin ventana; con rAF el recuadro no llegaba a aparecer.
+
+   Se para cuando la fila lleva un rato quieta, no al cabo de un tiempo
+   fijo. Encima de la torre se mueven varias cosas con duraciones
+   distintas —la entrada escalonada, las franjas que se abren, los nombres
+   al abreviarse— y cualquier plazo que se eligiera se quedaria corto para
+   alguna. Asi no hay que conocerlas: se sigue a la fila hasta que para. */
+function torreSeguirCrono(){
+
+    torreColocarCrono();
+
+    torreCronoQuieto = 0;
+
+    if (torreCronoTemp !== null) return;
+
+    const paso = () => {
+        const movido = torreColocarCrono();
+
+        torreCronoQuieto = movido ? 0 : torreCronoQuieto + 1;
+
+        /* Un segundo quieto y se deja de mirar. Vuelve a arrancar solo
+           cuando algo la mueva otra vez. */
+        if (torreCronoQuieto > 25) {
+            torreCronoTemp = null;
+            return;
+        }
+        torreCronoTemp = setTimeout(paso, 40);
+    };
+
+    torreCronoTemp = setTimeout(paso, 40);
+}
+
+
+function torreEsconderCrono(){
+
+    if (torreCronoTemp !== null) {
+        clearTimeout(torreCronoTemp);
+        torreCronoTemp = null;
+    }
+    torreCronoDonde = "";
+
+    if (torreCronoCaja) torreCronoCaja.classList.remove("visible");
+}
+
+
 function torreCronometro(){
 
     return '<span class="tf-crono">'
@@ -386,14 +515,6 @@ function torrePintarFilas(standings){
             columnas += `<div class="tf-dorsal">${torreEscapar(piloto.number)}</div>`;
         }
 
-        /* El cronómetro va después del dorsal y no pegado al nombre: ahí
-           quedaba a media fila, en un sitio distinto según lo largo que
-           fuera el apellido, y al abreviarse se movía. En columna propia
-           siempre cae en la misma vertical. */
-        columnas += `<div class="tf-crono-col">`
-                  + (piloto.is_best_lap ? torreCronometro() : "")
-                  + `</div>`;
-
         if (torreConfig.columna) {
             columnas += `<div class="tf-dif">${torreEscapar(torreDiferencia(piloto, index))}</div>`;
         }
@@ -429,6 +550,10 @@ function torrePintarFilas(standings){
        estaba abierta y entra un piloto nuevo, no debe cerrarse sola. */
     torreElemento.classList.toggle("mejor-vuelta", torreConfig.mejorVuelta);
     torreElemento.classList.toggle("con-diferencia", Boolean(torreConfig.columna));
+
+    /* Las filas acaban de cambiar de sitio: el recuadro de la vuelta
+       rápida las sigue mientras se asientan. */
+    torreSeguirCrono();
 
     const comparando = Boolean(torreConfig.comparar);
 
@@ -511,6 +636,11 @@ function arrancarTorre(opciones){
 
 
 function detenerTorre(){
+    /* El recuadro vive fuera de la torre, asi que no se lo lleva por
+       delante el CLEAR de la capa: hay que retirarlo a mano o se queda
+       flotando sobre la carrera. */
+    torreEsconderCrono();
+
     torreCancelarEntrada();
     torreEntrada.hecha = false;
     torreEntrada.corriendo = false;
@@ -551,6 +681,8 @@ function actualizarTorre(data){
         if (d.mejor_vuelta !== undefined) {
             torreConfig.mejorVuelta = Boolean(d.mejor_vuelta);
             torreElemento.classList.toggle("mejor-vuelta", torreConfig.mejorVuelta);
+            /* La franja empuja las filas de abajo mientras se abre. */
+            torreSeguirCrono();
         }
 
         /* El segundo piloto. Llega su dorsal para abrirla, o null para

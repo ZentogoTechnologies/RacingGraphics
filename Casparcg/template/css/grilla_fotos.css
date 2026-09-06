@@ -18,7 +18,11 @@
     left:50%;
     top:50%;
 
-    transform:translate(-50%, -50%);
+    /* Un 30% mas pequeña. Se escala el cuadro entero en vez de tocar las
+       treinta medidas de dentro: asi las proporciones que ya estaban
+       ajustadas —el tope de las fotos, el aire de la cabecera, el cuerpo
+       de los nombres— siguen siendo las mismas, solo que mas chicas. */
+    transform:translate(-50%, -50%) scale(.7);
 
     /* Encajonada, no a sangre. Mismo ancho que la grilla de nombres para
        que las dos se lean como el mismo grafico contado de dos formas, y

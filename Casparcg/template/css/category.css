@@ -14,20 +14,40 @@
 
     align-items:baseline;
 
-    gap:10px;
+    gap:9px;
 
-    margin-top:6px;
+    margin-top:5px;
 
-    /* No se parte en dos líneas: la barra crece de ancho, que es lo que
-       hace el panel al medirse. */
+    /* De una línea mientras quepan. La barra crece de ancho, que es lo
+       primero que hace el panel al medirse. */
     white-space:nowrap;
+}
+
+/* Cuando ya no caben ni con la barra al ancho máximo, se reparten en dos
+   líneas en vez de seguir encogiendo la letra. Lo pone la plantilla, que
+   es quien mide; aquí solo está el cómo.
+
+   Se prefiere partir a achicar: una categoría con siete subcategorías
+   acabaría con la letra tan pequeña que no se leería en televisión, que
+   es justo lo que se pidió evitar. */
+.cat-subs.dos-lineas{
+
+    flex-wrap:wrap;
+
+    white-space:normal;
+
+    /* Centrada respecto al nombre de arriba: las dos líneas quedan
+       equilibradas en vez de dejar un pico a la derecha. */
+    row-gap:2px;
 }
 
 .cat-sub{
 
     font-family:var(--fuente-graficos);
 
-    font-size:23px;
+    /* Más pequeña que antes —23px— para que quepan más y sigan
+       leyéndose. Es un dato de apoyo, no el titular de la carta. */
+    font-size:18px;
 
     font-weight:700;
 
@@ -44,7 +64,7 @@
    lista y no una sucesión de símbolos. */
 .cat-sep{
 
-    font-size:19px;
+    font-size:15px;
 
     font-weight:700;
 
