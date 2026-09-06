@@ -97,6 +97,16 @@ async def logo_categoria_por_ruta(category_id: int, datos: RutaLogoCategoria):
     return await service.logo_por_ruta(category_id, datos.ruta)
 
 
+@categories.post("/{category_id}/logo/sin-fondo", tags=["Categories"],
+                 response_model=CategoryResponse,
+                 dependencies=[Depends(puede_escribir)])
+async def quitar_fondo_logo_categoria(category_id: int):
+    """
+    Deja transparente el fondo del logo, si es de un solo color.
+    """
+    return await service.quitar_fondo_logo(category_id)
+
+
 @categories.delete("/{category_id}/logo", tags=["Categories"], response_model=CategoryResponse,
                    dependencies=[Depends(puede_escribir)])
 async def borrar_logo_categoria(category_id: int):

@@ -67,3 +67,87 @@ def quitar_fondo(contenido: bytes, sujeto: str = "persona") -> bytes:
     salida = io.BytesIO()
     recortada.save(salida, format="PNG", optimize=True)
     return salida.getvalue()
+
+
+# ── Logotipos ─────────────────────────────────────────────────────
+#
+# Un logo no se recorta con los modelos de arriba. Estan entrenados con
+# fotografias de personas y de objetos, y delante de unas letras con
+# destellos no saben que es figura y que es fondo: devuelven cualquier
+# cosa o la imagen entera.
+#
+# Lo que sirve es quitar el fondo por color. Los logos vienen sobre un
+# plano uniforme —casi siempre negro o blanco— y ese plano se puede
+# reconocer mirando las esquinas.
+
+# Hasta donde se considera fondo. Por debajo el pixel se va del todo, y
+# entre este valor y el doble se difumina: sin esa franja el borde de las
+# letras queda dentado.
+TOLERANCIA = 42
+
+
+def _color_del_fondo(imagen):
+    """El color de las cuatro esquinas, si coinciden entre si.
+
+    Se miran las esquinas y no un pixel suelto: una mota o el filo de un
+    destello darian un color equivocado para toda la imagen.
+    """
+    ancho, alto = imagen.size
+    m = max(2, min(ancho, alto) // 40)
+
+    esquinas = []
+    for x0, y0 in ((0, 0), (ancho - m, 0), (0, alto - m), (ancho - m, alto - m)):
+        trozo = imagen.crop((x0, y0, x0 + m, y0 + m))
+        pixeles = list(trozo.getdata())
+        esquinas.append(tuple(sum(c[i] for c in pixeles) // len(pixeles)
+                              for i in range(3)))
+
+    # Si las esquinas no se parecen, el fondo no es plano y esto no aplica.
+    for c in esquinas[1:]:
+        if sum(abs(a - b) for a, b in zip(c, esquinas[0])) > TOLERANCIA * 3:
+            return None
+
+    return tuple(sum(c[i] for c in esquinas) // 4 for i in range(3))
+
+
+def quitar_fondo_plano(contenido: bytes, tolerancia: int = TOLERANCIA) -> bytes:
+    """Deja transparente el fondo plano de un logotipo.
+
+    Devuelve PNG. Si el fondo no es plano se levanta un error en vez de
+    devolver una imagen destrozada: es mejor decirlo que entregar un logo
+    con agujeros.
+    """
+    from PIL import Image, ImageOps
+
+    imagen = Image.open(io.BytesIO(contenido))
+    imagen = ImageOps.exif_transpose(imagen).convert("RGBA")
+
+    fondo = _color_del_fondo(imagen.convert("RGB"))
+    if fondo is None:
+        raise ValueError(
+            "El fondo no es de un solo color: este recorte solo sirve para "
+            "logos sobre un plano uniforme"
+        )
+
+    fr, fg, fb = fondo
+    pixeles = imagen.load()
+    ancho, alto = imagen.size
+
+    for y in range(alto):
+        for x in range(ancho):
+            r, g, b, a = pixeles[x, y]
+            if a == 0:
+                continue
+
+            # Distancia al color del fondo. Se difumina en una franja para
+            # que el filo de las letras no quede dentado.
+            d = abs(r - fr) + abs(g - fg) + abs(b - fb)
+            if d <= tolerancia:
+                pixeles[x, y] = (r, g, b, 0)
+            elif d <= tolerancia * 2:
+                suave = int(255 * (d - tolerancia) / tolerancia)
+                pixeles[x, y] = (r, g, b, min(a, suave))
+
+    salida = io.BytesIO()
+    imagen.save(salida, format="PNG", optimize=True)
+    return salida.getvalue()

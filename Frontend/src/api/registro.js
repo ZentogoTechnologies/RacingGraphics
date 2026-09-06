@@ -138,6 +138,12 @@ export const categoriasApi = recurso('/categories')
 export const subirLogoCategoria = (categoryId, archivo) =>
   subirArchivo(`/categories/${categoryId}/logo`, archivo)
 
+// Deja transparente el fondo del logo. Va por color y no por el modelo
+// que usan las fotos: un logotipo con letras no es una figura que un
+// modelo de segmentación sepa reconocer.
+export const quitarFondoLogoCategoria = (categoryId) =>
+  pedir(`/categories/${categoryId}/logo/sin-fondo`, { method: 'POST' })
+
 export const borrarLogoCategoria = (categoryId) =>
   pedir(`/categories/${categoryId}/logo`, { method: 'DELETE' })
 

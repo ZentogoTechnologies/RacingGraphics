@@ -224,6 +224,41 @@ class CategoryService:
 
         return await self._asignar_logo(categoria, destino)
 
+    async def quitar_fondo_logo(self, category_id: int) -> CategoryResponse:
+        """Deja transparente el fondo del logo de la categoría.
+
+        Usa el recorte por color y no el de las fotos. Los modelos de
+        segmentación están entrenados con fotografías: delante de un
+        logotipo con letras y destellos no distinguen figura de fondo.
+        Un logo, en cambio, casi siempre viene sobre un plano uniforme, y
+        eso sí se puede reconocer y quitar.
+        """
+        categoria = await self._obtener(category_id)
+
+        if not categoria.logo:
+            raise HTTPException(
+                400, "La categoría no tiene logo: sube uno antes de quitarle el fondo")
+
+        actual = CARPETA_LOGOS / categoria.logo
+        if not actual.is_file():
+            raise HTTPException(400, "El archivo del logo no está en el disco")
+
+        from src.services.recorte_services import quitar_fondo_plano
+
+        try:
+            recortado = quitar_fondo_plano(actual.read_bytes())
+        except ValueError as e:
+            # El fondo no era plano. Se dice en claro: es un caso normal,
+            # no un fallo del servidor.
+            raise HTTPException(422, str(e))
+        except Exception as e:
+            raise HTTPException(422, f"No se pudo quitar el fondo: {e}")
+
+        # Siempre PNG: la transparencia no cabe en un JPG ni en un WEBP
+        # guardado como opaco.
+        destino = guardar_bytes(recortado, "logo.png", CARPETA_LOGOS / str(category_id))
+        return await self._asignar_logo(categoria, destino)
+
     async def borrar_logo(self, category_id: int) -> CategoryResponse:
         categoria = await self._categoria(category_id)
 

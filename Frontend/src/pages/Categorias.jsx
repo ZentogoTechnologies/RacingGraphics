@@ -2,13 +2,14 @@ import { t } from '../i18n'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   Pencil, Trash2, Plus, X, ChevronUp, ChevronDown, ChevronsUpDown, Loader2,
-  Upload, ImageIcon,
+  Scissors, Upload, ImageIcon,
 } from 'lucide-react'
 import ModuleHeader from '../components/shared/ModuleHeader'
 import Pagination from '../components/shared/Pagination'
 import ConfirmDialog from '../components/shared/ConfirmDialog'
 import {
-  borrarLogoCategoria, categoriasApi, subirLogoCategoria, urlLogoCategoria,
+  borrarLogoCategoria, categoriasApi, quitarFondoLogoCategoria,
+  subirLogoCategoria, urlLogoCategoria,
 } from '../api/registro'
 import { useListado } from '../hooks/useListado'
 import { useToast } from '../context/ToastContext'
@@ -75,6 +76,32 @@ export default function CategoriasModule() {
   const limpiarLogo = () => {
     setLogo(null); setLogoActual(null)
     if (inputLogo.current) inputLogo.current.value = ''
+  }
+
+  const [recortando, setRecortando] = useState(false)
+
+  /* Deja transparente el fondo del logo. Trabaja sobre el archivo ya
+     guardado, así que necesita la categoría creada: en un alta todavía no
+     hay nada en el servidor sobre lo que trabajar. */
+  const recortarLogo = async () => {
+    if (!currentEditId) return
+    setRecortando(true)
+    try {
+      const c = await quitarFondoLogoCategoria(currentEditId)
+      // logo_url y no logo: aquí se guarda la ruta, que es lo que espera
+      // urlLogoCategoria. El campo `logo` es solo el nombre del archivo y
+      // daría una dirección rota.
+      //
+      // El recorte se guarda como PNG, así que la extensión cambia y el
+      // navegador no puede servir la imagen anterior de su caché.
+      setLogoActual(c.logo_url || null)
+      lista.recargar()
+      toast.exito('Fondo quitado', 'El logo queda recortado sobre transparente')
+    } catch (err) {
+      toast.error('No se pudo quitar el fondo', err.message)
+    } finally {
+      setRecortando(false)
+    }
   }
 
   const quitarLogo = async () => {
@@ -261,6 +288,22 @@ export default function CategoriasModule() {
                   <Upload size={14}/>
                   {vistaLogo ? 'CAMBIAR' : 'ELEGIR LOGO'}
                 </button>
+
+                {/* Con logo guardado se ofrecen los tres; sin él, solo el de
+                    elegir. El recorte trabaja sobre el archivo del servidor,
+                    así que necesita la categoría ya creada. */}
+                {logoActual && currentEditId && (
+                  <button
+                    type="button" onClick={recortarLogo} disabled={recortando}
+                    title="Deja transparente el fondo, si es de un solo color"
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg border border-neutral-700 text-neutral-300 hover:border-green-500 hover:text-green-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors font-bold text-xs"
+                  >
+                    {recortando
+                      ? <Loader2 size={14} className="animate-spin"/>
+                      : <Scissors size={14}/>}
+                    {recortando ? 'QUITANDO…' : 'QUITAR FONDO'}
+                  </button>
+                )}
 
                 {vistaLogo && (
                   <button
