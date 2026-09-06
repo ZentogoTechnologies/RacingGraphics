@@ -34,18 +34,14 @@
                     <div class="duelo-carro" id="carroA">
                         <span class="marca">HONDA</span> CIVIC TYPE R
                     </div>
+                    <!-- Solo el tiempo. La reaccion y la velocidad se quitaron del
+                         arte: el tiempo es lo que decide la pasada y lo que la
+                         gente sigue. Los campos siguen llegando en los datos por
+                         si vuelven. -->
                     <div class="duelo-cifras">
-                        <div class="duelo-cifra">
-                            <span class="rotulo" data-t="drag.reaccion">Reacción</span>
-                            <span class="dato" id="rtA">0.045</span>
-                        </div>
                         <div class="duelo-cifra">
                             <span class="rotulo" data-t="drag.tiempo">Tiempo</span>
                             <span class="dato" id="etA">12.348</span>
-                        </div>
-                        <div class="duelo-cifra">
-                            <span class="rotulo" data-t="drag.velocidad">Velocidad</span>
-                            <span class="dato" id="velA">180.4</span>
                         </div>
                     </div>
                     <div class="duelo-etiqueta" data-t="drag.ganador">Ganador</div>
@@ -65,18 +61,14 @@
                     <div class="duelo-carro" id="carroB">
                         <span class="marca">TOYOTA</span> COROLLA GR
                     </div>
+                    <!-- Solo el tiempo. La reaccion y la velocidad se quitaron del
+                         arte: el tiempo es lo que decide la pasada y lo que la
+                         gente sigue. Los campos siguen llegando en los datos por
+                         si vuelven. -->
                     <div class="duelo-cifras">
-                        <div class="duelo-cifra">
-                            <span class="rotulo" data-t="drag.reaccion">Reacción</span>
-                            <span class="dato" id="rtB">0.512</span>
-                        </div>
                         <div class="duelo-cifra">
                             <span class="rotulo" data-t="drag.tiempo">Tiempo</span>
                             <span class="dato" id="etB">11.982</span>
-                        </div>
-                        <div class="duelo-cifra">
-                            <span class="rotulo" data-t="drag.velocidad">Velocidad</span>
-                            <span class="dato" id="velB">190.1</span>
                         </div>
                     </div>
                     <div class="duelo-etiqueta" data-t="drag.ganador">Ganador</div>
@@ -143,9 +135,10 @@ function update(data){
             if(d["brand_"+s]!==undefined||d["model_"+s]!==undefined)
                 carro("carro"+S, d["brand_"+s], d["model_"+s]);
 
-            cifra("rt"+S,  d["rt_"+s]);
+            /* Solo el tiempo se pinta. rt_ y speed_ siguen llegando en los
+               datos —el panel los sigue mandando— pero ya no tienen hueco
+               en el arte; cifra() ignora lo que no encuentra. */
             cifra("et"+S,  d["et_"+s]);
-            cifra("vel"+S, d["speed_"+s]);
 
             foto("foto"+S, d["photo_"+s]);
         }

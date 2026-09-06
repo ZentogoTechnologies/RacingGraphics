@@ -67,7 +67,7 @@
 
 .duelo-cabecera{
 
-    height:44px;
+    height:54px;
 
     flex:0 0 auto;
 
@@ -84,10 +84,10 @@
 
 .duelo-cabecera span{
 
-    font-size:19px;
-    font-weight:800;
+    font-size:27px;
+    font-weight:900;
 
-    letter-spacing:3px;
+    letter-spacing:4px;
 
     text-transform:uppercase;
 
@@ -190,14 +190,19 @@
    este, que es como se llaman entre ellos, pero no compite con el nombre. */
 .duelo-carril{
 
-    font-size:11px;
+    /* Un 50% sobre los 11 de antes, y en blanco. Es lo que dice de que
+       lado de la pista sale cada uno, que en drag es como se llaman entre
+       ellos; apagado y pequeño no se leia en television. */
+    font-size:16.5px;
     font-weight:800;
 
     letter-spacing:2.4px;
 
     text-transform:uppercase;
 
-    color:#9E9E9E;
+    color:#FFFFFF;
+
+    text-shadow:1px 1px 2px rgba(0,0,0,.8);
 
     white-space:nowrap;
 }
@@ -357,20 +362,62 @@
 .duelo-lado.gana{
 
     background:linear-gradient(180deg,
-        rgba(0,190,80,.20) 0%,
-        rgba(0,190,80,.06) 100%);
+        rgba(0,190,80,.24) 0%,
+        rgba(0,190,80,.08) 100%);
+
 }
 
+/* El recuadro verde, dibujado encima de todo el lado.
+
+   Va en una capa aparte y no como borde ni como sombra interior. Como
+   borde ocuparia sitio y correria las dos caras, que estan medidas para
+   quedar en los extremos. Como sombra interior se lo comia la foto, que
+   tiene fondo negro y va por encima: el marco moria justo donde empieza
+   la cara y parecia recortado a media pieza.
+
+   Asi rodea el lado entero, foto incluida, sin mover nada de sitio. */
 .duelo-lado.gana::after{
 
     content:"";
 
     position:absolute;
-    left:0; right:0; bottom:0;
+    inset:0;
 
-    height:4px;
+    border:3px solid #00BE50;
 
-    background:#00BE50;
+    border-radius:2px;
+
+    /* Por encima de la foto, que va en la 3 y en la 4 cuando la carta se
+       esta abriendo. */
+    z-index:5;
+
+    pointer-events:none;
+}
+
+/* El zoom va en los datos y no en el lado entero. La carta recorta lo que
+   se sale —de eso vive su entrada— y agrandar el lado le comia unos
+   pixeles arriba y abajo contra el canto. Los datos tienen aire de sobra
+   alrededor, asi que crecen sin tocar nada.
+
+   Leve a proposito: lo que tiene que saltar a la vista es el verde; el
+   zoom solo acompaña. */
+.duelo-lado.gana .duelo-datos{
+
+    transform:scale(1.06);
+
+    transition:transform .35s cubic-bezier(.34,1.3,.64,1);
+}
+
+/* Cada lado crece hacia su propio lado: el izquierdo desde su borde
+   izquierdo y el derecho desde el suyo, o al agrandarse se meterian
+   hacia el centro y el hueco del medio se cerraria. */
+.duelo-lado.izq .duelo-datos{ transform-origin:left center; }
+.duelo-lado.der .duelo-datos{ transform-origin:right center; }
+
+/* Vuelve a su tamaño al perder la marca, no de golpe. */
+.duelo-lado .duelo-datos{
+
+    transition:transform .35s cubic-bezier(.34,1.3,.64,1);
 }
 
 .duelo-etiqueta{
@@ -446,8 +493,7 @@
 ========================================================================== */
 
 .duelo.juntas .duelo-datos,
-.duelo.juntas .duelo-centro,
-.duelo.juntas .duelo-cabecera{
+.duelo.juntas .duelo-centro{
 
     max-width:0;
     min-width:0;
@@ -461,8 +507,7 @@
 }
 
 .duelo.abriendo .duelo-datos,
-.duelo.abriendo .duelo-centro,
-.duelo.abriendo .duelo-cabecera{
+.duelo.abriendo .duelo-centro{
 
     /* Un tope holgado y no el ancho exacto: max-width necesita un número
        para animarse, y pasarse solo termina la transición antes de tiempo,
@@ -476,6 +521,29 @@
                /* El texto espera a que haya hueco donde caber. */
                opacity   .40s ease .30s;
 }
+
+/* La cabecera solo se desvanece; no se le toca el ancho.
+
+   Antes entraba en las mismas reglas que los datos y el centro, con un
+   tope de 760px. La carta mide mas de mil, asi que esa caja de 760 se
+   quedaba pegada al borde izquierdo y el titulo salia descentrado aunque
+   dentro de su caja estuviera en el medio. Sin tope se estira a lo ancho
+   de la carta y entonces si queda centrado.
+
+   Encogerla nunca hizo falta: "DRAG WAR" mide menos que las dos caras
+   juntas, que es lo estrecho que llega a estar la carta al entrar. */
+.duelo.juntas .duelo-cabecera{
+
+    opacity:0;
+}
+
+.duelo.abriendo .duelo-cabecera{
+
+    opacity:1;
+
+    transition:opacity .40s ease .30s;
+}
+
 
 /* Las caras, por encima: si el texto quedara delante se vería asomar por
    encima de ellas mientras se abre el hueco. */
