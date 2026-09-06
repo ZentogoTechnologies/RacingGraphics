@@ -214,13 +214,19 @@ function torreColocarCrono(){
         return false;
     }
 
+    /* Un 5% mas bajo que la fila y centrado en ella: a la misma altura
+       exacta parecia una prolongacion de la fila y no una marca puesta
+       encima. El mismo 5% esta en el ancho, que lo pone el CSS. */
+    const alto = f.height * 0.95;
+    const arriba = f.top + (f.height - alto) / 2;
+
     caja.style.left   = `${t.right}px`;
-    caja.style.top    = `${f.top}px`;
-    caja.style.height = `${f.height}px`;
+    caja.style.top    = `${arriba}px`;
+    caja.style.height = `${alto}px`;
 
     caja.classList.add("visible");
 
-    const donde = `${t.right}|${f.top}|${f.height}`;
+    const donde = `${t.right}|${arriba}|${alto}`;
     const movido = donde !== torreCronoDonde;
     torreCronoDonde = donde;
 

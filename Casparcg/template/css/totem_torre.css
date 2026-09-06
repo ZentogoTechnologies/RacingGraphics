@@ -530,8 +530,13 @@
     position:fixed;
 
     /* Cuadrado: el alto lo pone la fila que señala y el ancho lo iguala,
-       para que el icono quede centrado y no estirado. */
-    width:var(--tf-alto-fila);
+       para que el icono quede centrado y no estirado.
+
+       Un 5% por debajo del alto de la fila: a la misma altura exacta el
+       recuadro parecía una prolongación de la fila y no una marca puesta
+       encima. El mismo 5% lo aplica torre.js al colocarlo, y ahí también
+       lo centra en la fila. */
+    width:calc(var(--tf-alto-fila) * .95);
 
     display:none;
 
@@ -557,8 +562,8 @@
 
 .tf-crono-fuera svg{
 
-    width:19px;
-    height:19px;
+    width:18px;
+    height:18px;
 
     display:block;
 
@@ -604,7 +609,8 @@
 
     background:rgba(0,0,0,.34);
 
-    font-size:14px;
+    /* Un 3% sobre los 14 de antes. Es la cifra que se busca en la fila. */
+    font-size:14.4px;
     font-weight:900;
 
     color:#FFFFFF;
@@ -717,9 +723,13 @@
     font-variant-numeric:tabular-nums;
 }
 
+/* MEJOR y ÚLTIMA. En blanco y no apagados: son lo que dice de qué tiempo
+   se está hablando, y con dos franjas abiertas —la de la vuelta rápida y
+   la del piloto comparado— es lo primero que hay que poder leer. Al 60%
+   de opacidad se perdían sobre el fondo de la franja. */
 .tf-franja-rotulo{
 
-    font-size:10px;
+    font-size:12px;
 
     font-weight:900;
 
@@ -727,7 +737,9 @@
 
     text-transform:uppercase;
 
-    color:rgba(255,255,255,.6);
+    color:#FFFFFF;
+
+    text-shadow:0 1px 2px rgba(0,0,0,.9);
 
     flex:0 0 auto;
 }
@@ -736,7 +748,8 @@
 
 .tf-franja-tiempo{
 
-    font-size:17px;
+    /* Un 3% sobre los 17 de antes. */
+    font-size:17.5px;
 
     font-weight:900;
 
