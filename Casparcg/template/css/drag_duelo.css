@@ -67,7 +67,7 @@
 
 .duelo-cabecera{
 
-    height:54px;
+    height:46px;
 
     flex:0 0 auto;
 
@@ -84,10 +84,10 @@
 
 .duelo-cabecera span{
 
-    font-size:27px;
+    font-size:24px;
     font-weight:900;
 
-    letter-spacing:4px;
+    letter-spacing:3.6px;
 
     text-transform:uppercase;
 
@@ -110,7 +110,9 @@
     display:flex;
     align-items:center;
 
-    height:186px;
+    /* Mas bajo. La carta esta anclada por abajo —bottom:40px— asi que
+       encoger el cuerpo la acorta hacia arriba y no la mueve de sitio. */
+    height:156px;
 }
 
 
@@ -180,7 +182,9 @@
 
     gap:5px;
 
-    min-width:330px;
+    /* Mas ancho a cada lado: el nombre y el carro respiran y el tiempo
+       deja de quedar apretado contra la foto. */
+    min-width:390px;
 }
 
 .duelo-lado.der .duelo-datos{
@@ -200,10 +204,10 @@
     /* Un 50% sobre los 11 de antes, y en blanco. Es lo que dice de que
        lado de la pista sale cada uno, que en drag es como se llaman entre
        ellos; apagado y pequeño no se leia en television. */
-    font-size:16.5px;
+    font-size:15px;
     font-weight:800;
 
-    letter-spacing:2.4px;
+    letter-spacing:2.2px;
 
     text-transform:uppercase;
 
@@ -231,7 +235,7 @@
 
 .duelo-nombre{
 
-    font-size:29px;
+    font-size:26px;
     font-weight:800;
 
     line-height:1;
@@ -252,7 +256,7 @@
 
 .duelo-carro{
 
-    font-size:17px;
+    font-size:16px;
     font-weight:600;
 
     line-height:1.15;
@@ -311,10 +315,10 @@
    con otras dos y ahora solo se veia pequeño. */
 .duelo-cifra .rotulo{
 
-    font-size:14px;
+    font-size:13px;
     font-weight:800;
 
-    letter-spacing:2px;
+    letter-spacing:1.8px;
 
     text-transform:uppercase;
 
@@ -329,7 +333,7 @@
 
     /* El dato de la carta: quien gano, cuanto hizo y en que carril. El
        cuanto se lee desde el sofa o no sirve. */
-    font-size:34px;
+    font-size:28px;
     font-weight:900;
 
     line-height:1;
@@ -392,31 +396,10 @@
     pointer-events:none;
 }
 
-/* El zoom va en los datos y no en el lado entero. La carta recorta lo que
-   se sale —de eso vive su entrada— y agrandar el lado le comia unos
-   pixeles arriba y abajo contra el canto. Los datos tienen aire de sobra
-   alrededor, asi que crecen sin tocar nada.
+/* Sin zoom en el ganador: se quito. Con las dos lineas verdes ya se ve
+   de quien se habla, y agrandar solo un lado descuadraba la simetria de
+   la carta, que es de lo que vive un enfrentamiento. */
 
-   Leve a proposito: lo que tiene que saltar a la vista es el verde; el
-   zoom solo acompaña. */
-.duelo-lado.gana .duelo-datos{
-
-    transform:scale(1.15);
-
-    transition:transform .35s cubic-bezier(.34,1.3,.64,1);
-}
-
-/* Cada lado crece hacia su propio lado: el izquierdo desde su borde
-   izquierdo y el derecho desde el suyo, o al agrandarse se meterian
-   hacia el centro y el hueco del medio se cerraria. */
-.duelo-lado.izq .duelo-datos{ transform-origin:left center; }
-.duelo-lado.der .duelo-datos{ transform-origin:right center; }
-
-/* Vuelve a su tamaño al perder la marca, no de golpe. */
-.duelo-lado .duelo-datos{
-
-    transition:transform .35s cubic-bezier(.34,1.3,.64,1);
-}
 
 .duelo-etiqueta{
 
@@ -466,7 +449,7 @@
 .duelo-centro span{
 
     width:2px;
-    height:118px;
+    height:96px;
 
     background:linear-gradient(180deg,
         transparent 0%,
@@ -540,6 +523,20 @@
     opacity:1;
 
     transition:opacity .40s ease .30s;
+}
+
+
+/* Se repone el ancho minimo de los datos, y solo el de los datos: la
+   regla de `juntas` lo deja en cero para que las dos caras se junten, y
+   ese cero seguia aplicandose con la carta ya abierta —las dos clases
+   conviven— asi que el ancho de cada lado lo decidia el texto y no la
+   medida puesta.
+
+   Aparte y no en la regla de arriba porque alli va tambien el hueco del
+   centro, y darle 390 de minimo lo abriria de par en par. */
+.duelo.abriendo .duelo-datos{
+
+    min-width:390px;
 }
 
 
