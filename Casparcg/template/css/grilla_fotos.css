@@ -348,12 +348,12 @@
 
 /* ── La linea de meta ── */
 
-.pi-meta{
-
-    fill:#FFFFFF;
-
-    stroke:none;
-}
+/* A cuadros y no una franja lisa: es la bandera de meta, y asi se
+   reconoce sin que nadie tenga que explicarla. El oscuro no es negro
+   puro: sobre el asfalto, que ya es oscuro, un negro pleno abre un hueco
+   en vez de leerse como un cuadro. */
+.pi-meta .claro { fill:#FFFFFF; stroke:none; }
+.pi-meta .oscuro{ fill:#12161C; stroke:none; }
 
 
 /* ── Los sitios de la parrilla ── */
@@ -412,6 +412,20 @@
     letter-spacing:1px;
 
     dominant-baseline:middle;
+}
+
+/* La posicion, delante del apellido. Mas apagada que el nombre: dice cual
+   es el sitio, pero de quien es se lee antes. */
+.pi-pos{
+
+    fill:rgba(255,255,255,.55);
+
+    font-weight:900;
+}
+
+.pi-nombre.destacada .pi-pos{
+
+    fill:rgba(255,255,255,.85);
 }
 
 .pi-nombre.destacada{
@@ -551,21 +565,11 @@
     text-overflow:ellipsis;
 }
 
-.gf-tiempo{
+/* El tiempo de clasificacion se quito de la banda: la parrilla dice en
+   que orden se sale, y con que vuelta se gano el sitio es otra cosa. Lo
+   pedia el sitio, no el grafico.
 
-    margin-top:6px;
-
-    font-size:30px;
-    font-weight:700;
-
-    line-height:1;
-
-    color:rgba(255,255,255,.9);
-
-    font-variant-numeric:tabular-nums;
-
-    text-shadow:0 2px 6px rgba(0,0,0,.9);
-}
+   El campo sigue viajando en los datos por si vuelve. */
 
 
 /* ===================================

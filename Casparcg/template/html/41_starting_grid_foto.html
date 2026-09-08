@@ -92,8 +92,6 @@ function datos(p, clase){
     const apellido = (p.last_name || p.full_name || "").trim().toUpperCase();
     const nombre   = (p.name || "").trim();
 
-    const tiempo = p.best_time
-        ? `<div class="gf-tiempo">${escapar(p.best_time)}</div>` : "";
 
     return `<div class="gf-datos ${clase}">`
          +   `<div class="gf-pos">`
@@ -103,7 +101,6 @@ function datos(p, clase){
          +   `<div class="gf-quien">`
          +     (nombre ? `<div class="gf-nombre">${escapar(nombre)}</div>` : "")
          +     `<div class="gf-apellido">${escapar(apellido)}</div>`
-         +     tiempo
          +   `</div>`
          + `</div>`;
 }
@@ -172,6 +169,8 @@ const PISTA = {
     escalon:    .45,  /* lo que la columna derecha va por detras */
     salida:     .15,  /* donde empieza el primer sitio */
     meta:       .02,  /* la linea de meta, justo delante del primero */
+    metaHonda:  .11,  /* lo que mide de fondo, las dos filas de cuadros */
+    cuadros:     14,  /* cuantos cuadros a lo ancho de la pista */
 };
 
 
@@ -346,9 +345,34 @@ function pistaDibujar(){
        que esos dos son los de la pole sin escribirlo; en el resto de
        las parejas seria mentira, porque tienen filas por delante. */
     if (pagina === 0) {
-        svg += `<g filter="url(#piNeon)"><polygon class="pi-meta" points="`
-             + pistaSuelo(-PISTA.media, PISTA.media,
-                          PISTA.meta, PISTA.meta + .07) + `"/></g>`;
+
+        /* A cuadros y no una franja lisa: es la bandera de meta, y a
+           cuadros se reconoce sin que nadie tenga que explicarla.
+
+           Dos filas desfasadas, como esta pintada de verdad. Los cuadros
+           se cuentan a lo ancho de la pista en unidades de pista, asi que
+           la perspectiva los estrecha sola hacia el fondo. */
+        const paso = (PISTA.media * 2) / PISTA.cuadros;
+        const alto = PISTA.metaHonda / 2;
+
+        svg += `<g class="pi-meta">`;
+
+        for (let f = 0; f < 2; f++) {
+            for (let c = 0; c < PISTA.cuadros; c++) {
+
+                const x0 = -PISTA.media + c * paso;
+                const z0 = PISTA.meta + f * alto;
+
+                /* El desfase de la fila de abajo es lo que da el damero:
+                   sin el saldrian dos filas de rayas paralelas. */
+                const claro = (c + f) % 2 === 0;
+
+                svg += `<polygon class="${claro ? "claro" : "oscuro"}" `
+                     + `points="${pistaSuelo(x0, x0 + paso, z0, z0 + alto)}"/>`;
+            }
+        }
+
+        svg += `</g>`;
     }
 
     /* De atras hacia delante: asi los de delante, que son mas grandes, se
@@ -384,12 +408,20 @@ function pistaDibujar(){
             /* Dentro de su sitio y no a un lado: fuera se cruzaba con las
                franjas de colores y el apellido se perdia contra ellas.
                Va en la boca, que es donde el sitio queda abierto, asi que
-               no pisa ninguna de las tres lineas pintadas. */
+               no pisa ninguna de las tres lineas pintadas.
+
+               Delante del apellido va su posicion. En la parrilla de
+               verdad el numero esta pintado en el suelo de cada sitio, y
+               aqui ademas ata el dibujo con las posiciones grandes de
+               abajo: sin el hay que contar cajas para saber cual es cual. */
             const cuerpo = (31 * sitio.k).toFixed(1);
+            const posicion = escapar(piloto.position ?? "");
 
             svg += `<text class="pi-nombre${suya}" x="${sitio.nombreX}" `
                  + `y="${sitio.nombreY}" text-anchor="middle" `
-                 + `font-size="${cuerpo}">` + escapar(apellido) + `</text>`;
+                 + `font-size="${cuerpo}">`
+                 + (posicion ? `<tspan class="pi-pos">${posicion}</tspan> ` : "")
+                 + escapar(apellido) + `</text>`;
         }
     }
 
