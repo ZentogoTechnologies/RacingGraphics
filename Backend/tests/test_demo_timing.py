@@ -22,7 +22,7 @@ from src.services.timing_services import (        # noqa: E402
     _del_xml, _segundos, _titulo_tanda, leer_xml,
 )
 
-DEMO = RAIZ / "src" / "public" / "demo" / "current.demo.xml"
+DEMO = RAIZ / "src" / "public" / "demo" / "current-demo.xml"
 
 
 @pytest.fixture(scope="module")
@@ -45,17 +45,54 @@ def test_se_leen_las_etiquetas(datos):
         assert l[campo] != "" or campo in ("flag",)
 
 
-def test_los_datos_son_reconociblemente_falsos(datos):
-    """Si esto saliera al aire por error en una carrera real, tiene que
-    notarse en el primer segundo. Un dato falso que parece real es peor
-    que no tener dato."""
+def test_el_evento_se_declara_de_demostracion(datos):
+    """La salvaguarda está en el rótulo del evento, no en los nombres.
+
+    Los pilotos son verosímiles a propósito: una tabla con «PILOTO 01» no
+    sirve para enseñarle el producto a nadie ni para revisar cómo quedan
+    las plantillas. Lo que canta que esto es de mentira es el evento, que
+    sale al aire en su propio gráfico.
+    """
     l = datos["labels"]
 
-    assert "DEMO" in l["eventname"].upper()
+    assert "DEMOSTRACION" in l["eventname"].upper()
     assert "DEMO" in l["trackname"].upper()
+    assert "DEMO" in l["groupname"].upper()
 
+
+def test_todos_los_pilotos_llevan_la_ficha_completa(datos):
+    """Una tabla a medias no sirve para revisar plantillas: la del piloto
+    sin marca se vería bien por casualidad."""
     for fila in datos["filas"]:
-        assert "DEMO" in (fila.get("fullname") or "").upper()
+        for campo in ("no", "fullname", "besttime", "lasttime", "laps",
+                      "averagespeed", "bestspeed", "totaltime",
+                      "transponder", "class", "position"):
+            assert (fila.get(campo) or "").strip(), f"falta {campo} en {fila.get('no')}"
+
+        # additional4 es el país y additional6 la marca, igual que en el
+        # XML real del autódromo.
+        assert (fila.get("additional4") or "").strip(), "falta el país"
+        assert (fila.get("additional6") or "").strip(), "falta la marca"
+        assert (fila.get("additional1") or "").strip(), "falta el equipo"
+
+
+def test_hay_pilotos_de_varios_paises(datos):
+    """El producto se vende fuera de Panamá y las banderas se pintan desde
+    este campo: con un solo país no se ve si el resto funciona."""
+    paises = {f.get("additional4") for f in datos["filas"]}
+    assert len(paises) >= 4, paises
+
+
+def test_las_marcas_no_se_repiten_todas(datos):
+    marcas = {f.get("additional6") for f in datos["filas"]}
+    assert len(marcas) >= 20, "muy pocas marcas distintas para revisar el arte"
+
+
+def test_los_dorsales_son_unicos(datos):
+    """Dos coches con el mismo dorsal romperían el cruce contra la base:
+    es la llave que ata una fila del cronometraje con un vehículo."""
+    dorsales = [f.get("no") for f in datos["filas"]]
+    assert len(dorsales) == len(set(dorsales))
 
 
 def test_no_lleva_datos_personales_de_nadie(datos):
@@ -76,10 +113,61 @@ def test_la_clasificacion_esta_ordenada(datos):
     assert len(posiciones) == len(set(posiciones)), "posiciones repetidas"
 
 
-def test_el_lider_no_tiene_diferencia(datos):
-    """Contra sí mismo no se mide nada, y la plantilla pinta el campo tal
-    cual: un '0.000' ahí se vería al aire."""
-    assert (datos["filas"][0].get("difference") or "") == ""
+# ── La penalización ──────────────────────────────────────────
+#
+# MyLaps no manda ninguna marca de penalización: no existe un campo que
+# la declare. Lo que hace es calcular `difference` contra el coche MÁS
+# RÁPIDO y no contra quien va primero, y con una sanción esos dos dejan
+# de ser el mismo. El sancionado queda como referencia con la diferencia
+# VACÍA, y es al primero de la clasificación a quien MyLaps le pone un
+# tiempo.
+#
+# Es la única forma de ejercitar `_reencuadrar_diferencias`, que es la
+# función más delicada del módulo y no tenía ninguna prueba.
+
+def test_la_firma_de_la_penalizacion_esta_en_el_archivo(datos):
+    p1, p2 = datos["filas"][0], datos["filas"][1]
+
+    assert (p1.get("difference") or "").strip(), \
+        "el primero debería llevar diferencia: la referencia es otro"
+    assert not (p2.get("difference") or "").strip(), \
+        "el sancionado es la referencia de MyLaps: su diferencia va vacía"
+
+
+def test_el_sancionado_tiene_mejor_tiempo_que_el_primero(datos):
+    """Es lo que lo delata: va más rápido y sale detrás."""
+    def a_segundos(t):
+        minutos, _, resto = t.partition(":")
+        return float(minutos) * 60 + float(resto) if resto else float(minutos)
+
+    p1 = a_segundos(datos["filas"][0].get("totaltime"))
+    p2 = a_segundos(datos["filas"][1].get("totaltime"))
+
+    assert p2 < p1, "el sancionado debería tener mejor tiempo total"
+
+
+def test_al_reencuadrar_el_sancionado_sale_en_negativo(datos):
+    """Lo que de verdad se ve al aire.
+
+    Tras reencuadrar contra el primero, quien va delante en pista y
+    detrás en la clasificación queda con diferencia negativa. Sin eso los
+    dos salían en blanco y no había forma de saber qué pasaba.
+    """
+    from src.services.timing_services import _reencuadrar_diferencias
+
+    standings = [
+        {"position": int(f.get("position")), "no": f.get("no"),
+         "leader": f.get("difference"), "interval": f.get("gap")}
+        for f in datos["filas"]
+    ]
+    _reencuadrar_diferencias(standings)
+
+    assert (standings[0]["leader"] or "") == "", \
+        "el primero queda en cero, y el tótem le escribe su etiqueta"
+
+    negativos = [s for s in standings if (s["leader"] or "").startswith("-")]
+    assert len(negativos) == 1, f"se esperaba un solo sancionado, hay {len(negativos)}"
+    assert negativos[0]["position"] == 2
 
 
 def test_las_diferencias_crecen_hacia_atras(datos):

@@ -16,12 +16,11 @@ from fastapi import HTTPException
 
 from src.models.tracks_model import Trazado
 
-# Casparcg/template/img/circuits, mirando desde Backend/src/services.
+# Backend/src/public/circuit-image, mirando desde Backend/src/services.
+# Las imágenes viven con el resto del material del cliente —fotos de
+# pilotos, logos de marcas— y no dentro de la carpeta de CasparCG.
 RAIZ = Path(__file__).resolve().parents[3]
-CARPETA_IMAGENES = RAIZ / "Casparcg" / "template" / "img" / "circuits"
-
-# Lo que la plantilla pone en el src, relativo a Casparcg/template/html.
-PREFIJO_PLANTILLA = "../img/circuits/"
+CARPETA_IMAGENES = RAIZ / "Backend" / "src" / "public" / "circuit-image"
 
 EXTENSIONES = {".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp"}
 
@@ -39,8 +38,26 @@ def _sanear(texto: str) -> str:
 
 
 def ruta_plantilla(imagen: Optional[str]) -> Optional[str]:
-    """Lo que hay que mandarle a CasparCG para que la encuentre."""
-    return f"{PREFIJO_PLANTILLA}{imagen}" if imagen else None
+    """La URL con la que CasparCG carga la imagen del trazado.
+
+    Absoluta y por HTTP, no una ruta de disco. La plantilla se abre desde
+    file://, que no tiene contra qué resolver una ruta relativa, así que
+    tiene que apuntar al backend igual que ya hacen las fotos de pilotos
+    y los logos de marcas.
+
+    La consecuencia es que el backend debe estar corriendo para que el
+    trazado salga al aire. No añade una dependencia nueva: sin backend
+    tampoco saldrían las fotos ni los logos, ni habría de dónde sacar el
+    cronometraje.
+    """
+    from config import settings
+
+    if not imagen:
+        return None
+
+    return f"{settings.PUBLIC_BASE_URL.rstrip('/')}/public/circuit-image/{imagen}"
+
+
 
 
 class TrazadosService:

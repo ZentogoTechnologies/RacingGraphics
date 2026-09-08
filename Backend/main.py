@@ -121,11 +121,15 @@ app.mount(
     name="public",
 )
 
-# Imágenes de los trazados. CasparCG las lee del disco por ruta relativa,
-# pero la interfaz necesita verlas por HTTP para la vista previa, y una
-# etiqueta <img> no puede mandar la cabecera del token. Son dibujos de
-# pista, lo mismo que ya sale al aire, así que van abiertas igual que
-# /public.
+# Imágenes de los trazados. Viven dentro de src/public, así que el
+# montaje de arriba ya las sirve en /public/circuit-image/ y es de ahí de
+# donde las carga CasparCG.
+#
+# Se conserva además /media/circuits apuntando a la misma carpeta: es la
+# dirección que usa la vista previa del panel, y romperla obligaría a
+# tocar el frontend sin ganar nada. Van abiertas igual que /public: son
+# dibujos de pista, lo mismo que ya sale al aire, y una etiqueta <img> no
+# puede mandar la cabecera del token.
 from src.services.tracks_services import CARPETA_IMAGENES
 
 CARPETA_IMAGENES.mkdir(parents=True, exist_ok=True)

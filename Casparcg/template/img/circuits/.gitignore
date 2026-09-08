@@ -1,5 +1,0 @@
-# Las imagenes de los trazados las carga cada instalacion desde Ajustes:
-# son contenido del autodromo donde corre el software, no del repositorio.
-# La carpeta si se versiona para que exista al clonar.
-*
-!.gitignore

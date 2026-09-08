@@ -207,7 +207,7 @@ def paso_comprobar(origen: str) -> bool:
         ("CasparCG", RAIZ / "Casparcg" / "casparcg.exe", os.name == "nt"),
         ("Plantillas", RAIZ / "Casparcg" / "template" / "html", True),
         ("XML de demostración",
-         RAIZ / "Backend" / "src" / "public" / "demo" / "current.demo.xml", True),
+         RAIZ / "Backend" / "src" / "public" / "demo" / "current-demo.xml", True),
     ]
 
     for nombre, ruta, obligatorio in piezas:
@@ -282,7 +282,7 @@ def paso_configurar() -> None:
     # demostración deja el sistema utilizable desde el primer arranque.
     lineas.setdefault(
         "TIMING_XML_PATH",
-        str(RAIZ / "Backend" / "src" / "public" / "demo" / "current.demo.xml"),
+        str(RAIZ / "Backend" / "src" / "public" / "demo" / "current-demo.xml"),
     )
 
     env.write_text(
