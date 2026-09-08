@@ -158,9 +158,11 @@ const PISTA = {
 
     /* Las franjas de adorno, por fuera del asfalto. */
     franjaDe:   .10,  /* a que distancia del borde empiezan */
-    franjaA:    .82,  /* y hasta donde llegan */
-    franjas:      5,  /* cuantas por lado */
-    franjaHueco: .35, /* que parte de cada paso es hueco */
+    franjaA:    .62,  /* y hasta donde llegan */
+    /* Dos por lado: una roja y una blanca. Con cinco el adorno pesaba
+       tanto como la pista y competia con los apellidos. */
+    franjas:      2,
+    franjaHueco: .30, /* que parte de cada paso es hueco */
 
     columna:    .72,  /* desvio del centro de cada columna de sitios */
     ancha:      .58,  /* media anchura de un sitio */
@@ -304,6 +306,32 @@ function pistaDibujar(){
     }
 
     svg += `</g>`;
+
+    /* ── El logo al fondo ────────────────────────────────────────
+       Donde muere la pista quedaba un hueco vacio. El logo del
+       autodromo lo llena y ademas dice donde se corre, que es lo que
+       uno esperaria ver al fondo de una recta.
+
+       Apagado a proposito: es un telon, no un dato. Si compitiera con
+       los apellidos habria que leerlo, y no hay nada que leer ahi.
+
+       Sale del mismo archivo que usan las demas plantillas, el que
+       Ajustes sobrescribe al subir uno nuevo. Ruta relativa y no por
+       HTTP: CasparCG abre esto con file:// y una ruta de servidor no
+       cargaria nunca. */
+    {
+        const fin = pistaProyectar(0, fondoZ);
+        /* Lo mas grande que cabe entre donde muere la pista y el borde
+           de arriba del lienzo. Mas pequeño se perdia y el fondo seguia
+           viendose vacio, que era el problema. */
+        const ancho = 360;
+        const alto = 108;
+
+        svg += `<image class="pi-logo" href="../img/logo-cliente.png" `
+             + `x="${fin.x - ancho / 2}" y="${fin.y - alto - 8}" `
+             + `width="${ancho}" height="${alto}" `
+             + `preserveAspectRatio="xMidYMax meet"/>`;
+    }
 
     /* Los bordes del asfalto. */
     for (const lado of [-1, 1]) {

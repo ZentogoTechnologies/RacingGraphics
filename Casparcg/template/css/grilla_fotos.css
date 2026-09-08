@@ -325,6 +325,16 @@
 }
 
 
+/* ── El logo del fondo ── */
+
+/* Donde muere la pista. Es un telon y no un dato: apagado para que no
+   compita con los apellidos ni con las dos caras. */
+.pi-logo{
+
+    opacity:.34;
+}
+
+
 /* ── Las franjas de los lados ── */
 
 /* Rectas paralelas al eje de la pista, alternando rojo y blanco. Adornan
