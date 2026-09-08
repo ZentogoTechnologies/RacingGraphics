@@ -312,28 +312,66 @@
 }
 
 
-/* ── Las cajas de la parrilla ── */
+/* ── Los pianos ── */
 
-.pi-caja{
+/* Rojo y blanco, los del borde de cualquier pista. Con el resplandor que
+   les pone el filtro quedan como el neon del ejemplo. */
+.pi-piano{
 
-    fill:rgba(255,255,255,.03);
+    stroke:none;
 
-    stroke:rgba(255,255,255,.28);
+    /* Un punto por debajo del blanco puro. Con el resplandor encima, a
+       plena intensidad los pianos brillaban mas que la fila de los dos
+       que se presentan, que es lo que tiene que mandar. */
+    opacity:.82;
+}
+
+.pi-piano.rojo  { fill:#FF1B2D; }
+.pi-piano.blanco{ fill:#FFFFFF; }
+
+
+/* ── La linea de meta ── */
+
+.pi-meta{
+
+    fill:#FFFFFF;
+
+    stroke:none;
+}
+
+
+/* ── Los sitios de la parrilla ── */
+
+/* No es una caja cerrada sino la marca de verdad: la linea de delante y
+   los dos costados, abierta por detras. Cerrada pesaba de mas para lo que
+   tiene que decir. */
+.pi-sitio{
+
+    fill:none;
+
+    stroke:rgba(255,255,255,.32);
 
     stroke-width:2;
 
     stroke-linejoin:round;
+    stroke-linecap:round;
 }
 
-/* La fila de los dos que se estan presentando. Se marca con el filo y no
-   con relleno: rellena competiria con las caras, que son lo que se mira. */
-.pi-caja.destacada{
+/* La fila de los dos que se estan presentando. */
+.pi-sitio.destacada{
 
-    fill:rgba(255,255,255,.07);
-
-    stroke:rgba(255,255,255,.85);
+    stroke:#FFFFFF;
 
     stroke-width:3;
+}
+
+/* El suelo de esa fila, sin filo: dice de quien se habla sin volver a
+   cerrar la caja. */
+.pi-suelo{
+
+    fill:rgba(255,255,255,.09);
+
+    stroke:none;
 }
 
 

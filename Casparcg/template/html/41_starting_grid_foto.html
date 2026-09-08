@@ -147,12 +147,16 @@ const PISTA = {
     escalaX:   170,   /* pixeles por unidad lateral en primer plano */
 
     media:     1.75,  /* media anchura de la pista */
+    cordon:     .16,  /* lo que sobresale el piano por fuera del borde */
     columna:    .72,  /* desvio del centro de cada columna de cajas */
     ancha:      .58,  /* media anchura de una caja */
     honda:      .80,  /* lo que mide una caja de fondo */
+    ala:        .55,  /* que parte de ese fondo dibujan los lados */
     fila:       .95,  /* de una fila a la siguiente */
     escalon:    .45,  /* lo que la columna derecha va por detras */
     salida:     .15,  /* donde empieza la primera caja */
+    meta:       .02,  /* la linea de meta, justo delante de la primera */
+    tramos:      14,  /* en cuantos trozos se parte cada piano */
 };
 
 
@@ -168,24 +172,45 @@ function pistaProyectar(x, z){
 }
 
 
-/* Una caja de parrilla: el rectangulo del suelo entre dos profundidades,
-   proyectado. Sale un trapecio, mas estrecho por arriba, que es lo que da
-   la sensacion de fondo. */
-function pistaCaja(centroX, z0, z1){
+/* Un cuadrilatero del suelo, proyectado. Sirve para los pianos y para el
+   relleno de la caja de los que se presentan. */
+function pistaSuelo(x0, x1, z0, z1){
 
-    const a = pistaProyectar(centroX - PISTA.ancha, z0);   /* cerca izq */
-    const b = pistaProyectar(centroX + PISTA.ancha, z0);   /* cerca der */
-    const c = pistaProyectar(centroX + PISTA.ancha, z1);   /* lejos der */
-    const d = pistaProyectar(centroX - PISTA.ancha, z1);   /* lejos izq */
+    const a = pistaProyectar(x0, z0);
+    const b = pistaProyectar(x1, z0);
+    const c = pistaProyectar(x1, z1);
+    const d = pistaProyectar(x0, z1);
+
+    return `${a.x},${a.y} ${b.x},${b.y} ${c.x},${c.y} ${d.x},${d.y}`;
+}
+
+
+/* El sitio de un piloto en la parrilla. No es una caja cerrada sino la
+   marca de verdad: la linea de delante y los dos costados, abierta por
+   detras, que es como esta pintada en el asfalto y como se ve en la
+   referencia. */
+function pistaSitio(centroX, z0){
+
+    const z1 = z0 + PISTA.honda;
+    const zAla = z0 + PISTA.honda * PISTA.ala;
+
+    const izqCerca  = pistaProyectar(centroX - PISTA.ancha, z0);
+    const derCerca  = pistaProyectar(centroX + PISTA.ancha, z0);
+    const izqLejos  = pistaProyectar(centroX - PISTA.ancha, zAla);
+    const derLejos  = pistaProyectar(centroX + PISTA.ancha, zAla);
 
     return {
-        puntos: `${a.x},${a.y} ${b.x},${b.y} ${c.x},${c.y} ${d.x},${d.y}`,
-        /* El apellido se cuelga del borde de fondo, que es donde estaria
-           el morro del carro: asi no se monta con la caja de al lado. */
-        lejosIzq: d.x,
-        lejosDer: c.x,
-        lejosY:   d.y,
-        k:        d.k,
+        /* De la punta de un costado, al frente, y a la punta del otro. */
+        linea: `${izqLejos.x},${izqLejos.y} ${izqCerca.x},${izqCerca.y} `
+             + `${derCerca.x},${derCerca.y} ${derLejos.x},${derLejos.y}`,
+
+        relleno: pistaSuelo(centroX - PISTA.ancha, centroX + PISTA.ancha, z0, z1),
+
+        /* El apellido se cuelga de la punta del costado. */
+        puntaIzq: izqLejos.x,
+        puntaDer: derLejos.x,
+        puntaY:   izqLejos.y,
+        k:        izqLejos.k,
     };
 }
 
@@ -207,14 +232,54 @@ function pistaDibujar(){
     let svg = `<svg viewBox="0 0 ${PISTA.ancho} ${PISTA.alto}" `
             + `preserveAspectRatio="xMidYMid meet">`;
 
-    /* Los bordes de la pista. Delimitan a los lados y son lo que hace que
-       las cajas se lean como sitios en una pista y no como cuadros
-       sueltos. */
+    /* El resplandor. Es lo que hace que el rojo y el blanco de los pianos
+       se lean como neon y no como dos colores planos. */
+    svg += `<defs><filter id="piNeon" x="-40%" y="-40%" width="180%" height="180%">`
+         + `<feGaussianBlur stdDeviation="3" result="halo"/>`
+         + `<feMerge><feMergeNode in="halo"/><feMergeNode in="halo"/>`
+         + `<feMergeNode in="SourceGraphic"/></feMerge></filter></defs>`;
+
+    /* ── Los pianos ──────────────────────────────────────────────
+       Rojo y blanco alternos por fuera de cada borde. Decoran los
+       lados, que era lo que se pedia, y de paso dicen donde acaba la
+       pista mejor que una raya sola. Van a tramos iguales en
+       profundidad, asi que la perspectiva los acorta sola segun se
+       alejan, que es lo que hace que se lean como suelo. */
+    svg += `<g filter="url(#piNeon)">`;
+
+    for (const lado of [-1, 1]) {
+        for (let i = 0; i < PISTA.tramos; i++) {
+
+            const z0 = fondoZ * (i / PISTA.tramos);
+            const z1 = fondoZ * ((i + 1) / PISTA.tramos);
+
+            const dentro = lado * PISTA.media;
+            const fuera  = lado * (PISTA.media + PISTA.cordon);
+
+            svg += `<polygon class="pi-piano ${i % 2 ? "blanco" : "rojo"}" `
+                 + `points="${pistaSuelo(dentro, fuera, z0, z1)}"/>`;
+        }
+    }
+
+    svg += `</g>`;
+
+    /* Los bordes de la pista, por dentro del piano. */
     for (const lado of [-1, 1]) {
         const cerca = pistaProyectar(lado * PISTA.media, 0);
         const lejos = pistaProyectar(lado * PISTA.media, fondoZ);
         svg += `<line class="pi-borde" x1="${cerca.x}" y1="${cerca.y}" `
              + `x2="${lejos.x}" y2="${lejos.y}"/>`;
+    }
+
+    /* ── La linea de meta ────────────────────────────────────────
+       Solo cuando delante van el primero y el segundo. Es lo que dice
+       que esos dos son los de la pole sin escribirlo; en el resto de
+       las parejas seria mentira, porque tienen filas por delante. */
+    if (pagina === 0) {
+        svg += `<g filter="url(#piNeon)">`
+             + `<polygon class="pi-meta" points="`
+             + pistaSuelo(-PISTA.media, PISTA.media,
+                          PISTA.meta, PISTA.meta + .07) + `"/></g>`;
     }
 
     /* De atras hacia delante: asi las de delante, que son mas grandes, se
@@ -230,25 +295,30 @@ function pistaDibujar(){
             const z0 = PISTA.salida + fila * PISTA.fila + lado * PISTA.escalon;
             const signo = lado === 0 ? -1 : 1;
 
-            const caja = pistaCaja(signo * PISTA.columna, z0, z0 + PISTA.honda);
+            const sitio = pistaSitio(signo * PISTA.columna, z0);
 
-            /* La fila de delante es la de los dos que se presentan: se
-               marca para que se vea cual de todas es la suya. */
+            /* La fila de delante es la de los dos que se presentan. */
             const suya = fila === 0 ? " destacada" : "";
 
-            svg += `<polygon class="pi-caja${suya}" points="${caja.puntos}"/>`;
+            /* El relleno solo en la suya y sin filo: marca de quien se
+               habla sin volver a cerrar la caja. */
+            if (fila === 0) {
+                svg += `<polygon class="pi-suelo" points="${sitio.relleno}"/>`;
+            }
+
+            svg += `<polyline class="pi-sitio${suya}" points="${sitio.linea}"/>`;
 
             const apellido = (piloto.last_name || piloto.full_name || "")
                              .trim().toUpperCase();
             if (!apellido) continue;
 
-            /* Por fuera de su caja, hacia el borde de la pista: en medio
-               se montaria con la caja de al lado. */
-            const x = signo < 0 ? caja.lejosIzq - 12 : caja.lejosDer + 12;
+            /* Por fuera de su sitio, hacia el borde de la pista: en medio
+               se montaria con el de al lado. */
+            const x = signo < 0 ? sitio.puntaIzq - 12 : sitio.puntaDer + 12;
             const anclaje = signo < 0 ? "end" : "start";
-            const cuerpo = (34 * caja.k).toFixed(1);
+            const cuerpo = (34 * sitio.k).toFixed(1);
 
-            svg += `<text class="pi-nombre${suya}" x="${x}" y="${caja.lejosY}" `
+            svg += `<text class="pi-nombre${suya}" x="${x}" y="${sitio.puntaY}" `
                  + `text-anchor="${anclaje}" font-size="${cuerpo}">`
                  + escapar(apellido) + `</text>`;
         }
