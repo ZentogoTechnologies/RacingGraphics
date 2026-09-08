@@ -20,6 +20,12 @@
 
         <div class="gf-pareja" id="pareja"></div>
 
+        <!-- La parrilla dibujada, en el hueco que dejan las dos caras.
+             Va aparte de .gf-pareja porque los lados se animan con un
+             transform y eso crea contexto de apilado: dentro, el dibujo
+             quedaria por debajo del velo oscuro. -->
+        <div class="gf-pista" id="pista"></div>
+
         <div class="gf-paso" id="paso"></div>
 
     </div>
@@ -102,6 +108,158 @@ function datos(p, clase){
          + `</div>`;
 }
 
+/* ==========================================================================
+   LA PARRILLA DIBUJADA
+
+   El hueco entre las dos caras se ocupa con la parrilla vista en
+   perspectiva: los dos que se estan presentando delante, y detras los que
+   arrancan pegados a ellos. Es lo mismo que hace la F1 y sirve para lo
+   mismo: situar de un vistazo donde queda cada uno.
+
+   No hace falta ningun dato nuevo. Los nombres cambian de carrera en
+   carrera, si, pero salen de la misma lista que ya alimenta las caras y
+   los tiempos, y esa lista la arma el backend leyendo el current.xml del
+   cronometraje y cruzando los apellidos con la base. El dibujo solo mira
+   la lista que ya esta aqui.
+
+   Se dibuja con una perspectiva de un punto de fuga, no con cajas puestas
+   a ojo. Con las medidas a ojo, cambiar cuantas filas se ven obliga a
+   recolocarlo todo; con la proyeccion basta con pedir mas filas.
+========================================================================== */
+
+/* Cuantas filas de parrilla se ven: la de los dos presentados y las de
+   detras. Tres es lo que cabe sin que la ultima quede tan pequeña que no
+   se lea el apellido. */
+const PISTA_FILAS = 3;
+
+/* La proyeccion. `z` es la profundidad en cajas de parrilla, `x` el
+   desvio lateral respecto al eje de la pista.
+
+   El punto de fuga queda por encima del lienzo a proposito: asi los
+   bordes de la pista salen por arriba en vez de juntarse a la vista,
+   que es como se ve una recta de verdad y como esta en la referencia. */
+const PISTA = {
+    ancho:     700,   /* el lienzo, mas ancho que alto como el hueco */
+    alto:      540,
+    horizonte:-140,   /* fuera del lienzo, por arriba */
+    frente:    510,   /* la y del borde de abajo, lo mas cerca */
+    fuga:      .42,   /* cuanto encoge por unidad de profundidad */
+    escalaX:   170,   /* pixeles por unidad lateral en primer plano */
+
+    media:     1.75,  /* media anchura de la pista */
+    columna:    .72,  /* desvio del centro de cada columna de cajas */
+    ancha:      .58,  /* media anchura de una caja */
+    honda:      .80,  /* lo que mide una caja de fondo */
+    fila:       .95,  /* de una fila a la siguiente */
+    escalon:    .45,  /* lo que la columna derecha va por detras */
+    salida:     .15,  /* donde empieza la primera caja */
+};
+
+
+function pistaProyectar(x, z){
+
+    const k = 1 / (1 + z * PISTA.fuga);
+
+    return {
+        x: PISTA.ancho / 2 + x * PISTA.escalaX * k,
+        y: PISTA.horizonte + (PISTA.frente - PISTA.horizonte) * k,
+        k: k,
+    };
+}
+
+
+/* Una caja de parrilla: el rectangulo del suelo entre dos profundidades,
+   proyectado. Sale un trapecio, mas estrecho por arriba, que es lo que da
+   la sensacion de fondo. */
+function pistaCaja(centroX, z0, z1){
+
+    const a = pistaProyectar(centroX - PISTA.ancha, z0);   /* cerca izq */
+    const b = pistaProyectar(centroX + PISTA.ancha, z0);   /* cerca der */
+    const c = pistaProyectar(centroX + PISTA.ancha, z1);   /* lejos der */
+    const d = pistaProyectar(centroX - PISTA.ancha, z1);   /* lejos izq */
+
+    return {
+        puntos: `${a.x},${a.y} ${b.x},${b.y} ${c.x},${c.y} ${d.x},${d.y}`,
+        /* El apellido se cuelga del borde de fondo, que es donde estaria
+           el morro del carro: asi no se monta con la caja de al lado. */
+        lejosIzq: d.x,
+        lejosDer: c.x,
+        lejosY:   d.y,
+        k:        d.k,
+    };
+}
+
+
+function pistaDibujar(){
+
+    const destino = document.getElementById("pista");
+    if (!destino) return;
+
+    /* Se empieza por el primero de los dos que se estan presentando. Los
+       de detras son los que siguen en la lista, sin mas. */
+    const desde = pagina * POR_PAGINA;
+
+    /* Sin al menos la fila de delante no hay nada que dibujar. */
+    if (!parrilla[desde]) { destino.innerHTML = ""; return; }
+
+    const fondoZ = PISTA.salida + PISTA_FILAS * PISTA.fila + PISTA.escalon;
+
+    let svg = `<svg viewBox="0 0 ${PISTA.ancho} ${PISTA.alto}" `
+            + `preserveAspectRatio="xMidYMid meet">`;
+
+    /* Los bordes de la pista. Delimitan a los lados y son lo que hace que
+       las cajas se lean como sitios en una pista y no como cuadros
+       sueltos. */
+    for (const lado of [-1, 1]) {
+        const cerca = pistaProyectar(lado * PISTA.media, 0);
+        const lejos = pistaProyectar(lado * PISTA.media, fondoZ);
+        svg += `<line class="pi-borde" x1="${cerca.x}" y1="${cerca.y}" `
+             + `x2="${lejos.x}" y2="${lejos.y}"/>`;
+    }
+
+    /* De atras hacia delante: asi las de delante, que son mas grandes, se
+       pintan encima de las de atras y no al reves. */
+    for (let fila = PISTA_FILAS - 1; fila >= 0; fila--) {
+        for (let lado = 1; lado >= 0; lado--) {
+
+            const piloto = parrilla[desde + fila * 2 + lado];
+            if (!piloto) continue;
+
+            /* Las impares delante y las pares medio cuerpo por detras,
+               que es como se forma una parrilla de verdad. */
+            const z0 = PISTA.salida + fila * PISTA.fila + lado * PISTA.escalon;
+            const signo = lado === 0 ? -1 : 1;
+
+            const caja = pistaCaja(signo * PISTA.columna, z0, z0 + PISTA.honda);
+
+            /* La fila de delante es la de los dos que se presentan: se
+               marca para que se vea cual de todas es la suya. */
+            const suya = fila === 0 ? " destacada" : "";
+
+            svg += `<polygon class="pi-caja${suya}" points="${caja.puntos}"/>`;
+
+            const apellido = (piloto.last_name || piloto.full_name || "")
+                             .trim().toUpperCase();
+            if (!apellido) continue;
+
+            /* Por fuera de su caja, hacia el borde de la pista: en medio
+               se montaria con la caja de al lado. */
+            const x = signo < 0 ? caja.lejosIzq - 12 : caja.lejosDer + 12;
+            const anclaje = signo < 0 ? "end" : "start";
+            const cuerpo = (34 * caja.k).toFixed(1);
+
+            svg += `<text class="pi-nombre${suya}" x="${x}" y="${caja.lejosY}" `
+                 + `text-anchor="${anclaje}" font-size="${cuerpo}">`
+                 + escapar(apellido) + `</text>`;
+        }
+    }
+
+    svg += `</svg>`;
+
+    destino.innerHTML = svg;
+}
+
+
 function cuantasPaginas(){
     return Math.max(1, Math.ceil(parrilla.length / POR_PAGINA));
 }
@@ -142,6 +300,10 @@ function pintar(){
     const lados = destino.querySelectorAll(".gf-lado");
     if (lados[0]) lados[0].style.animation = "gfLadoIzq .55s ease forwards";
     if (lados[1]) lados[1].style.animation = "gfLadoDer .55s ease forwards";
+
+    /* La parrilla dibujada cambia con la pareja: delante van los dos que
+       se presentan y detras los que arrancan pegados a ellos. */
+    pistaDibujar();
 }
 
 function pararRelevo(){

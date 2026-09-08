@@ -251,6 +251,115 @@
 
 
 /* ===================================
+   LA PARRILLA DIBUJADA
+
+   Ocupa el hueco que dejan las dos caras. Va por encima del velo oscuro
+   —que esta en la 2— y por debajo de los nombres y los tiempos, que van
+   en la 5: si un apellido de la pista se cruzara con el del piloto que se
+   presenta, manda el segundo.
+
+   Todo en linea fina y apagada. Es un plano, no un dato: tiene que
+   situar sin robarle la mirada a las caras.
+=================================== */
+
+.gf-pista{
+
+    position:absolute;
+
+    /* Debajo de la cabecera, igual que las caras. */
+    top:var(--gf-cabecera);
+    bottom:0;
+
+    left:50%;
+    transform:translateX(-50%);
+
+    /* Lo que queda libre entre las dos fotos. Se deriva del ancho de la
+       foto en vez de escribirse aparte: asi al mover --gf-foto-ancho el
+       dibujo se ajusta solo y no hay dos numeros que mantener a la par. */
+    width:calc(100% - var(--gf-foto-ancho, 56%));
+
+    z-index:3;
+
+    pointer-events:none;
+}
+
+.gf-pista svg{
+
+    width:100%;
+    height:100%;
+
+    display:block;
+
+    /* Un respiro por abajo: pegado al borde, la caja de delante se leia
+       como si se saliera del cuadro. */
+    padding-bottom:26px;
+
+    box-sizing:border-box;
+
+    overflow:visible;
+}
+
+
+/* ── Los bordes de la pista ── */
+
+.pi-borde{
+
+    stroke:rgba(255,255,255,.20);
+
+    stroke-width:2;
+
+    fill:none;
+}
+
+
+/* ── Las cajas de la parrilla ── */
+
+.pi-caja{
+
+    fill:rgba(255,255,255,.03);
+
+    stroke:rgba(255,255,255,.28);
+
+    stroke-width:2;
+
+    stroke-linejoin:round;
+}
+
+/* La fila de los dos que se estan presentando. Se marca con el filo y no
+   con relleno: rellena competiria con las caras, que son lo que se mira. */
+.pi-caja.destacada{
+
+    fill:rgba(255,255,255,.07);
+
+    stroke:rgba(255,255,255,.85);
+
+    stroke-width:3;
+}
+
+
+/* ── Los apellidos ── */
+
+.pi-nombre{
+
+    fill:rgba(255,255,255,.55);
+
+    font-family:var(--fuente-graficos);
+    font-weight:700;
+
+    letter-spacing:1px;
+
+    dominant-baseline:middle;
+}
+
+.pi-nombre.destacada{
+
+    fill:#FFFFFF;
+
+    font-weight:900;
+}
+
+
+/* ===================================
    LA BANDA DE DATOS
 =================================== */
 
