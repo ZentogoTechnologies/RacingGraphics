@@ -33,7 +33,9 @@
 
     border-radius:18px;
 
-    background:rgba(4,6,9,.95);
+    /* Mas transparente: por debajo va la carrera y el cuadro tapa media
+       pantalla. A .95 era casi opaco y se comia el plano entero. */
+    background:rgba(4,6,9,.80);
 
     box-shadow:0 22px 60px rgba(0,0,0,.6);
 
@@ -48,7 +50,7 @@
     /* Lo que se reserva la cabecera. Va aqui y no repetido en cada regla
        porque lo usan dos: la propia cabecera y el tope de las fotos. Si se
        escribieran por separado, tocar una dejaria a la otra desfasada. */
-    --gf-cabecera:174px;
+    --gf-cabecera:212px;
 }
 
 
@@ -66,7 +68,9 @@
 
     box-sizing:border-box;
 
-    padding:34px 0 20px;
+    /* Mas aire arriba y abajo del titulo: pegado al borde y a las caras
+       se leia como una etiqueta y no como la cabecera del grafico. */
+    padding:44px 0 30px;
 
     text-align:center;
 
@@ -86,7 +90,7 @@
 
     color:#FF3B45;
 
-    margin-bottom:6px;
+    margin-bottom:12px;
 }
 
 .gf-titulo{
@@ -109,7 +113,7 @@
    compite con el nombre del grafico. */
 .gf-categoria{
 
-    margin-top:8px;
+    margin-top:14px;
 
     font-size:20px;
     font-weight:700;
@@ -144,30 +148,16 @@
 
 .gf-lado{
 
-    /* Cada lado se pasa un poco del centro y la mascara los funde. Sin
-       solape quedaba una linea recta entre las dos caras. */
+    /* Ya no se solapan en el centro. Cada cara se va a su esquina y en
+       medio queda el hueco, que es donde va a ir la pista con las
+       posiciones. */
     flex:1 1 0;
-
-    margin-right:-70px;
 
     position:relative;
 
     height:100%;
 
     min-width:0;
-
-    display:flex;
-
-    /* Las dos caras miran al centro. */
-    justify-content:flex-end;
-}
-
-.gf-lado.der{
-
-    justify-content:flex-start;
-
-    margin-right:0;
-    margin-left:-70px;
 }
 
 /* Velo oscuro arriba y abajo. Va en un elemento propio y no en la mascara
@@ -198,9 +188,21 @@
 
     position:absolute;
 
-    inset:0;
+    top:0; bottom:0;
 
-    width:100%;
+    /* Arrimada a su esquina y no a todo el lado. Lo que sobra por dentro
+       es el hueco del medio; cuanto mas estrecha la foto, mas hueco.
+
+       De paso el encuadre mejora: la caja se acerca a la proporcion de un
+       retrato, asi que `cover` recorta bastante menos que cuando ocupaba
+       media pantalla. */
+    left:0;
+    right:auto;
+
+    /* La mitad justa de su lado, asi que entre las dos queda libre la
+       mitad del cuadro. Es el hueco donde va a ir la pista. */
+    width:var(--gf-foto-ancho, 50%);
+
     height:100%;
 
     max-width:none;
@@ -215,16 +217,22 @@
        linea recta. Una sola mascara y en un eje: CEF no compone bien dos
        superpuestas, y el oscurecido de arriba y abajo lo pone el velo del
        contenedor. */
-    -webkit-mask-image:linear-gradient(90deg, #000 46%, transparent 96%);
-    mask-image:linear-gradient(90deg, #000 46%, transparent 96%);
+    /* Se difumina por el borde de dentro para que la foto no termine en
+       una linea recta contra el hueco. Empieza mas tarde que antes: la
+       caja es mas estrecha y con el corte al 46% se perdia media cara. */
+    -webkit-mask-image:linear-gradient(90deg, #000 62%, transparent 100%);
+    mask-image:linear-gradient(90deg, #000 62%, transparent 100%);
 }
 
-/* En el lado derecho la mascara va al reves: se difumina hacia la
-   izquierda, que es donde esta el centro. */
+/* En el lado derecho todo va al reves: la foto se arrima a la derecha y
+   la mascara se difumina hacia la izquierda, que es donde esta el hueco. */
 .gf-lado.der .gf-foto{
 
-    -webkit-mask-image:linear-gradient(270deg, #000 46%, transparent 96%);
-    mask-image:linear-gradient(270deg, #000 46%, transparent 96%);
+    left:auto;
+    right:0;
+
+    -webkit-mask-image:linear-gradient(270deg, #000 62%, transparent 100%);
+    mask-image:linear-gradient(270deg, #000 62%, transparent 100%);
 }
 
 /* Sin foto no se deja el hueco vacio: se pone la silueta que ya usan las
