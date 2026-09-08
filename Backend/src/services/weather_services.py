@@ -87,6 +87,39 @@ def _consultar(lat: float, lon: float) -> dict:
         return json.loads(r.read().decode("utf-8"))
 
 
+# Coordenadas y nombre del sitio, que el cliente puso en el asistente. Se
+# guardan en memoria al arrancar (igual que la ruta del cronometraje) para
+# no consultar la base cada vez que una plantilla pide el clima.
+_ubicacion = {
+    "lat": None, "lon": None, "lugar": "", "pais": "",
+}
+
+
+async def cargar_ubicacion() -> dict:
+    """Trae de la base la ubicación del circuito. Se llama al arrancar."""
+    from src.models.instalacion_model import Instalacion
+
+    doc = await Instalacion.find_one({"clave": "instalacion"})
+    if doc and doc.lat is not None and doc.lon is not None:
+        _ubicacion.update({
+            "lat": doc.lat, "lon": doc.lon,
+            "lugar": doc.ciudad or doc.circuito or doc.organizacion,
+            "pais": doc.pais.upper(),
+        })
+
+    return dict(_ubicacion)
+
+
+def ubicacion() -> tuple[float, float, str, str]:
+    """La del cliente si la configuró; si no, la de respaldo del .env."""
+    if _ubicacion["lat"] is not None:
+        return (_ubicacion["lat"], _ubicacion["lon"],
+                _ubicacion["lugar"], _ubicacion["pais"])
+
+    return (settings.WEATHER_LAT, settings.WEATHER_LON,
+            settings.WEATHER_PLACE, settings.WEATHER_COUNTRY)
+
+
 def obtener_clima(forzar: bool = False) -> dict:
     """Clima actual del autódromo, listo para la plantilla.
 
@@ -101,7 +134,8 @@ def obtener_clima(forzar: bool = False) -> dict:
         return {**_cache, "desde_cache": True}
 
     try:
-        crudo = _consultar(settings.WEATHER_LAT, settings.WEATHER_LON)
+        lat, lon, _lugar, _pais = ubicacion()
+        crudo = _consultar(lat, lon)
     except (urllib.error.URLError, OSError, ValueError, TimeoutError) as e:
         if _cache:
             return {
@@ -131,8 +165,8 @@ def obtener_clima(forzar: bool = False) -> dict:
         "humidity": round(actual.get("relative_humidity_2m") or 0),
         "wind_speed": round(actual.get("wind_speed_10m") or 0),
         "description": descripcion,
-        "city": settings.WEATHER_PLACE,
-        "country": settings.WEATHER_COUNTRY,
+        "city": ubicacion()[2],
+        "country": ubicacion()[3],
         "current_date": _fecha_es(ahora),
 
         # Para el icono que dibuja la propia plantilla.
@@ -141,8 +175,8 @@ def obtener_clima(forzar: bool = False) -> dict:
 
         "precipitation": actual.get("precipitation"),
         "weather_code": codigo,
-        "lat": settings.WEATHER_LAT,
-        "lon": settings.WEATHER_LON,
+        "lat": ubicacion()[0],
+        "lon": ubicacion()[1],
         "consultado": ahora.strftime("%H:%M:%S"),
         "desde_cache": False,
     }

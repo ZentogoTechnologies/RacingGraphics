@@ -17,6 +17,7 @@ from src.models.users_model import User
 from src.models.events_model import Event
 from src.models.settings_model import Ajustes
 from src.models.tracks_model import Trazado
+from src.models.instalacion_model import Instalacion
 
 # Routes
 from src.routes.categories_routes import categories
@@ -31,6 +32,7 @@ from src.routes.events_routes import events
 from src.routes.settings_routes import ajustes
 from src.routes.weather_routes import weather
 from src.routes.license_routes import license
+from src.routes.instalacion_routes import setup
 
 # Auth
 from src.services.auth_services import usuario_actual
@@ -46,7 +48,8 @@ async def lifespan(app: FastAPI):
     client = AsyncMongoClient(settings.MONGO_URI)
     await init_beanie(
         database=client[settings.DB_NAME],
-        document_models=[Category, Pilot, Vehicle, User, Event, Ajustes, Trazado]
+        document_models=[Category, Pilot, Vehicle, User, Event, Ajustes, Trazado,
+                         Instalacion]
     )
     print("✅ Conectado a MongoDB")
 
@@ -57,6 +60,25 @@ async def lifespan(app: FastAPI):
     ruta = await cargar_ajustes()
     if ruta:
         print(f"   current.xml: {ruta} (ajuste guardado)")
+
+    from src.services.weather_services import cargar_ubicacion
+
+    lugar = await cargar_ubicacion()
+    if lugar["lat"] is not None:
+        print(f"   clima: {lugar['lugar']} ({lugar['lat']}, {lugar['lon']})")
+
+    from src.services.license_services import (
+        avisar_si_es_de_desarrollo, es_clave_de_desarrollo,
+    )
+
+    avisar_si_es_de_desarrollo()
+    if es_clave_de_desarrollo():
+        print("   ⚠ Licencias: clave de DESARROLLO. No distribuir así.")
+
+    from src.services.instalacion_services import esta_configurado
+
+    if not await esta_configurado():
+        print("   ⚠ Sin configurar: el asistente de instalación está abierto")
 
     yield
     await client.close()
@@ -151,6 +173,11 @@ app.mount(
 # dependencia se declara aquí y no dentro de cada router para que la
 # política de acceso se lea de un vistazo en un solo lugar.
 PROTEGIDO = [Depends(usuario_actual)]
+
+# El asistente de instalación. Va primero porque es lo único que
+# funciona cuando aún no hay usuarios: se protege con el token que dejó
+# el instalador en el disco, y deja de responder al completarse.
+app.include_router(setup, prefix="/api/v1/setup", tags=["Setup"])
 
 app.include_router(login, prefix="/api/v1/auth", tags=["Auth"])
 app.include_router(users, prefix="/api/v1/users", tags=["Users"])

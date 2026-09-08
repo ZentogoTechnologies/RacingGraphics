@@ -49,3 +49,4 @@ claves/
 # máquina, no del proyecto.
 *.lic
 licencia.estado.json
+claves-desarrollo/

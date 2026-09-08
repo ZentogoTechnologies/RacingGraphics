@@ -219,44 +219,70 @@ h1 span{color:#64748b;font-weight:400}
 <!-- 5 -->
 <div class="fase">
   <div class="num" style="background:#059669">5</div>
-  <div class="ftit">Configuración en el navegador</div>
-  <div class="fsub">EL INSTALADOR CEDE EL CONTROL AQUÍ</div>
+  <div class="ftit">Asistente web</div>
+  <div class="fsub">EL INSTALADOR CEDE EL CONTROL AL NAVEGADOR</div>
 
   <div class="card" style="border-color:#059669">
     <div class="k">5.1</div><div>
       <div class="body-t">Arrancan los servicios y se abre el navegador</div>
       <div class="body-d">El backend atiende en <span class="mono">0.0.0.0:8080</span> —por toda la
-      red local— y sirve también la interfaz. Un solo puerto para todo.<br>
-      El asistente muestra en pantalla la dirección con la que entrar
-      desde otro equipo: <span class="mono">http://&lt;IP-del-servidor&gt;:8080</span></div>
+      red local— y sirve también la interfaz.<br>
+      El instalador deja un <b>token de un solo uso</b> en el disco y abre el asistente con él.
+      Sin ese token nadie más de la red puede configurar el sistema.<br>
+      Se muestra la dirección para entrar desde otro equipo:
+      <span class="mono">http://&lt;IP-del-servidor&gt;:8080</span></div>
       <span class="tag t-auto">Automático</span>
     </div>
   </div>
 
   <div class="card" style="border-color:#059669">
     <div class="k">5.2</div><div>
-      <div class="body-t">Define la contraseña del usuario dueño</div>
-      <div class="body-d">No hay contraseña por defecto: se establece aquí, en esta instalación.</div>
+      <div class="body-t">Datos del cliente</div>
+      <div class="body-d">Nombre del autódromo o promotora, país, ciudad, nombre del circuito
+      e idioma. <b>Nada viene puesto de fábrica.</b></div>
       <span class="tag t-user">Acción del usuario</span>
     </div>
   </div>
 
   <div class="card" style="border-color:#059669">
     <div class="k">5.3</div><div>
-      <div class="body-t">Indica la ruta del <span class="mono">current.xml</span> de MyLaps</div>
-      <div class="body-d">El archivo de cronometraje. Debe ser ruta UNC
-      (<span class="mono">\\servidor\recurso</span>), no una unidad mapeada:
-      un servicio de Windows no ve las unidades de red mapeadas.<br>
-      Si MyLaps aún no está encendido, la ruta se verifica contra el
-      <b>current.xml de demostración</b> que viene incluido, y la real se ajusta después.</div>
+      <div class="body-t">Logo del cliente</div>
+      <div class="body-d">Es el que sale al aire en las plantillas. Se sube aquí; hasta entonces
+      el producto no lleva el logo de nadie.</div>
       <span class="tag t-user">Acción del usuario</span>
     </div>
   </div>
 
   <div class="card" style="border-color:#059669">
     <div class="k">5.4</div><div>
-      <div class="body-t">Ajusta canal de CasparCG, logo del cliente y ubicación del clima</div>
-      <div class="body-d">Todo editable después desde Ajustes.</div>
+      <div class="body-t">Las tres cuentas del sistema — obligatorias</div>
+      <div class="body-d">
+      <b>owner</b> administra cuentas · <b>admin</b> escribe en la base ·
+      <b>standard</b> opera gráficos sin modificar registros.<br>
+      Se exigen las tres para que el reparto de roles exista desde el primer día. Con solo el
+      dueño creado, todos acabarían usando esa cuenta y los roles no separarían nada.<br>
+      Sin contraseñas por defecto: se establecen aquí.</div>
+      <span class="tag t-user">Acción del usuario</span>
+    </div>
+  </div>
+
+  <div class="card" style="border-color:#059669">
+    <div class="k">5.5</div><div>
+      <div class="body-t">Cronometraje — ruta del <span class="mono">current.xml</span> de MyLaps</div>
+      <div class="body-d">Ruta UNC (<span class="mono">\\servidor\recurso</span>), no una unidad
+      mapeada: un servicio de Windows no ve las unidades de red mapeadas.<br>
+      El asistente <b>verifica la ruta antes de guardarla</b>. Si MyLaps aún no está encendido,
+      se comprueba contra el <b>current.xml de demostración</b> incluido.</div>
+      <span class="tag t-user">Acción del usuario</span>
+    </div>
+  </div>
+
+  <div class="card" style="border-color:#059669">
+    <div class="k">5.6</div><div>
+      <div class="body-t">CasparCG y ubicación del circuito</div>
+      <div class="body-d">Se prueba la conexión con el servidor de gráficos, y se fijan las
+      coordenadas del circuito para la plantilla del clima. También estaban escritas en el
+      código apuntando a un solo autódromo.</div>
       <span class="tag t-user">Acción del usuario</span>
     </div>
   </div>
@@ -264,7 +290,8 @@ h1 span{color:#64748b;font-weight:400}
   <div class="card" style="border-color:#059669;background:#ecfdf5">
     <div class="k" style="background:#059669">FIN</div><div>
       <div class="body-t" style="color:#065f46">✓ Race Core Studio operativo</div>
-      <div class="body-d" style="color:#047857">El panel queda listo para trabajar.
+      <div class="body-d" style="color:#047857">Se borra el token y el asistente no vuelve a abrirse.
+      Todo cambio posterior pasa por Ajustes, con sesión y con rol.<br>
       A partir de aquí ya no hace falta internet.</div>
     </div>
   </div>

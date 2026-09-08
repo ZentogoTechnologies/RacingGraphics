@@ -66,12 +66,18 @@ class Settings(BaseSettings):
     JWT_EXPIRE_HOURS: int = 12
 
     # ── Clima ────────────────────────────────────────────────
-    # Autódromo Panamá, Sajalices (Capira). Coordenadas tomadas del
-    # marcador del sitio en Google Maps.
-    WEATHER_LAT: float = 8.7016426
-    WEATHER_LON: float = -79.8702415
-    WEATHER_PLACE: str = "Sajalices, Capira"
-    WEATHER_COUNTRY: str = "PANAMÁ"
+    # Las coordenadas del circuito las pone cada cliente en el asistente
+    # de instalación y viven en la base, no aquí: estas líneas tenían las
+    # de un autódromo concreto, y con eso el producto solo servía para él.
+    #
+    # Lo que queda son valores neutros de respaldo, para que una
+    # instalación a medio configurar no reviente al pedir el clima. El
+    # 0,0 es el Golfo de Guinea; si alguien ve ese dato al aire, sabrá al
+    # instante que falta configurar la ubicación.
+    WEATHER_LAT: float = 0.0
+    WEATHER_LON: float = 0.0
+    WEATHER_PLACE: str = ""
+    WEATHER_COUNTRY: str = ""
 
     # Segundos que se reutiliza la última consulta. El clima no cambia de
     # un segundo a otro y la plantilla se puede sacar al aire muchas veces
@@ -112,5 +118,15 @@ class Settings(BaseSettings):
     # Servidor de licencias de Zentogo: activación, renovación y
     # manifiestos de versión.
     LICENSE_SERVER_URL: str = "https://licencias.zentogo.com"
+
+    # ── Instalación ──────────────────────────────────────────
+    # Versión del producto. Fuente única: la reportan /setup/estado y el
+    # actualizador, y con ella el manifiesto decide si hay algo nuevo.
+    APP_VERSION: str = "1.0.0"
+
+    # Token de un solo uso que protege el asistente de instalación. Lo
+    # escribe el instalador y se borra al terminar. Sin él, cualquiera en
+    # la red local podría llegar antes que el técnico y nombrarse dueño.
+    SETUP_TOKEN_FILE: str = "instalacion.token"
 
 settings = Settings()

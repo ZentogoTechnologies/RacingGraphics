@@ -62,10 +62,25 @@ logger = logging.getLogger(__name__)
 #
 #  La privada correspondiente vive únicamente en el servidor de licencias
 #  de Zentogo y no aparece en este repositorio por ningún lado.
+#
+#  ⚠ LA QUE ESTÁ PUESTA AHORA ES DE DESARROLLO, no de producción.
+#
+#  La genera tools/licencias/licencia_de_prueba.py para poder probar el
+#  sistema de extremo a extremo, y su privada está en claves-desarrollo/,
+#  que no va a git. Antes de la primera venta hay que:
+#
+#      1. Generar el par real:
+#         python tools/licencias/claves.py --nombre licencias
+#      2. Guardar la privada solo en el servidor de licencias.
+#      3. Pegar aquí la pública y recompilar el backend.
+#
+#  Mientras siga esta clave, el backend lo avisa al arrancar (ver
+#  `es_clave_de_desarrollo`). Si eso sale en la consola de un cliente,
+#  el paso 3 se saltó.
 # ══════════════════════════════════════════════════════════════════════
 
 CLAVE_PUBLICA_PEM = """-----BEGIN PUBLIC KEY-----
-MCowBQYDK2VwAyEAGb9ECWmEzf6FQbrBZ9w7lshQhqowtrbLDFw4rXAxZuE=
+MCowBQYDK2VwAyEAX/GCLCwa2z7cU/sX8Q6pd7CrkMkuz+1zpelsA5r3Lxw=
 -----END PUBLIC KEY-----"""
 
 # Ed25519. Se nombra el algoritmo explícitamente al verificar para que un
@@ -178,6 +193,31 @@ class Licencia:
                 self.dias_de_gracia_restantes if self.estado is Estado.GRACIA else None
             ),
         }
+
+
+# Huella de la clave de desarrollo que instala licencia_de_prueba.py. Se
+# compara para poder avisar; no es un secreto, es justo lo contrario.
+_INICIO_CLAVE_DESARROLLO = "MCowBQYDK2VwAyEAX/GCLCwa2z7cU/sX8Q6pd7CrkMkuz+1zpelsA5r3Lxw="
+
+
+def es_clave_de_desarrollo() -> bool:
+    """¿El backend está verificando con la clave de pruebas?"""
+    return _INICIO_CLAVE_DESARROLLO in CLAVE_PUBLICA_PEM
+
+
+def avisar_si_es_de_desarrollo() -> None:
+    """Se llama al arrancar. Ruidoso a propósito.
+
+    Vender con esta clave significaría que cualquiera que haya tenido el
+    repositorio delante puede emitirse licencias perpetuas. El aviso está
+    para que eso no pase por descuido.
+    """
+    if es_clave_de_desarrollo():
+        logger.warning(
+            "LICENCIAS: clave pública DE DESARROLLO en uso. "
+            "No distribuir así: generar el par de producción con "
+            "tools/licencias/claves.py y sustituirla."
+        )
 
 
 def _ahora() -> datetime:
