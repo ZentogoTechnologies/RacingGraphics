@@ -23,12 +23,17 @@
        las fotos, el aire de la cabecera, el cuerpo de los nombres— siguen
        siendo las mismas, solo que a otro tamaño.
 
-       Estuvo en .7 y se subio a .84: quedaba chico para lo que tiene que
-       contar. Escalar es tambien lo que agranda la letra y las caras sin
-       tener que retocarlas una a una, y lo que mantiene el aire de la
-       cabecera: el hueco que se reserva arriba crece en la misma
-       proporcion, asi que las fotos no vuelven a subir hasta el titulo. */
-    transform:translate(-50%, -50%) scale(.84);
+       Estuvo en .7, luego en .84 y ahora en .95: seguia quedando chico
+       contra el fondo. A .95 el cuadro mide 1539x789 y deja 190px de
+       margen a cada lado y 145 arriba y abajo en una pantalla de
+       1920x1080, que es zona segura de sobra para television.
+
+       Escalar el cuadro entero es lo que agranda a la vez la letra, las
+       caras y el dibujo de la parrilla sin tener que retocar treinta
+       medidas una a una. Y es lo que mantiene el aire de la cabecera: el
+       hueco que se reserva arriba crece en la misma proporcion, asi que
+       las fotos no vuelven a subir hasta el titulo. */
+    transform:translate(-50%, -50%) scale(.95);
 
     /* Encajonada, no a sangre. Mismo ancho que la grilla de nombres para
        que las dos se lean como el mismo grafico contado de dos formas, y
