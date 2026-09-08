@@ -18,11 +18,17 @@
     left:50%;
     top:50%;
 
-    /* Un 30% mas pequeña. Se escala el cuadro entero en vez de tocar las
-       treinta medidas de dentro: asi las proporciones que ya estaban
-       ajustadas —el tope de las fotos, el aire de la cabecera, el cuerpo
-       de los nombres— siguen siendo las mismas, solo que mas chicas. */
-    transform:translate(-50%, -50%) scale(.7);
+    /* Se escala el cuadro entero en vez de tocar las treinta medidas de
+       dentro: asi las proporciones que ya estaban ajustadas —el tope de
+       las fotos, el aire de la cabecera, el cuerpo de los nombres— siguen
+       siendo las mismas, solo que a otro tamaño.
+
+       Estuvo en .7 y se subio a .84: quedaba chico para lo que tiene que
+       contar. Escalar es tambien lo que agranda la letra y las caras sin
+       tener que retocarlas una a una, y lo que mantiene el aire de la
+       cabecera: el hueco que se reserva arriba crece en la misma
+       proporcion, asi que las fotos no vuelven a subir hasta el titulo. */
+    transform:translate(-50%, -50%) scale(.84);
 
     /* Encajonada, no a sangre. Mismo ancho que la grilla de nombres para
        que las dos se lean como el mismo grafico contado de dos formas, y
@@ -199,9 +205,10 @@
     left:0;
     right:auto;
 
-    /* La mitad justa de su lado, asi que entre las dos queda libre la
-       mitad del cuadro. Es el hueco donde va a ir la pista. */
-    width:var(--gf-foto-ancho, 50%);
+    /* Algo mas de la mitad de su lado. Las caras se comen mas cuadro que
+       antes y aun asi queda libre el 44% del medio, que es de sobra para
+       la pista que va ahi. */
+    width:var(--gf-foto-ancho, 56%);
 
     height:100%;
 
