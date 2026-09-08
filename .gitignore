@@ -53,3 +53,8 @@ claves-desarrollo/
 
 # Token de un solo uso del asistente de instalación. Es de la máquina.
 instalacion.token
+
+# Artefactos del empaquetado del instalador
+installer/dist/
+installer/build/
+installer/*.spec
