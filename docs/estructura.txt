@@ -1,0 +1,377 @@
+Race-Core-Studio/
+├── .claude/
+│   └── launch.json
+├── Backend/  — API FastAPI + MongoDB (Beanie)
+│   ├── src/
+│   │   ├── database/
+│   │   │   ├── collections/  (7 archivos)
+│   │   │   ├── __init__.py
+│   │   │   ├── database.py
+│   │   │   └── README.md
+│   │   ├── models/  — Documentos de MongoDB
+│   │   │   ├── __init__.py
+│   │   │   ├── categories_model.py
+│   │   │   ├── events_model.py
+│   │   │   ├── instalacion_model.py
+│   │   │   ├── pilots_model.py
+│   │   │   ├── settings_model.py
+│   │   │   ├── tracks_model.py
+│   │   │   ├── users_model.py
+│   │   │   └── vehicles_model.py
+│   │   ├── public/
+│   │   │   ├── categorias/  (4 archivos)
+│   │   │   ├── demo/  — current.xml de demostración
+│   │   │   │   ├── current.demo.xml
+│   │   │   │   └── LEEME.md
+│   │   │   ├── eventos/  (2 archivos)
+│   │   │   ├── marcas/  (23 archivos)
+│   │   │   ├── pilotos/  (20 archivos)
+│   │   │   ├── vehiculos/  (4 archivos)
+│   │   │   ├── __init__.py
+│   │   │   ├── current (1).xml
+│   │   │   ├── current (2).xml
+│   │   │   ├── LEEME.md
+│   │   │   ├── Plantilla de Pilotos GT Challenge.xlsx
+│   │   │   ├── Plantilla de Pilotos ST-GT.xlsx
+│   │   │   └── Plantilla de Pilotos TCR.xlsx
+│   │   ├── routes/  — Endpoints del API
+│   │   │   ├── __init__.py
+│   │   │   ├── categories_routes.py
+│   │   │   ├── events_routes.py
+│   │   │   ├── graphics_routes.py
+│   │   │   ├── instalacion_routes.py
+│   │   │   ├── license_routes.py
+│   │   │   ├── login_routes.py
+│   │   │   ├── pilots_routes.py
+│   │   │   ├── settings_routes.py
+│   │   │   ├── system_routes.py
+│   │   │   ├── timing_routes.py
+│   │   │   ├── users_routes.py
+│   │   │   ├── vehicles_routes.py
+│   │   │   └── weather_routes.py
+│   │   ├── schemas/  — Validación de entrada y salida
+│   │   │   ├── __init__.py
+│   │   │   ├── categories_schemas.py
+│   │   │   ├── common_schemas.py
+│   │   │   ├── events_schemas.py
+│   │   │   ├── graphics_schemas.py
+│   │   │   ├── instalacion_schemas.py
+│   │   │   ├── license_schemas.py
+│   │   │   ├── pilots_schemas.py
+│   │   │   ├── users_schemas.py
+│   │   │   └── vehicles_schemas.py
+│   │   ├── services/  — Lógica de negocio
+│   │   │   ├── __init__.py
+│   │   │   ├── auth_services.py
+│   │   │   ├── casparcg_client.py
+│   │   │   ├── categories_services.py
+│   │   │   ├── events_services.py
+│   │   │   ├── fingerprint_services.py
+│   │   │   ├── graphics_services.py
+│   │   │   ├── imagenes_services.py
+│   │   │   ├── instalacion_services.py
+│   │   │   ├── license_services.py
+│   │   │   ├── pagination.py
+│   │   │   ├── pilots_services.py
+│   │   │   ├── recorte_services.py
+│   │   │   ├── red_services.py
+│   │   │   ├── settings_services.py
+│   │   │   ├── system_services.py
+│   │   │   ├── timing_services.py
+│   │   │   ├── tracks_services.py
+│   │   │   ├── ubicacion_services.py
+│   │   │   ├── users_services.py
+│   │   │   ├── vehicles_services.py
+│   │   │   └── weather_services.py
+│   │   ├── utils/
+│   │   │   └── __init__.py
+│   │   └── __init__.py
+│   ├── tests/  — 107 pruebas
+│   │   ├── test_demo_timing.py
+│   │   ├── test_instalacion.py
+│   │   ├── test_licencia_local.py
+│   │   ├── test_license_services.py
+│   │   └── test_ubicacion.py
+│   ├── .env.example
+│   ├── .gitignore
+│   ├── __init__.py
+│   ├── config.py
+│   ├── docs.py
+│   ├── exportar_collections.py
+│   ├── exportar_pilotos.py
+│   ├── LICENSE
+│   ├── main.py
+│   ├── migrar_nacionalidades.py
+│   ├── README.md
+│   ├── requirements.txt
+│   └── seed_admin.py
+├── Casparcg/  — Servidor de gráficos
+│   ├── locales/  (220 archivos)
+│   ├── prebuilds/  (1 archivos)
+│   ├── template/  — Plantillas que salen al aire
+│   │   ├── css/
+│   │   │   ├── animaciones.css
+│   │   │   ├── banderas.css
+│   │   │   ├── category.css
+│   │   │   ├── circuit_track.css
+│   │   │   ├── drag_duelo.css
+│   │   │   ├── event.css
+│   │   │   ├── flags.css
+│   │   │   ├── global.css
+│   │   │   ├── grilla.css
+│   │   │   ├── grilla_fotos.css
+│   │   │   ├── narrator.css
+│   │   │   ├── pilot_card_short.css
+│   │   │   ├── pilot_vs.css
+│   │   │   ├── results.css
+│   │   │   ├── social_media.css
+│   │   │   ├── starting_grid.css
+│   │   │   ├── tipografia.css
+│   │   │   ├── tipografia_activa.css
+│   │   │   ├── torre_medidas.css
+│   │   │   ├── totem_names.css
+│   │   │   ├── totem_short.css
+│   │   │   ├── totem_torre.css
+│   │   │   └── weather.css
+│   │   ├── fonts/  (19 archivos)
+│   │   ├── html/
+│   │   │   ├── 10_no_background.html
+│   │   │   ├── 11_red_background.html
+│   │   │   ├── 12_blue_background.html
+│   │   │   ├── 13_yellow_background.html
+│   │   │   ├── 14_green_background.html
+│   │   │   ├── 15_cian_background.html
+│   │   │   ├── 16_magenta_background.html
+│   │   │   ├── 17_orange_background.html
+│   │   │   ├── 20_totem_fullname.html
+│   │   │   ├── 22_totem_leader.html
+│   │   │   ├── 23_totem_interval.html
+│   │   │   ├── 30_green_flag.html
+│   │   │   ├── 31_yellow_flag.html
+│   │   │   ├── 32_safety_car_flag.html
+│   │   │   ├── 33_red_flag.html
+│   │   │   ├── 34_finish_flag.html
+│   │   │   ├── 35_white_flag.html
+│   │   │   ├── 36_blue_flag.html
+│   │   │   ├── 37_black_flag.html
+│   │   │   ├── 38_meatball_flag.html
+│   │   │   ├── 39_slippery_flag.html
+│   │   │   ├── 3A_warning_flag.html
+│   │   │   ├── 40_starting_grid_names.html
+│   │   │   ├── 41_starting_grid_foto.html
+│   │   │   ├── 51_pilot_card_short.html
+│   │   │   ├── 52_pilot_vs.html
+│   │   │   ├── 60_circuit_track.html
+│   │   │   ├── 61_event.html
+│   │   │   ├── 62_narrator.html
+│   │   │   ├── 63_social_media.html
+│   │   │   ├── 65_weather.html
+│   │   │   ├── 66_comentarist.html
+│   │   │   ├── 67_reporter.html
+│   │   │   ├── 68_category.html
+│   │   │   ├── 70_results.html
+│   │   │   └── 80_drag_duelo.html
+│   │   ├── i18n/  (2 archivos)
+│   │   ├── img/  (263 archivos)
+│   │   └── js/
+│   │       ├── entrada.js
+│   │       ├── flags.js
+│   │       ├── i18n.js
+│   │       ├── idioma_activo.js
+│   │       ├── timing.js
+│   │       └── torre.js
+│   ├── avcodec-61.dll
+│   ├── avdevice-61.dll
+│   ├── avfilter-10.dll
+│   ├── avformat-61.dll
+│   ├── avutil-59.dll
+│   ├── casparcg.config
+│   ├── casparcg.exe
+│   ├── casparcg.exp
+│   ├── casparcg.lib
+│   ├── casparcg_auto_restart.bat
+│   ├── cg20.fth.1080i5000
+│   ├── cg20.fth.1080i5994
+│   ├── cg20.fth.1080i6000
+│   ├── cg20.fth.1080p2398
+│   ├── cg20.fth.1080p2400
+│   ├── cg20.fth.1080p2500
+│   ├── cg20.fth.1080p2997
+│   ├── cg20.fth.1080p3000
+│   ├── cg20.fth.1080p5000
+│   ├── cg20.fth.1080p5994
+│   ├── cg20.fth.1080p6000
+│   ├── cg20.fth.1556p2398
+│   ├── cg20.fth.1556p2400
+│   ├── cg20.fth.1556p2500
+│   ├── cg20.fth.2160p2398
+│   ├── cg20.fth.2160p2400
+│   ├── cg20.fth.2160p2500
+│   ├── cg20.fth.2160p2997
+│   ├── cg20.fth.2160p3000
+│   ├── cg20.fth.2160p5000
+│   ├── cg20.fth.2160p5994
+│   ├── cg20.fth.2160p6000
+│   ├── cg20.fth.576p2500
+│   ├── cg20.fth.720p2398
+│   ├── cg20.fth.720p2400
+│   ├── cg20.fth.720p2500
+│   ├── cg20.fth.720p2997
+│   ├── cg20.fth.720p3000
+│   ├── cg20.fth.720p5000
+│   ├── cg20.fth.720p5994
+│   ├── cg20.fth.720p6000
+│   ├── cg20.fth.dci1080p2398
+│   ├── cg20.fth.dci1080p2400
+│   ├── cg20.fth.dci1080p2500
+│   ├── cg20.fth.dci2160p2398
+│   ├── cg20.fth.dci2160p2400
+│   ├── cg20.fth.dci2160p2500
+│   ├── cg20.fth.ntsc
+│   ├── cg20.fth.ntsc.169
+│   ├── cg20.fth.pal
+│   ├── cg20.fth.pal.43
+│   ├── CHANGELOG.md
+│   ├── chrome_100_percent.pak
+│   ├── chrome_200_percent.pak
+│   ├── chrome_elf.dll
+│   ├── d3dcompiler_47.dll
+│   ├── ffmpeg.exe
+│   ├── ffprobe.exe
+│   ├── glew32.dll
+│   ├── icudtl.dat
+│   ├── libcef.dll
+│   ├── libEGL.dll
+│   ├── LiberationMono-Regular.ttf
+│   ├── libGLESv2.dll
+│   ├── LICENSE
+│   ├── OpenAL32.dll
+│   ├── postproc-58.dll
+│   ├── README.md
+│   ├── resources.pak
+│   ├── scanner.exe
+│   ├── sfml-graphics-2.dll
+│   ├── sfml-system-2.dll
+│   ├── sfml-window-2.dll
+│   ├── swresample-5.dll
+│   ├── swscale-8.dll
+│   ├── tbb12.dll
+│   ├── tbbmalloc.dll
+│   ├── tbbmalloc_proxy.dll
+│   ├── v8_context_snapshot.bin
+│   ├── vk_swiftshader.dll
+│   ├── vk_swiftshader_icd.json
+│   └── vulkan-1.dll
+├── docs/  — Manual, diagramas y maquetas
+│   ├── flujos/
+│   │   ├── flujo-instalacion.html
+│   │   ├── flujo-instalacion.png
+│   │   ├── LEEME.md
+│   │   └── renderizar.mjs
+│   ├── manual/
+│   │   ├── manual-race-core-studio.html
+│   │   └── Manual-Race-Core-Studio.pdf
+│   ├── maquetas/  (13 archivos)
+│   └── licenciamiento.md
+├── Frontend/  — Panel React + Vite
+│   ├── public/  (5 archivos)
+│   ├── scripts/
+│   │   └── paises.mjs
+│   ├── src/
+│   │   ├── api/  — Cliente del API
+│   │   │   ├── auth.js
+│   │   │   ├── graphics.js
+│   │   │   └── registro.js
+│   │   ├── components/
+│   │   │   ├── auth/
+│   │   │   │   ├── LoginScreen.jsx
+│   │   │   │   ├── ProtectedRoute.jsx
+│   │   │   │   └── RoleRoute.jsx
+│   │   │   ├── events/
+│   │   │   │   ├── EventSelectionScreen.jsx
+│   │   │   │   ├── SeleccionVehiculos.jsx
+│   │   │   │   └── SesionesEvento.jsx
+│   │   │   ├── graphics/
+│   │   │   │   ├── FormularioDuelo.jsx
+│   │   │   │   ├── SelectorCarrera.jsx
+│   │   │   │   └── SelectorPiloto.jsx
+│   │   │   ├── layout/
+│   │   │   │   └── NavItem.jsx
+│   │   │   ├── pilots/
+│   │   │   │   └── CarrosDelPiloto.jsx
+│   │   │   ├── settings/
+│   │   │   │   ├── ExploradorXml.jsx
+│   │   │   │   └── Trazados.jsx
+│   │   │   └── shared/
+│   │   │       ├── ConfirmDialog.jsx
+│   │   │       ├── DisciplinaGate.jsx
+│   │   │       ├── ModuleHeader.jsx
+│   │   │       ├── Pagination.jsx
+│   │   │       └── SelectorPais.jsx
+│   │   ├── context/  — Sesión, disciplina, carrera, idioma
+│   │   │   ├── AuthContext.jsx
+│   │   │   ├── CarreraContext.jsx
+│   │   │   ├── DisciplinaContext.jsx
+│   │   │   ├── IdiomaContext.jsx
+│   │   │   └── ToastContext.jsx
+│   │   ├── data/  (1 archivos)
+│   │   ├── hooks/
+│   │   │   └── useListado.js
+│   │   ├── i18n/
+│   │   │   ├── en.json
+│   │   │   ├── es.json
+│   │   │   └── index.js
+│   │   ├── layouts/
+│   │   │   └── MainLayout.jsx
+│   │   ├── pages/  — Un módulo por archivo
+│   │   │   ├── Ajustes.jsx
+│   │   │   ├── Categorias.jsx
+│   │   │   ├── Eventos.jsx
+│   │   │   ├── Graficos.jsx
+│   │   │   ├── Home.jsx
+│   │   │   ├── Pilotos.jsx
+│   │   │   ├── Usuarios.jsx
+│   │   │   └── Vehiculos.jsx
+│   │   ├── utils/
+│   │   │   ├── exportExcel.js
+│   │   │   └── exportJSON.js
+│   │   ├── App.jsx
+│   │   ├── index.css
+│   │   └── main.jsx
+│   ├── .gitignore
+│   ├── index.html
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── postcss.config.js
+│   ├── prototipo_racing_app.jsx
+│   ├── README.md
+│   ├── tailwind.config.js
+│   └── vite.config.js
+├── installer/  — Instalador y licencia offline
+│   ├── instalar.py
+│   ├── LEEME.md
+│   └── licencia_local.py
+├── launcher/  — Arranque del sistema en Windows
+│   ├── construir.bat
+│   ├── race-core-studio.ico
+│   └── race_core_studio.py
+├── tools/  — Herramientas de Zentogo · NO se distribuyen
+│   ├── demo/  — Generador del XML de prueba
+│   │   └── generar_current.py
+│   └── licencias/  — Claves, emisión y manifiestos
+│       ├── claves.py
+│       ├── emitir.py
+│       ├── licencia_de_prueba.py
+│       └── manifiesto.py
+├── .gitattributes
+├── .gitignore
+├── amcp_commands
+├── circuit.jpg
+├── desktop.ini
+├── drag-3d.png
+├── exponer-cloudflare.bat
+├── Icono.ico
+├── kartodromo-3d.png
+├── Logo.jpeg
+├── Pilotos Race Core Studio.xlsx
+└── trazado-largo-3d.png
