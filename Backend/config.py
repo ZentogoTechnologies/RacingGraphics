@@ -9,17 +9,31 @@ class Settings(BaseSettings):
     DB_NAME: str = "race-core-studio"
 
     # ── API ──────────────────────────────────────────────────
-    # El 8000 lo reserva el media-server de CasparCG (ver casparcg.config),
-    # por eso el backend vive en el 8080.
-    API_HOST: str = "127.0.0.1"
-    API_PORT: int = 8080
+    # 0.0.0.0 significa "atiende por todas las interfaces de red", no una
+    # dirección concreta. Es lo que convierte al equipo en servidor: la
+    # máquina que tiene CasparCG se dedica solo a eso, y el panel se opera
+    # desde el navegador de otro equipo, de un iPad o de la propia consola.
+    # Con 127.0.0.1 el backend solo se dejaría alcanzar desde sí mismo.
+    #
+    # Para que otro dispositivo entre hace falta además abrir el puerto en
+    # el Firewall de Windows; eso lo hace el instalador.
+    API_HOST: str = "0.0.0.0"
+
+    # El 8000 lo reserva el media-server de CasparCG (ver casparcg.config)
+    # y el 5250 el AMCP, así que el backend se va al 9600, lejos de los
+    # puertos habituales de la máquina de transmisión.
+    API_PORT: int = 9600
 
     # ── Archivos públicos ────────────────────────────────────
     # URL con la que CasparCG alcanza al backend para bajar las fotos
     # de los pilotos y los logos de las marcas. Tiene que ser absoluta:
     # la plantilla se carga desde file:// y no tiene contra qué resolver
     # una ruta relativa.
-    PUBLIC_BASE_URL: str = "http://127.0.0.1:8080"
+    # Se queda en 127.0.0.1 aunque el API atienda por todas las
+    # interfaces: CasparCG corre en esta misma máquina, así que llega por
+    # loopback. Poner aquí la IP de la red local ataría las plantillas a
+    # una dirección que cambia sola cuando el router reparte otra.
+    PUBLIC_BASE_URL: str = "http://127.0.0.1:9600"
 
     # ── Cronometraje (MyLaps) ────────────────────────────────
     # Archivo que MyLaps reescribe constantemente con la clasificación.

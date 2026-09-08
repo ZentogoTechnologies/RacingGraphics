@@ -4,7 +4,7 @@ Arranca el sistema completo en el orden en que se necesita:
 
     1. CasparCG        (el servidor de gráficos, con su ventana)
     2. Base de datos   (solo se verifica; MongoDB corre como servicio)
-    3. Backend         (FastAPI en el 8080)
+    3. Backend         (FastAPI en el 9600, abierto a la red)
     4. Frontend        (Vite en el 5173)
     5. Navegador       (abre el login)
 
@@ -122,7 +122,7 @@ LOGS = RAIZ / "logs"
 PIDS = LOGS / "procesos.json"
 
 PUERTO_CASPARCG = 5250
-PUERTO_BACKEND = 8080
+PUERTO_BACKEND = 9600
 PUERTO_FRONTEND = 5173
 URL_LOGIN = f"http://localhost:{PUERTO_FRONTEND}/login"
 

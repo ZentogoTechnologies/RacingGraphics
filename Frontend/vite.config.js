@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react'
 // El backend, visto desde esta máquina. Solo lo usa el proxy de
 // desarrollo; en producción el propio backend sirve el frontend y no hay
 // dos puertos que conciliar.
-const BACKEND = process.env.BACKEND_URL || 'http://127.0.0.1:8080'
+const BACKEND = process.env.BACKEND_URL || 'http://127.0.0.1:9600'
 
 export default defineConfig({
   plugins: [react()],

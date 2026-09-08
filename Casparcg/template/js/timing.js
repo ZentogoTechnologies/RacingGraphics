@@ -19,7 +19,7 @@
        });
 ========================================================================== */
 
-var TIMING_API = "http://127.0.0.1:8080/api/v1";
+var TIMING_API = "http://127.0.0.1:9600/api/v1";
 
 /* Cada cuanto se le pregunta al backend. El reloj de carrera avanza por
    segundos, asi que medio segundo va sobrado y no satura nada: el backend
@@ -31,7 +31,7 @@ var _timingUltimo = null;
 
 
 /* CasparCG puede cambiar la direccion del backend con
-   CG ... UPDATE 1 "{\"api\":\"http://otra-maquina:8080/api/v1\"}" */
+   CG ... UPDATE 1 "{\"api\":\"http://otra-maquina:9600/api/v1\"}" */
 function configurarTiming(api) {
     if (api) TIMING_API = api;
 }

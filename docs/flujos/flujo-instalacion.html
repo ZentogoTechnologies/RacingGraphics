@@ -66,7 +66,7 @@ h1 span{color:#64748b;font-weight:400}
     <h1>Race Core Studio <span>· Flujo de instalación</span></h1>
   </div>
   <div class="meta">
-    Windows Server / Windows 11<br>
+    Equipo servidor: Windows Server / Windows 11<br>
     Versión <b>1.0</b> · Descarga total <b>≈ 500 MB</b><br>
     Tiempo estimado <b>20–35 min</b>
   </div>
@@ -201,7 +201,9 @@ h1 span{color:#64748b;font-weight:400}
     <div class="k">4.3</div><div>
       <div class="body-t">Backend — ejecutable único</div>
       <div class="body-d">Sin Python ni venv en la máquina del cliente. Genera su propia firma
-      de sesiones al azar y activa la exigencia de licencia.</div>
+      de sesiones al azar y activa la exigencia de licencia.<br>
+      Se registra como servicio y <b>se abre el puerto 9600 en el Firewall de Windows</b>,
+      para que el panel se alcance desde otros dispositivos.</div>
     </div>
   </div>
 
@@ -223,8 +225,10 @@ h1 span{color:#64748b;font-weight:400}
   <div class="card" style="border-color:#059669">
     <div class="k">5.1</div><div>
       <div class="body-t">Arrancan los servicios y se abre el navegador</div>
-      <div class="body-d">Todo en un solo puerto: <span class="mono">127.0.0.1:8080</span>.
-      El backend sirve también la interfaz.</div>
+      <div class="body-d">El backend atiende en <span class="mono">0.0.0.0:9600</span> —por toda la
+      red local— y sirve también la interfaz. Un solo puerto para todo.<br>
+      El asistente muestra en pantalla la dirección con la que entrar
+      desde otro equipo: <span class="mono">http://&lt;IP-del-servidor&gt;:9600</span></div>
       <span class="tag t-auto">Automático</span>
     </div>
   </div>
@@ -242,7 +246,9 @@ h1 span{color:#64748b;font-weight:400}
       <div class="body-t">Indica la ruta del <span class="mono">current.xml</span> de MyLaps</div>
       <div class="body-d">El archivo de cronometraje. Debe ser ruta UNC
       (<span class="mono">\\servidor\recurso</span>), no una unidad mapeada:
-      un servicio de Windows no ve las unidades de red mapeadas.</div>
+      un servicio de Windows no ve las unidades de red mapeadas.<br>
+      Si MyLaps aún no está encendido, la ruta se verifica contra el
+      <b>current.xml de demostración</b> que viene incluido, y la real se ajusta después.</div>
       <span class="tag t-user">Acción del usuario</span>
     </div>
   </div>
@@ -262,6 +268,15 @@ h1 span{color:#64748b;font-weight:400}
       A partir de aquí ya no hace falta internet.</div>
     </div>
   </div>
+</div>
+
+<div class="foot" style="border-color:#0ea5e9;margin-bottom:14px">
+  <h3 style="color:#38bdf8">Un equipo hace de servidor. Todo lo demás entra por el navegador.</h3>
+  <p>La máquina que ejecuta <b>CasparCG</b> se dedica solo a eso: gráficos, base de datos y API.
+  No se trabaja sentado frente a ella. El panel se opera desde el navegador de <b>cualquier
+  dispositivo de la red</b> —Windows, Linux, macOS o un iPad, que es el formato recomendado— apuntando
+  a <b>http://&lt;IP-del-servidor&gt;:9600</b>. También desde el navegador del propio servidor,
+  si hace falta.</p>
 </div>
 
 <div class="foot">

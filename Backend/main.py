@@ -72,10 +72,21 @@ app = FastAPI(
     openapi_tags=tags_metadata
 )
 
+# El panel lo sirve este mismo backend, así que para la interfaz no hay
+# cruce de origen y el navegador ni pregunta. Quien sí cruza es CasparCG:
+# sus plantillas se cargan desde file://, cuyo origen es "null", y piden
+# el cronometraje y las fotos por HTTP.
+#
+# allow_credentials va en falso, y es importante ahora que el backend
+# atiende a toda la red local. La sesión viaja como token Bearer en la
+# cabecera Authorization, no en una cookie, así que no hacen falta
+# credenciales de origen cruzado. Dejarlo en verdadero junto a "*" es
+# además una combinación que el estándar prohíbe: el navegador la
+# rechaza, de modo que no estaba habilitando nada, solo aparentándolo.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -184,7 +195,7 @@ app.include_router(timing, prefix="/api/v1/timing", tags=["Timing"])
 #  atendido ya una ruta del API, así que tiene que declararse el último.
 #
 #  Sirve para no depender de dos puertos. Con el frontend en 5173 y el
-#  API en 8080 hay que decirle al navegador en qué host está el API, y esa
+#  API en 9600 hay que decirle al navegador en qué host está el API, y esa
 #  dirección cambia según desde dónde se entre: localhost aquí, otra IP en
 #  la red local, otro nombre a través de un túnel. Sirviéndolo desde aquí
 #  el navegador pide siempre a quien le dio la página.
