@@ -1,0 +1,276 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Liberation Sans','DejaVu Sans',sans-serif;background:#0f1620;color:#0f172a;width:1240px}
+.page{padding:44px 48px 40px}
+
+/* Cabecera */
+.head{display:flex;align-items:flex-end;justify-content:space-between;
+  border-bottom:3px solid #1e293b;padding-bottom:20px;margin-bottom:8px}
+.brand{font-size:15px;letter-spacing:3.4px;color:#94a3b8;font-weight:700;margin-bottom:9px}
+h1{font-size:41px;color:#f1f5f9;letter-spacing:-.6px;line-height:1.05}
+h1 span{color:#64748b;font-weight:400}
+.meta{text-align:right;color:#64748b;font-size:14px;line-height:1.7}
+.meta b{color:#cbd5e1;font-weight:700}
+
+/* Fases */
+.fase{position:relative;padding:26px 0 4px 92px}
+.fase::before{content:'';position:absolute;left:31px;top:0;bottom:0;width:3px;background:#293445}
+.fase:last-child::before{bottom:auto;height:52px}
+.num{position:absolute;left:0;top:26px;width:64px;height:64px;border-radius:16px;
+  display:flex;align-items:center;justify-content:center;font-size:27px;font-weight:700;color:#fff;z-index:2;
+  box-shadow:0 0 0 7px #0f1620}
+.ftit{font-size:24px;font-weight:700;color:#f1f5f9;letter-spacing:-.2px;margin-bottom:3px}
+.fsub{font-size:15px;color:#8095ad;margin-bottom:16px;font-weight:600;letter-spacing:.2px}
+
+/* Tarjetas */
+.card{background:#fff;border-radius:13px;padding:17px 21px;margin-bottom:11px;
+  border-left:6px solid;display:flex;gap:16px;align-items:flex-start}
+.k{font-size:13px;font-weight:700;color:#fff;background:#334155;border-radius:6px;
+  padding:4px 9px;flex-shrink:0;margin-top:2px;letter-spacing:.4px}
+.body-t{font-size:19px;font-weight:700;line-height:1.32;color:#0f172a}
+.body-d{font-size:16px;color:#475569;line-height:1.55;margin-top:5px}
+.mono{font-family:'DejaVu Sans Mono',monospace;font-size:14.5px;background:#eef2f7;
+  padding:2px 7px;border-radius:5px;color:#1e293b;font-weight:700}
+
+/* Etiquetas */
+.tag{display:inline-block;font-size:13px;font-weight:700;padding:4px 11px;border-radius:20px;
+  margin-top:9px;letter-spacing:.3px}
+.t-net{background:#fef3c7;color:#92400e}
+.t-auto{background:#e0f2fe;color:#075985}
+.t-user{background:#dcfce7;color:#166534}
+
+/* Fallo */
+.fail{background:#fff1f2;border-left:6px solid #e11d48;border-radius:13px;
+  padding:15px 21px;margin-bottom:11px}
+.fail .body-t{color:#9f1239;font-size:17px}
+.fail .body-d{color:#a1414f;font-size:15px}
+
+/* Lista de componentes */
+.comp{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:4px 0 11px}
+.ci{background:#fff;border-radius:11px;padding:14px 15px;border-top:5px solid}
+.ci .n{font-size:12px;color:#64748b;font-weight:700;letter-spacing:.5px}
+.ci .v{font-size:18px;font-weight:700;color:#0f172a;margin:3px 0 1px}
+.ci .s{font-size:13.5px;color:#64748b;font-weight:600}
+
+/* Pie */
+.foot{margin-top:26px;background:#172033;border-radius:14px;padding:22px 26px;
+  border-left:6px solid #f59e0b}
+.foot h3{color:#fbbf24;font-size:17px;margin-bottom:8px;letter-spacing:.2px}
+.foot p{color:#94a3b8;font-size:15.5px;line-height:1.62}
+.foot b{color:#e2e8f0}
+</style></head><body><div class="page">
+
+<div class="head">
+  <div>
+    <div class="brand">ZENTOGO TECHNOLOGIES</div>
+    <h1>Race Core Studio <span>· Flujo de instalación</span></h1>
+  </div>
+  <div class="meta">
+    Windows Server / Windows 11<br>
+    Versión <b>1.0</b> · Descarga total <b>≈ 500 MB</b><br>
+    Tiempo estimado <b>20–35 min</b>
+  </div>
+</div>
+
+<!-- 1 -->
+<div class="fase">
+  <div class="num" style="background:#2563eb">1</div>
+  <div class="ftit">Descarga del instalador</div>
+  <div class="fsub">LO HACE EL CLIENTE</div>
+
+  <div class="card" style="border-color:#2563eb">
+    <div class="k">1.1</div><div>
+      <div class="body-t">Descarga <span class="mono">RaceCoreStudio-Setup.exe</span> desde zentogo.com</div>
+      <div class="body-d">Archivo pequeño (≈ 8 MB). No trae el producto dentro: trae el instalador.<br>
+      Firmado con certificado Authenticode, para que Windows no lo bloquee.</div>
+      <span class="tag t-user">Acción del usuario</span>
+    </div>
+  </div>
+
+  <div class="card" style="border-color:#2563eb">
+    <div class="k">1.2</div><div>
+      <div class="body-t">Lo ejecuta e instala el Instalador de Race Core Studio</div>
+      <div class="body-d">Queda instalado de forma permanente: después sirve como actualizador
+      y herramienta de mantenimiento.</div>
+      <span class="tag t-user">Acción del usuario</span>
+    </div>
+  </div>
+</div>
+
+<!-- 2 -->
+<div class="fase">
+  <div class="num" style="background:#d97706">2</div>
+  <div class="ftit">Licencia</div>
+  <div class="fsub">REQUIERE INTERNET · OBLIGATORIO</div>
+
+  <div class="card" style="border-color:#d97706">
+    <div class="k">2.1</div><div>
+      <div class="body-t">Ingresa su correo y su clave de licencia</div>
+      <div class="body-d">Los datos que Zentogo le entregó al comprar.</div>
+      <span class="tag t-user">Acción del usuario</span>
+    </div>
+  </div>
+
+  <div class="card" style="border-color:#d97706">
+    <div class="k">2.2</div><div>
+      <div class="body-t">El instalador calcula la huella del equipo</div>
+      <div class="body-d">SHA-256 de <span class="mono">MachineGuid</span> + serial del volumen del sistema.
+      Opaca: identifica la máquina sin revelar nada de ella.</div>
+      <span class="tag t-auto">Automático</span>
+    </div>
+  </div>
+
+  <div class="card" style="border-color:#d97706">
+    <div class="k">2.3</div><div>
+      <div class="body-t">Valida contra el servidor de licencias de Zentogo</div>
+      <div class="body-d">Se comprueba correo, clave, vigencia y que la licencia no esté ya
+      atada a otro equipo.</div>
+      <span class="tag t-net">Necesita conexión</span>
+    </div>
+  </div>
+
+  <div class="fail">
+    <div class="body-t">✕ Si falla, se detiene aquí con el motivo exacto</div>
+    <div class="body-d">«Licencia vencida» · «Ya activada en otro equipo» · «Clave incorrecta».
+    Nunca un error genérico: el cliente debe saber qué resolver sin llamar a soporte.</div>
+  </div>
+
+  <div class="card" style="border-color:#16a34a">
+    <div class="k">2.4</div><div>
+      <div class="body-t">✓ Recibe la licencia firmada y el manifiesto de la versión</div>
+      <div class="body-d">Token Ed25519 con la vigencia dentro. A partir de aquí el software
+      valida <b>sin internet</b>.</div>
+      <span class="tag t-auto">Automático</span>
+    </div>
+  </div>
+</div>
+
+<!-- 3 -->
+<div class="fase">
+  <div class="num" style="background:#0d9488">3</div>
+  <div class="ftit">Descarga de componentes</div>
+  <div class="fsub">AUTOMÁTICO · ≈ 500 MB · REANUDABLE</div>
+
+  <div class="card" style="border-color:#0d9488">
+    <div class="k">3.1</div><div>
+      <div class="body-t">Verifica la firma del manifiesto antes de bajar nada</div>
+      <div class="body-d">Sin esto, quien controle la red del cliente decidiría qué se instala
+      en su máquina.</div>
+      <span class="tag t-auto">Automático</span>
+    </div>
+  </div>
+
+  <div class="card" style="border-color:#0d9488">
+    <div class="k">3.2</div><div>
+      <div class="body-t">Descarga los cuatro componentes y comprueba el SHA-256 de cada uno</div>
+      <div class="body-d">Todo sale del repositorio oficial de Race Core Studio, no de terceros.</div>
+      <span class="tag t-net">Necesita conexión</span>
+    </div>
+  </div>
+
+  <div class="comp">
+    <div class="ci" style="border-color:#0d9488"><div class="n">COMPONENTE 1</div><div class="v">CasparCG</div><div class="s">≈ 82 MB</div></div>
+    <div class="ci" style="border-color:#0d9488"><div class="n">COMPONENTE 2</div><div class="v">MongoDB</div><div class="s">≈ 300 MB</div></div>
+    <div class="ci" style="border-color:#0d9488"><div class="n">COMPONENTE 3</div><div class="v">Backend</div><div class="s">≈ 90 MB</div></div>
+    <div class="ci" style="border-color:#0d9488"><div class="n">COMPONENTE 4</div><div class="v">Frontend</div><div class="s">≈ 5 MB</div></div>
+  </div>
+</div>
+
+<!-- 4 -->
+<div class="fase">
+  <div class="num" style="background:#7c3aed">4</div>
+  <div class="ftit">Instalación</div>
+  <div class="fsub">AUTOMÁTICO · EL ORDEN IMPORTA</div>
+
+  <div class="card" style="border-color:#7c3aed">
+    <div class="k">4.1</div><div>
+      <div class="body-t">CasparCG — el servidor de gráficos</div>
+      <div class="body-d">Queda registrado como servicio, escuchando AMCP en el puerto 5250.</div>
+    </div>
+  </div>
+
+  <div class="card" style="border-color:#7c3aed">
+    <div class="k">4.2</div><div>
+      <div class="body-t">MongoDB — la base de datos</div>
+      <div class="body-d">MSI oficial en modo silencioso, como servicio de Windows.
+      Va antes que el backend porque éste la necesita viva al primer arranque.</div>
+    </div>
+  </div>
+
+  <div class="card" style="border-color:#7c3aed">
+    <div class="k">4.3</div><div>
+      <div class="body-t">Backend — ejecutable único</div>
+      <div class="body-d">Sin Python ni venv en la máquina del cliente. Genera su propia firma
+      de sesiones al azar y activa la exigencia de licencia.</div>
+    </div>
+  </div>
+
+  <div class="card" style="border-color:#7c3aed">
+    <div class="k">4.4</div><div>
+      <div class="body-t">Frontend — se compila y se limpia</div>
+      <div class="body-d">Se genera el <span class="mono">dist</span> y se borra todo lo demás:
+      código fuente, dependencias y configuraciones. En el equipo queda solo el compilado.</div>
+    </div>
+  </div>
+</div>
+
+<!-- 5 -->
+<div class="fase">
+  <div class="num" style="background:#059669">5</div>
+  <div class="ftit">Configuración en el navegador</div>
+  <div class="fsub">EL INSTALADOR CEDE EL CONTROL AQUÍ</div>
+
+  <div class="card" style="border-color:#059669">
+    <div class="k">5.1</div><div>
+      <div class="body-t">Arrancan los servicios y se abre el navegador</div>
+      <div class="body-d">Todo en un solo puerto: <span class="mono">127.0.0.1:8080</span>.
+      El backend sirve también la interfaz.</div>
+      <span class="tag t-auto">Automático</span>
+    </div>
+  </div>
+
+  <div class="card" style="border-color:#059669">
+    <div class="k">5.2</div><div>
+      <div class="body-t">Define la contraseña del usuario dueño</div>
+      <div class="body-d">No hay contraseña por defecto: se establece aquí, en esta instalación.</div>
+      <span class="tag t-user">Acción del usuario</span>
+    </div>
+  </div>
+
+  <div class="card" style="border-color:#059669">
+    <div class="k">5.3</div><div>
+      <div class="body-t">Indica la ruta del <span class="mono">current.xml</span> de MyLaps</div>
+      <div class="body-d">El archivo de cronometraje. Debe ser ruta UNC
+      (<span class="mono">\\servidor\recurso</span>), no una unidad mapeada:
+      un servicio de Windows no ve las unidades de red mapeadas.</div>
+      <span class="tag t-user">Acción del usuario</span>
+    </div>
+  </div>
+
+  <div class="card" style="border-color:#059669">
+    <div class="k">5.4</div><div>
+      <div class="body-t">Ajusta canal de CasparCG, logo del cliente y ubicación del clima</div>
+      <div class="body-d">Todo editable después desde Ajustes.</div>
+      <span class="tag t-user">Acción del usuario</span>
+    </div>
+  </div>
+
+  <div class="card" style="border-color:#059669;background:#ecfdf5">
+    <div class="k" style="background:#059669">FIN</div><div>
+      <div class="body-t" style="color:#065f46">✓ Race Core Studio operativo</div>
+      <div class="body-d" style="color:#047857">El panel queda listo para trabajar.
+      A partir de aquí ya no hace falta internet.</div>
+    </div>
+  </div>
+</div>
+
+<div class="foot">
+  <h3>Internet: obligatorio para instalar y renovar. Nunca para trabajar.</h3>
+  <p>La licencia se valida <b>offline</b> en cada arranque: la vigencia viaja firmada dentro del
+  propio token y se comprueba contra el reloj local. En el autódromo la red se cae, y el software
+  no puede dejar de funcionar por eso. Si la licencia vence, hay un <b>periodo de gracia</b>
+  antes de que el sistema se bloquee — y el bloqueo alcanza solo a los gráficos: el cliente sigue
+  entrando al panel para poder renovar.</p>
+</div>
+
+</div></body></html>
