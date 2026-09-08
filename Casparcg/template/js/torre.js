@@ -679,7 +679,7 @@ function detenerTorre(){
 function actualizarTorre(data){
 
     /* Acepta {"limite":15}, {"retraso":10}, {"modo":"corto"|"completo"} y
-       {"api":"http://otra-maquina:9600/api/v1"} */
+       {"api":"http://otra-maquina:8080/api/v1"} */
 
     try {
         const d = typeof data === "string" ? JSON.parse(data) : (data || {});

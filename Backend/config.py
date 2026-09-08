@@ -19,10 +19,9 @@ class Settings(BaseSettings):
     # el Firewall de Windows; eso lo hace el instalador.
     API_HOST: str = "0.0.0.0"
 
-    # El 8000 lo reserva el media-server de CasparCG (ver casparcg.config)
-    # y el 5250 el AMCP, así que el backend se va al 9600, lejos de los
-    # puertos habituales de la máquina de transmisión.
-    API_PORT: int = 9600
+    # El 8000 lo reserva el media-server de CasparCG (ver casparcg.config),
+    # por eso el backend vive en el 8080.
+    API_PORT: int = 8080
 
     # ── Archivos públicos ────────────────────────────────────
     # URL con la que CasparCG alcanza al backend para bajar las fotos
@@ -33,7 +32,7 @@ class Settings(BaseSettings):
     # interfaces: CasparCG corre en esta misma máquina, así que llega por
     # loopback. Poner aquí la IP de la red local ataría las plantillas a
     # una dirección que cambia sola cuando el router reparte otra.
-    PUBLIC_BASE_URL: str = "http://127.0.0.1:9600"
+    PUBLIC_BASE_URL: str = "http://127.0.0.1:8080"
 
     # ── Cronometraje (MyLaps) ────────────────────────────────
     # Archivo que MyLaps reescribe constantemente con la clasificación.

@@ -22,7 +22,7 @@ from openpyxl import Workbook
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
 
-API = "http://127.0.0.1:9600/api/v1"
+API = "http://127.0.0.1:8080/api/v1"
 
 CARPETA_FOTOS = Path(__file__).resolve().parent / "src" / "public" / "pilotos"
 

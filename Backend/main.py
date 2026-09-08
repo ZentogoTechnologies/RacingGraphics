@@ -195,7 +195,7 @@ app.include_router(timing, prefix="/api/v1/timing", tags=["Timing"])
 #  atendido ya una ruta del API, así que tiene que declararse el último.
 #
 #  Sirve para no depender de dos puertos. Con el frontend en 5173 y el
-#  API en 9600 hay que decirle al navegador en qué host está el API, y esa
+#  API en 8080 hay que decirle al navegador en qué host está el API, y esa
 #  dirección cambia según desde dónde se entre: localhost aquí, otra IP en
 #  la red local, otro nombre a través de un túnel. Sirviéndolo desde aquí
 #  el navegador pide siempre a quien le dio la página.

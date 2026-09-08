@@ -35,7 +35,7 @@ export default function LoginScreen() {
       // contactarlo (0), y son dos problemas muy distintos para el operador.
       setError(
         err.status === 0
-          ? 'No se pudo contactar al backend. ¿Está corriendo en el 9600?'
+          ? 'No se pudo contactar al backend. ¿Está corriendo en el 8080?'
           : err.message,
       )
     } finally {
