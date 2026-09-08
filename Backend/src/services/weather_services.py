@@ -77,7 +77,10 @@ def _consultar(lat: float, lon: float) -> dict:
             "temperature_2m", "relative_humidity_2m", "apparent_temperature",
             "precipitation", "weather_code", "wind_speed_10m", "is_day",
         ]),
-        "timezone": "America/Panama",
+        # "auto" hace que Open-Meteo deduzca la zona horaria de las
+        # coordenadas. Estaba fija en America/Panama, así que un cliente
+        # en España veía sus horas corridas siete husos.
+        "timezone": "auto",
         "wind_speed_unit": "kmh",
     }
 

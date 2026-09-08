@@ -75,6 +75,16 @@ h2{font-size:25px;color:#f4f4f5;font-weight:700;margin-bottom:7px;letter-spacing
 .tarj .k{font-size:12px;color:#71717a;font-weight:700;letter-spacing:.5px}
 .tarj .v{font-size:19px;color:#f4f4f5;font-weight:700;margin-top:3px}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tabs{display:flex;gap:0;margin-bottom:18px;border-bottom:1px solid #3f3f46}
+.tab{padding:11px 20px;font-size:14.5px;font-weight:700;color:#71717a;
+  border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab.on{color:#dc2626;border-bottom-color:#dc2626}
+.res{background:#1c1c1f;border:1px solid #3f3f46;border-radius:9px;padding:11px 15px;
+  margin-bottom:7px;display:flex;align-items:center;gap:12px}
+.res.sel{border-color:#16a34a;background:rgba(22,163,74,.08)}
+.res .nn{font-size:15.5px;color:#e4e4e7;font-weight:700}
+.res .dd{font-size:13px;color:#71717a;margin-top:1px}
+.res .cc{font-family:'DejaVu Sans Mono',monospace;font-size:12.5px;color:#a1a1aa}
 .subir{border:2px dashed #3f3f46;border-radius:11px;padding:30px;text-align:center;background:#1c1c1f}
 .subir .i{font-size:38px;margin-bottom:8px}
 .subir .t{color:#e4e4e7;font-size:16px;font-weight:700}
@@ -85,8 +95,8 @@ h2{font-size:25px;color:#f4f4f5;font-weight:700;margin-bottom:7px;letter-spacing
 <div class="pantalla" id="p1"><div class="rotulo">01 · BIENVENIDA</div>
 <div class="caja">
   <div class="marca"><div class="n">RACE <b>CORE</b> STUDIO</div><div class="s">ASISTENTE DE INSTALACIÓN</div></div>
-  <div class="pasos"><div class="pp on"></div><div class="pp"></div><div class="pp"></div><div class="pp"></div><div class="pp"></div><div class="pp"></div></div>
-  <div class="cuenta">PASO 1 DE 6</div>
+  <div class="pasos"><div class="pp on"></div><div class="pp"></div><div class="pp"></div><div class="pp"></div><div class="pp"></div><div class="pp"></div><div class="pp"></div></div>
+  <div class="cuenta">PASO 1 DE 7</div>
   <h2>Todo quedó instalado</h2>
   <div class="sub">Falta configurar el sistema para este autódromo. Son seis pasos y toma unos minutos.</div>
   <div class="av ok"><div class="t">✓ Licencia activa — Autódromo de Ejemplo</div>
@@ -101,8 +111,8 @@ h2{font-size:25px;color:#f4f4f5;font-weight:700;margin-bottom:7px;letter-spacing
 <div class="pantalla" id="p2"><div class="rotulo">02 · DATOS DEL CLIENTE</div>
 <div class="caja">
   <div class="marca"><div class="n">RACE <b>CORE</b> STUDIO</div><div class="s">ASISTENTE DE INSTALACIÓN</div></div>
-  <div class="pasos"><div class="pp ya"></div><div class="pp on"></div><div class="pp"></div><div class="pp"></div><div class="pp"></div><div class="pp"></div></div>
-  <div class="cuenta">PASO 2 DE 6</div>
+  <div class="pasos"><div class="pp ya"></div><div class="pp on"></div><div class="pp"></div><div class="pp"></div><div class="pp"></div><div class="pp"></div><div class="pp"></div></div>
+  <div class="cuenta">PASO 2 DE 7</div>
   <h2>¿Quién es el cliente?</h2>
   <div class="sub">Estos datos aparecen en el panel y en los gráficos que salen al aire.</div>
   <div class="campo"><label class="lab">AUTÓDROMO, CLUB O PROMOTORA *</label>
@@ -122,8 +132,8 @@ h2{font-size:25px;color:#f4f4f5;font-weight:700;margin-bottom:7px;letter-spacing
 <div class="pantalla" id="p3"><div class="rotulo">03 · LOGO DEL CLIENTE</div>
 <div class="caja">
   <div class="marca"><div class="n">RACE <b>CORE</b> STUDIO</div><div class="s">ASISTENTE DE INSTALACIÓN</div></div>
-  <div class="pasos"><div class="pp ya"></div><div class="pp ya"></div><div class="pp on"></div><div class="pp"></div><div class="pp"></div><div class="pp"></div></div>
-  <div class="cuenta">PASO 3 DE 6</div>
+  <div class="pasos"><div class="pp ya"></div><div class="pp ya"></div><div class="pp on"></div><div class="pp"></div><div class="pp"></div><div class="pp"></div><div class="pp"></div></div>
+  <div class="cuenta">PASO 3 DE 7</div>
   <h2>Logo del autódromo</h2>
   <div class="sub">Es el que sale al aire en las plantillas de gráficos. Puedes cambiarlo después desde Ajustes.</div>
   <div class="subir"><div class="i">🏁</div><div class="t">Arrastra el logo aquí, o haz clic para elegirlo</div>
@@ -138,8 +148,8 @@ h2{font-size:25px;color:#f4f4f5;font-weight:700;margin-bottom:7px;letter-spacing
 <div class="pantalla" id="p4"><div class="rotulo">04 · LAS TRES CUENTAS</div>
 <div class="caja ancha">
   <div class="marca"><div class="n">RACE <b>CORE</b> STUDIO</div><div class="s">ASISTENTE DE INSTALACIÓN</div></div>
-  <div class="pasos"><div class="pp ya"></div><div class="pp ya"></div><div class="pp ya"></div><div class="pp on"></div><div class="pp"></div><div class="pp"></div></div>
-  <div class="cuenta">PASO 4 DE 6</div>
+  <div class="pasos"><div class="pp ya"></div><div class="pp ya"></div><div class="pp ya"></div><div class="pp on"></div><div class="pp"></div><div class="pp"></div><div class="pp"></div></div>
+  <div class="cuenta">PASO 4 DE 7</div>
   <h2>Las tres cuentas del sistema</h2>
   <div class="sub">Las tres son obligatorias. Si solo existiera el dueño, todos operarían con esa cuenta
   y los roles no separarían nada.</div>
@@ -158,8 +168,8 @@ h2{font-size:25px;color:#f4f4f5;font-weight:700;margin-bottom:7px;letter-spacing
 <div class="pantalla" id="p5"><div class="rotulo">05 · CRONOMETRAJE</div>
 <div class="caja ancha">
   <div class="marca"><div class="n">RACE <b>CORE</b> STUDIO</div><div class="s">ASISTENTE DE INSTALACIÓN</div></div>
-  <div class="pasos"><div class="pp ya"></div><div class="pp ya"></div><div class="pp ya"></div><div class="pp ya"></div><div class="pp on"></div><div class="pp"></div></div>
-  <div class="cuenta">PASO 5 DE 6</div>
+  <div class="pasos"><div class="pp ya"></div><div class="pp ya"></div><div class="pp ya"></div><div class="pp ya"></div><div class="pp on"></div><div class="pp"></div><div class="pp"></div></div>
+  <div class="cuenta">PASO 5 DE 7</div>
   <h2>Cronometraje — MyLaps</h2>
   <div class="sub">Race Core Studio lee el <span class="mono">current.xml</span> que MyLaps reescribe en vivo.
   Indica dónde está en la red.</div>
@@ -178,8 +188,8 @@ h2{font-size:25px;color:#f4f4f5;font-weight:700;margin-bottom:7px;letter-spacing
 <div class="pantalla" id="p6"><div class="rotulo">06 · CRONOMETRAJE · ERROR</div>
 <div class="caja ancha">
   <div class="marca"><div class="n">RACE <b>CORE</b> STUDIO</div><div class="s">ASISTENTE DE INSTALACIÓN</div></div>
-  <div class="pasos"><div class="pp ya"></div><div class="pp ya"></div><div class="pp ya"></div><div class="pp ya"></div><div class="pp on"></div><div class="pp"></div></div>
-  <div class="cuenta">PASO 5 DE 6</div>
+  <div class="pasos"><div class="pp ya"></div><div class="pp ya"></div><div class="pp ya"></div><div class="pp ya"></div><div class="pp on"></div><div class="pp"></div><div class="pp"></div></div>
+  <div class="cuenta">PASO 5 DE 7</div>
   <h2>Cronometraje — MyLaps</h2>
   <div class="sub">Race Core Studio lee el <span class="mono">current.xml</span> que MyLaps reescribe en vivo.</div>
   <div class="campo"><label class="lab">RUTA DEL CURRENT.XML</label>
@@ -196,25 +206,97 @@ h2{font-size:25px;color:#f4f4f5;font-weight:700;margin-bottom:7px;letter-spacing
 </div></div>
 
 <!-- 07 -->
-<div class="pantalla" id="p7"><div class="rotulo">07 · GRÁFICOS Y UBICACIÓN</div>
+<div class="pantalla" id="p7"><div class="rotulo">08 · UBICACIÓN · BUSCAR</div>
 <div class="caja ancha">
   <div class="marca"><div class="n">RACE <b>CORE</b> STUDIO</div><div class="s">ASISTENTE DE INSTALACIÓN</div></div>
-  <div class="pasos"><div class="pp ya"></div><div class="pp ya"></div><div class="pp ya"></div><div class="pp ya"></div><div class="pp ya"></div><div class="pp on"></div></div>
-  <div class="cuenta">PASO 6 DE 6</div>
-  <h2>Gráficos y ubicación del circuito</h2>
-  <div class="sub">Última comprobación antes de terminar.</div>
+  <div class="pasos"><div class="pp ya"></div><div class="pp ya"></div><div class="pp ya"></div><div class="pp ya"></div><div class="pp ya"></div><div class="pp ya"></div><div class="pp on"></div></div>
+  <div class="cuenta">PASO 7 DE 7</div>
+  <h2>¿Dónde está el circuito?</h2>
+  <div class="sub">Se usa para la plantilla del clima. Búscalo por su nombre, pega un enlace
+  del mapa, o escribe las coordenadas.</div>
+
+  <div class="tabs">
+    <div class="tab on">Buscar por nombre</div>
+    <div class="tab">Pegar enlace del mapa</div>
+    <div class="tab">Escribir coordenadas</div>
+  </div>
+
+  <div class="campo">
+    <input class="inp" value="Monterrey">
+    <div class="ayuda">Un buscador de mapas encuentra ciudades, no circuitos. Si el nombre de tu
+    pista no aparece, busca la ciudad más cercana: para el clima, unos kilómetros no cambian nada.</div>
+  </div>
+
+  <div style="margin:16px 0 4px">
+    <div class="res sel"><div style="flex:1"><div class="nn">✓ Monterrey</div>
+      <div class="dd">Nuevo León, México</div></div>
+      <div class="cc">25.6866, −100.3161</div></div>
+    <div class="res"><div style="flex:1"><div class="nn">Monterrey</div>
+      <div class="dd">Casanare, Colombia</div></div>
+      <div class="cc">4.8833, −72.8833</div></div>
+    <div class="res"><div style="flex:1"><div class="nn">Monterrey</div>
+      <div class="dd">California, Estados Unidos</div></div>
+      <div class="cc">36.6002, −121.8947</div></div>
+  </div>
+
+  <div class="av info"><div class="t">Zona horaria detectada: America/Monterrey</div>
+    <div class="d">Sale de la ubicación elegida. No hace falta configurarla aparte.</div></div>
+
+  <div class="pie"><button class="btn2">Atrás</button><div class="esp"></div>
+    <button class="btn">Continuar</button></div>
+</div></div>
+
+<!-- 07b -->
+<div class="pantalla" id="p9"><div class="rotulo">09 · UBICACIÓN · PEGAR ENLACE</div>
+<div class="caja ancha">
+  <div class="marca"><div class="n">RACE <b>CORE</b> STUDIO</div><div class="s">ASISTENTE DE INSTALACIÓN</div></div>
+  <div class="pasos"><div class="pp ya"></div><div class="pp ya"></div><div class="pp ya"></div><div class="pp ya"></div><div class="pp ya"></div><div class="pp ya"></div><div class="pp on"></div></div>
+  <div class="cuenta">PASO 7 DE 7</div>
+  <h2>¿Dónde está el circuito?</h2>
+  <div class="sub">Para precisión al metro: pon el pin sobre la recta de meta en Google Maps y pega
+  aquí el enlace.</div>
+
+  <div class="tabs">
+    <div class="tab">Buscar por nombre</div>
+    <div class="tab on">Pegar enlace del mapa</div>
+    <div class="tab">Escribir coordenadas</div>
+  </div>
+
+  <div class="campo">
+    <input class="inp ok" value="https://maps.app.goo.gl/K9xR2vQm4TzNp8Wс">
+    <div class="ayuda">Vale el enlace corto de compartir desde el móvil, el enlace largo del
+    navegador, o las coordenadas que salen al hacer clic derecho sobre el mapa.</div>
+  </div>
+
+  <div class="av ok"><div class="t">✓ Coordenadas leídas del enlace</div>
+    <div class="d">Latitud <span class="mono">25.686600</span> ·
+    Longitud <span class="mono">−100.316100</span></div></div>
+
+  <div class="av info"><div class="t">Cómo sacar las coordenadas en Google Maps</div>
+    <div class="d">Clic derecho sobre el circuito → los números que aparecen arriba del menú
+    son la latitud y la longitud. Al hacer clic se copian solos.</div></div>
+
+  <div class="pie"><button class="btn2">Atrás</button><div class="esp"></div>
+    <button class="btn">Continuar</button></div>
+</div></div>
+
+<!-- 10 -->
+<div class="pantalla" id="p10"><div class="rotulo">07 · SERVIDOR DE GRÁFICOS</div>
+<div class="caja">
+  <div class="marca"><div class="n">RACE <b>CORE</b> STUDIO</div><div class="s">ASISTENTE DE INSTALACIÓN</div></div>
+  <div class="pasos"><div class="pp ya"></div><div class="pp ya"></div><div class="pp ya"></div><div class="pp ya"></div><div class="pp ya"></div><div class="pp on"></div><div class="pp"></div></div>
+  <div class="cuenta">PASO 6 DE 7</div>
+  <h2>Servidor de gráficos</h2>
+  <div class="sub">Comprobación de que CasparCG está corriendo y responde.</div>
   <div class="av ok"><div class="t">✓ CasparCG respondió</div>
-    <div class="d">Servidor 2.4.3 · canal 1 · 1080p6000 — conexión AMCP en el puerto 5250</div></div>
-  <div class="campo"><label class="lab">COORDENADAS DEL CIRCUITO</label>
-    <div class="fila"><input class="inp ph" value="25.6866"><input class="inp ph" value="-100.3161"></div>
-    <div class="ayuda">Latitud y longitud. Se usan para la plantilla del clima. Se sacan de Google Maps
-    haciendo clic derecho sobre el circuito.</div></div>
+    <div class="d">Servidor 2.4.3 · canal 1 · 1080p6000 — AMCP en el puerto 5250</div></div>
+  <div class="tarj"><div class="k">PLANTILLAS ENCONTRADAS</div><div class="v">23</div></div>
   <div class="pie"><button class="btn2">Atrás</button><div class="esp"></div>
     <button class="btn3">Probar de nuevo</button><button class="btn">Continuar</button></div>
 </div></div>
 
 <!-- 08 -->
-<div class="pantalla" id="p8"><div class="rotulo">08 · LISTO</div>
+<div class="pantalla" id="p8"><div class="rotulo">10 · INSTALACIÓN COMPLETADA</div>
 <div class="caja">
   <div class="marca"><div class="n">RACE <b>CORE</b> STUDIO</div><div class="s">INSTALACIÓN COMPLETADA</div></div>
   <div style="text-align:center;font-size:56px;margin:6px 0 18px">🏁</div>

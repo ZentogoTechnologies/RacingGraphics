@@ -14,7 +14,7 @@ from fastapi import APIRouter, Depends, File, Form, Header, HTTPException, Uploa
 from typing import Optional
 
 from src.schemas.instalacion_schemas import (
-    Clima, DatosUsuarios, Organizacion, RutaTiming,
+    Clima, DatosUsuarios, Organizacion, RutaTiming, TextoUbicacion,
 )
 from src.services import instalacion_services as inst
 from src.services.auth_services import hashear
@@ -209,6 +209,42 @@ async def probar_casparcg():
 async def guardar_casparcg():
     await inst.guardar_paso("casparcg", {})
     return {"ok": True}
+
+
+@setup.get("/buscar-ubicacion", tags=["Setup"], dependencies=PROTEGIDO)
+async def buscar_ubicacion(q: str, idioma: str = "es"):
+    """Busca un lugar por su nombre.
+
+    Usa el geocodificador de Open-Meteo, el mismo servicio que ya da el
+    clima: sin clave de API y sin coste. Google Maps habría obligado a
+    facturar una clave y a repartirla con cada instalación.
+    """
+    from src.services.ubicacion_services import buscar
+
+    resultados = buscar(q, idioma=idioma)
+    return {
+        "resultados": resultados,
+        # Un geocodificador encuentra ciudades, no circuitos. Que la
+        # interfaz lo pueda decir evita que alguien crea que el sistema
+        # falla cuando el nombre de su pista no aparece.
+        "sugerencia": (
+            "Si el circuito no aparece, busca la ciudad más cercana o pega el "
+            "enlace de Google Maps. Para el clima, unos kilómetros no cambian nada."
+            if not resultados else ""
+        ),
+    }
+
+
+@setup.post("/interpretar-ubicacion", tags=["Setup"], dependencies=PROTEGIDO)
+async def interpretar_ubicacion(datos: TextoUbicacion):
+    """Saca las coordenadas de un enlace de mapa o de un texto pegado.
+
+    Acepta un enlace de Google Maps —incluidos los cortos que salen al
+    compartir desde el móvil—, coordenadas decimales y grados con minutos.
+    """
+    from src.services.ubicacion_services import interpretar
+
+    return interpretar(datos.texto)
 
 
 @setup.post("/clima", tags=["Setup"], dependencies=PROTEGIDO)

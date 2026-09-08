@@ -86,11 +86,22 @@ class RutaTiming(BaseModel):
                       description=r"Ruta del current.xml. UNC: \\servidor\recurso")
 
 
+class TextoUbicacion(BaseModel):
+    """Lo que el cliente escriba o pegue: coordenadas, o un enlace de mapa."""
+
+    texto: str = Field(..., min_length=1, max_length=600)
+
+
 class Clima(BaseModel):
     """Coordenadas del circuito, para la plantilla del clima."""
 
     lat: float = Field(..., ge=-90, le=90)
     lon: float = Field(..., ge=-180, le=180)
+
+    # Los devuelve el buscador junto con las coordenadas, así que se
+    # aprovechan en vez de volver a preguntarlos.
+    ciudad: Optional[str] = Field(None, max_length=80)
+    zona_horaria: Optional[str] = Field(None, max_length=64)
 
 
 class EstadoInstalacion(BaseModel):
