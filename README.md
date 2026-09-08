@@ -223,10 +223,10 @@ licencia. El instalador lo pone en `true`.
 - [x] Validación de licencia offline, con gracia y bloqueo
 - [x] Asistente de instalación (14 endpoints)
 - [x] Instalador con licencia validada sin servidor
+- [x] Asistente de instalación en React, los siete pasos
 
 **Pendiente**
 
-- [ ] Frontend del asistente en React — hoy son maquetas
 - [ ] Empaquetar el instalador como `.exe` firmado
 - [ ] Servidor de licencias (emisión, renovación, reasignación)
 - [ ] Descarga de componentes desde el manifiesto firmado

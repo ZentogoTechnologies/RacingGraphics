@@ -7,7 +7,9 @@ import { IdiomaProvider } from './context/IdiomaContext'
 import ProtectedRoute from './components/auth/ProtectedRoute'
 import RoleRoute from './components/auth/RoleRoute'
 import DisciplinaGate from './components/shared/DisciplinaGate'
+import GuardaInstalacion from './components/instalacion/GuardaInstalacion'
 import LoginScreen from './components/auth/LoginScreen'
+import InstalacionModule from './pages/Instalacion'
 import MainLayout from './layouts/MainLayout'
 import HomeModule from './pages/Home'
 import EventosModule from './pages/Eventos'
@@ -29,6 +31,16 @@ export default function App() {
           <DisciplinaProvider>
             <CarreraProvider>
             <Routes>
+              {/* El asistente va fuera de toda guarda: cuando se usa
+                  todavía no hay usuarios, así que exigir sesión aquí
+                  sería pedir la llave de una puerta que aún no existe.
+                  Se protege con el token que dejó el instalador. */}
+              <Route path="/instalacion" element={<InstalacionModule />} />
+
+              {/* Antes que la sesión: sin sistema configurado el login no
+                  sirve de nada, y mandar ahí a quien acaba de instalar es
+                  un callejón sin salida. */}
+              <Route element={<GuardaInstalacion />}>
               <Route path="/login" element={<LoginScreen />} />
 
               {/* Primero sesión, después disciplina. En ese orden: la
@@ -57,6 +69,8 @@ export default function App() {
                     </Route>
                   </Route>
                 </Route>
+              </Route>
+
               </Route>
 
               {/* Una URL escrita a mano que no existe cae en la raíz, y la
