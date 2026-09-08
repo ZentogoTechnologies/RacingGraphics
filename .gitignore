@@ -50,3 +50,6 @@ claves/
 *.lic
 licencia.estado.json
 claves-desarrollo/
+
+# Token de un solo uso del asistente de instalación. Es de la máquina.
+instalacion.token
