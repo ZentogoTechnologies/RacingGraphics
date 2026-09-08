@@ -1,4 +1,26 @@
+from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# Carpeta del backend.
+#
+# Las rutas relativas de los ajustes se resuelven contra esto y NO contra
+# el directorio actual. El instalador corre desde la raíz del repositorio
+# y el backend desde Backend/, así que "licencia.lic" apuntaba a dos
+# sitios distintos según quién la leyera: el instalador dejaba el token
+# de instalación en la raíz y el backend lo buscaba en Backend/, no lo
+# encontraba, y daba el asistente por no disponible.
+BASE_DIR = Path(__file__).resolve().parent
+
+
+def ruta_del_backend(valor: str) -> Path:
+    """Una ruta de los ajustes, anclada a la carpeta del backend.
+
+    Las absolutas se respetan tal cual: un cliente puede querer la
+    licencia en otro disco.
+    """
+    ruta = Path(valor).expanduser()
+    return ruta if ruta.is_absolute() else BASE_DIR / ruta
 
 class Settings(BaseSettings):
     # Sin esto el archivo .env no se lee: los valores salian siempre

@@ -98,6 +98,52 @@ la red. **El instalador enseña esa dirección al terminar.**
 
 ---
 
+## ¿Cómo sé que la instalación funcionó?
+
+Cinco comprobaciones, en orden. Si las cinco pasan, funcionó.
+
+**1 · El instalador termina con los cinco pasos en OK** y te da una
+dirección con `?token=…`
+
+**2 · El backend arranca y dice que falta configurar**
+
+```bat
+cd Backend
+venv\Scripts\python.exe -m uvicorn main:app --host 0.0.0.0 --port 8080
+```
+
+Tiene que imprimir `Conectado a MongoDB` y
+`Sin configurar: el asistente de instalación está abierto`.
+
+**3 · El asistente abre y rechaza a quien no traiga el token**
+
+Abre la dirección que dio el instalador: debe salir «Todo quedó
+instalado» con la licencia en verde. Sin el `?token=…`, debe decir que
+falta el token.
+
+**4 · Completas los siete pasos.** Al terminar te deja en el login. Ahí
+entra con la cuenta `owner` que acabas de crear.
+
+**5 · Compruebas que quedó guardado**
+
+```bat
+curl http://127.0.0.1:8080/api/v1/setup/estado
+```
+
+Tiene que responder `"configurado": true` y `"asistente_disponible": false`.
+El archivo `Backend\instalacion.token` ya no debe existir: se borra al
+completar, y con él se cierra el asistente para siempre.
+
+### Si algo falla
+
+| Síntoma | Causa casi siempre |
+|---|---|
+| El instalador se para en el paso 3 | MongoDB no está corriendo: `net start MongoDB` |
+| El asistente dice «falta el token» | Abriste la dirección sin el `?token=…` que dio el instalador |
+| El asistente dice «ya está configurado» | Ya se completó antes. Para repetir: borra la base y `Backend\.env` |
+| El panel no carga, solo el API | Falta compilar el frontend: `npm run build --prefix Frontend` |
+| La ruta del cronometraje no verifica | Es unidad mapeada (`W:\`). Usa la ruta UNC completa |
+
 ## Probar el vencimiento de la licencia
 
 Es lo que no se puede ensayar esperando un año, y lo que más conviene

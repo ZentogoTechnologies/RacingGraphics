@@ -46,7 +46,7 @@ from typing import Optional
 
 import jwt
 
-from config import settings
+from config import ruta_del_backend, settings
 from src.services.fingerprint_services import huella_equipo
 
 logger = logging.getLogger(__name__)
@@ -232,12 +232,12 @@ def _sin_licencia(estado: Estado, mensaje: str = "") -> Licencia:
 
 def ruta_licencia() -> Path:
     """Archivo con el token. Lo escribe el instalador al activar."""
-    return Path(settings.LICENSE_FILE).expanduser()
+    return ruta_del_backend(settings.LICENSE_FILE)
 
 
 def ruta_estado() -> Path:
     """Marca de agua del reloj. Ver `_revisar_reloj`."""
-    return Path(settings.LICENSE_STATE_FILE).expanduser()
+    return ruta_del_backend(settings.LICENSE_STATE_FILE)
 
 
 # ── Reloj ────────────────────────────────────────────────────

@@ -214,7 +214,11 @@ export function Ubicacion({ onSiguiente, onAtras }) {
     limpiar(); setBuscando(true)
     try {
       const r = await api.interpretarUbicacion(texto)
-      if (r.ok) setElegido({ lat: r.lat, lon: r.lon, nombre: `Leído del ${r.origen}` })
+      // Sin `nombre`: lo que se lee de unas coordenadas o de un enlace no
+      // trae ciudad, y poner aquí la etiqueta de la interfaz la mandaba a
+      // la base y de ahí al gráfico del clima, que acababa rotulando
+      // «Leído del enlace del mapa» donde va el nombre del sitio.
+      if (r.ok) setElegido({ lat: r.lat, lon: r.lon, origen: r.origen })
       else setError(r.error)
     } catch (e) {
       setError(e.message)
@@ -325,7 +329,9 @@ export function Ubicacion({ onSiguiente, onAtras }) {
       {elegido && (
         <div className="mt-4">
           <Aviso tipo="ok" titulo="Ubicación elegida">
-            {elegido.nombre}{elegido.detalle ? ` · ${elegido.detalle}` : ''}
+            {elegido.nombre
+              ? <>{elegido.nombre}{elegido.detalle ? ` · ${elegido.detalle}` : ''}</>
+              : `Coordenadas leídas del ${elegido.origen}`}
             <br />
             Latitud <Mono>{elegido.lat.toFixed(6)}</Mono> ·
             Longitud <Mono>{elegido.lon.toFixed(6)}</Mono>

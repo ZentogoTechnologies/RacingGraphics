@@ -25,7 +25,7 @@ import secrets
 from pathlib import Path
 from typing import Optional
 
-from config import settings
+from config import ruta_del_backend, settings
 from src.models.instalacion_model import PASOS, Instalacion
 from src.models.users_model import User
 
@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 
 
 def ruta_token() -> Path:
-    return Path(settings.SETUP_TOKEN_FILE).expanduser()
+    return ruta_del_backend(settings.SETUP_TOKEN_FILE)
 
 
 # ── Token de instalación ─────────────────────────────────────
@@ -110,6 +110,12 @@ async def hay_dueno() -> bool:
 
 
 async def esta_configurado() -> bool:
+    """¿El sistema está listo para usarse?
+
+    Es la pregunta que responde el frontend al arrancar para decidir entre
+    el asistente y el login. NO es la que decide si el asistente sigue
+    abierto: para eso está `asistente_cerrado`.
+    """
     doc = await Instalacion.find_one({"clave": "instalacion"})
 
     if doc is not None and doc.completada:
@@ -119,15 +125,42 @@ async def esta_configurado() -> bool:
     return await hay_dueno()
 
 
+async def asistente_cerrado() -> bool:
+    """¿Se acabó el asistente para siempre?
+
+    Solo lo cierra haberlo completado, y no que existan cuentas. Antes se
+    usaba `esta_configurado`, y eso lo cerraba en cuanto se creaba el
+    dueño —o sea, justo después del paso de las cuentas—: quien cerrara el
+    navegador ahí se quedaba con la instalación a medias y sin forma de
+    terminarla ni de volver a empezarla.
+
+    La puerta la sigue guardando el token, que es lo que de verdad impide
+    que alguien de la red local se cuele: se borra al completar, así que
+    una instalación terminada no se puede reabrir aunque este método
+    dijera que no.
+    """
+    doc = await Instalacion.find_one({"clave": "instalacion"})
+
+    if doc is not None:
+        return doc.completada
+
+    # Sin documento pero con dueño: instalación anterior al asistente, que
+    # nunca lo tuvo. No hay nada que retomar.
+    return await hay_dueno()
+
+
 async def estado() -> dict:
     """Lo que necesita saber el frontend para decidir qué enseñar."""
     doc = await Instalacion.find_one({"clave": "instalacion"})
     configurado = await esta_configurado()
+    cerrado = await asistente_cerrado()
 
     return {
         "configurado": configurado,
         # Solo cuenta si además queda token: sin él no se puede empezar.
-        "asistente_disponible": not configurado and ruta_token().is_file(),
+        # Va contra `cerrado` y no contra `configurado` para que una
+        # instalación interrumpida tras crear las cuentas se pueda retomar.
+        "asistente_disponible": not cerrado and ruta_token().is_file(),
         "paso": doc.paso if doc else PASOS[0],
         "pasos": PASOS,
         "organizacion": doc.organizacion if doc else "",

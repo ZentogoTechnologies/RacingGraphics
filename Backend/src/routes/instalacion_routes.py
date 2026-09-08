@@ -30,8 +30,12 @@ async def permitir(x_setup_token: Optional[str] = Header(None)) -> None:
     instalación esté sin completar no basta: sin token, cualquiera en la
     red local podría configurar el sistema. Y tener el token tampoco
     basta una vez terminada: el asistente no se reabre.
+
+    Se pregunta por `asistente_cerrado` y no por `esta_configurado`: lo
+    segundo pasa a ser cierto en cuanto existe el dueño, y eso cerraba el
+    asistente en mitad de la instalación, justo tras crear las cuentas.
     """
-    if await inst.esta_configurado():
+    if await inst.asistente_cerrado():
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="El sistema ya está configurado. Los cambios se hacen desde Ajustes.",

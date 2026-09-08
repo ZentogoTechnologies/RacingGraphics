@@ -20,6 +20,7 @@ from pymongo import ASCENDING, IndexModel
 PASOS = [
     "bienvenida",
     "organizacion",
+    "logo",
     "usuarios",
     "cronometraje",
     "casparcg",
