@@ -139,24 +139,37 @@ const PISTA_FILAS = 3;
    bordes de la pista salen por arriba en vez de juntarse a la vista,
    que es como se ve una recta de verdad y como esta en la referencia. */
 const PISTA = {
-    ancho:     700,   /* el lienzo, mas ancho que alto como el hueco */
+    /* El lienzo. Ancho de sobra a proposito: las franjas de los lados
+       tienen que caber dentro o la mascara se las come. */
+    ancho:     820,
     alto:      540,
     horizonte:-140,   /* fuera del lienzo, por arriba */
     frente:    510,   /* la y del borde de abajo, lo mas cerca */
     fuga:      .42,   /* cuanto encoge por unidad de profundidad */
-    escalaX:   170,   /* pixeles por unidad lateral en primer plano */
+    /* Pixeles por unidad lateral en primer plano. Sube hasta donde las
+       franjas de fuera siguen cabiendo en el lienzo: asi el dibujo ocupa
+       todo el hueco que dejan las caras en vez de quedarse chico en medio. */
+    escalaX:   185,
 
-    media:     1.75,  /* media anchura de la pista */
-    cordon:     .16,  /* lo que sobresale el piano por fuera del borde */
-    columna:    .72,  /* desvio del centro de cada columna de cajas */
-    ancha:      .58,  /* media anchura de una caja */
-    honda:      .80,  /* lo que mide una caja de fondo */
-    ala:        .55,  /* que parte de ese fondo dibujan los lados */
+    /* Media anchura de la pista. Estrecha respecto al lienzo para dejar
+       sitio a las franjas por fuera; con la pista mas ancha no cabian y
+       salian recortadas contra el borde. */
+    media:     1.35,
+
+    /* Las franjas de adorno, por fuera del asfalto. */
+    franjaDe:   .10,  /* a que distancia del borde empiezan */
+    franjaA:    .82,  /* y hasta donde llegan */
+    franjas:      5,  /* cuantas por lado */
+    franjaHueco: .35, /* que parte de cada paso es hueco */
+
+    columna:    .72,  /* desvio del centro de cada columna de sitios */
+    ancha:      .58,  /* media anchura de un sitio */
+    honda:      .80,  /* lo que mide un sitio de fondo */
+    ala:        .55,  /* que parte de ese fondo dibujan los costados */
     fila:       .95,  /* de una fila a la siguiente */
     escalon:    .45,  /* lo que la columna derecha va por detras */
-    salida:     .15,  /* donde empieza la primera caja */
-    meta:       .02,  /* la linea de meta, justo delante de la primera */
-    tramos:      14,  /* en cuantos trozos se parte cada piano */
+    salida:     .15,  /* donde empieza el primer sitio */
+    meta:       .02,  /* la linea de meta, justo delante del primero */
 };
 
 
@@ -172,8 +185,8 @@ function pistaProyectar(x, z){
 }
 
 
-/* Un cuadrilatero del suelo, proyectado. Sirve para los pianos y para el
-   relleno de la caja de los que se presentan. */
+/* Un cuadrilatero del suelo, proyectado. Lo usan el asfalto, las franjas,
+   la meta y el relleno del sitio de los que se presentan. */
 function pistaSuelo(x0, x1, z0, z1){
 
     const a = pistaProyectar(x0, z0);
@@ -194,23 +207,24 @@ function pistaSitio(centroX, z0){
     const z1 = z0 + PISTA.honda;
     const zAla = z0 + PISTA.honda * PISTA.ala;
 
-    const izqCerca  = pistaProyectar(centroX - PISTA.ancha, z0);
-    const derCerca  = pistaProyectar(centroX + PISTA.ancha, z0);
-    const izqLejos  = pistaProyectar(centroX - PISTA.ancha, zAla);
-    const derLejos  = pistaProyectar(centroX + PISTA.ancha, zAla);
+    const izqCerca = pistaProyectar(centroX - PISTA.ancha, z0);
+    const derCerca = pistaProyectar(centroX + PISTA.ancha, z0);
+    const izqLejos = pistaProyectar(centroX - PISTA.ancha, zAla);
+    const derLejos = pistaProyectar(centroX + PISTA.ancha, zAla);
+
+    /* Donde va el apellido: centrado sobre el sitio y a la altura de la
+       boca, que es por donde el sitio queda abierto. */
+    const boca = pistaProyectar(centroX, zAla);
 
     return {
-        /* De la punta de un costado, al frente, y a la punta del otro. */
         linea: `${izqLejos.x},${izqLejos.y} ${izqCerca.x},${izqCerca.y} `
              + `${derCerca.x},${derCerca.y} ${derLejos.x},${derLejos.y}`,
 
         relleno: pistaSuelo(centroX - PISTA.ancha, centroX + PISTA.ancha, z0, z1),
 
-        /* El apellido se cuelga de la punta del costado. */
-        puntaIzq: izqLejos.x,
-        puntaDer: derLejos.x,
-        puntaY:   izqLejos.y,
-        k:        izqLejos.k,
+        nombreX: boca.x,
+        nombreY: boca.y,
+        k:       boca.k,
     };
 }
 
@@ -232,38 +246,66 @@ function pistaDibujar(){
     let svg = `<svg viewBox="0 0 ${PISTA.ancho} ${PISTA.alto}" `
             + `preserveAspectRatio="xMidYMid meet">`;
 
-    /* El resplandor. Es lo que hace que el rojo y el blanco de los pianos
-       se lean como neon y no como dos colores planos. */
-    svg += `<defs><filter id="piNeon" x="-40%" y="-40%" width="180%" height="180%">`
-         + `<feGaussianBlur stdDeviation="3" result="halo"/>`
-         + `<feMerge><feMergeNode in="halo"/><feMergeNode in="halo"/>`
-         + `<feMergeNode in="SourceGraphic"/></feMerge></filter></defs>`;
+    svg += `<defs>`
 
-    /* ── Los pianos ──────────────────────────────────────────────
-       Rojo y blanco alternos por fuera de cada borde. Decoran los
-       lados, que era lo que se pedia, y de paso dicen donde acaba la
-       pista mejor que una raya sola. Van a tramos iguales en
-       profundidad, asi que la perspectiva los acorta sola segun se
-       alejan, que es lo que hace que se lean como suelo. */
-    svg += `<g filter="url(#piNeon)">`;
+         /* El resplandor. Es lo que hace que el rojo y el blanco de las
+            franjas se lean como neon y no como dos colores planos. */
+         + `<filter id="piNeon" x="-40%" y="-40%" width="180%" height="180%">`
+         + `<feGaussianBlur stdDeviation="2.5" result="halo"/>`
+         + `<feMerge><feMergeNode in="halo"/><feMergeNode in="halo"/>`
+         + `<feMergeNode in="SourceGraphic"/></feMerge></filter>`
+
+         /* El asfalto se apaga hacia el fondo. Plano se leia como una
+            plancha de carton; asi parece que se pierde en la distancia. */
+         + `<linearGradient id="piAsfalto" x1="0" y1="1" x2="0" y2="0">`
+         + `<stop offset="0" stop-color="#FFFFFF" stop-opacity=".16"/>`
+         + `<stop offset="1" stop-color="#FFFFFF" stop-opacity=".03"/>`
+         + `</linearGradient>`
+
+         /* Las franjas tambien: enteras hasta el fondo tiraban del ojo
+            hacia arriba, justo donde no hay nada que mirar. */
+         + `<linearGradient id="piApaga" x1="0" y1="1" x2="0" y2="0">`
+         + `<stop offset="0" stop-color="#FFFFFF" stop-opacity="1"/>`
+         + `<stop offset=".55" stop-color="#FFFFFF" stop-opacity=".55"/>`
+         + `<stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>`
+         + `</linearGradient>`
+         + `<mask id="piMascara"><rect x="0" y="0" `
+         + `width="${PISTA.ancho}" height="${PISTA.alto}" fill="url(#piApaga)"/>`
+         + `</mask>`
+
+         + `</defs>`;
+
+    /* ── El asfalto ──────────────────────────────────────────────
+       El carril del medio en gris, para que se entienda que es pista y
+       no un hueco entre las dos caras. */
+    svg += `<polygon class="pi-asfalto" points="`
+         + pistaSuelo(-PISTA.media, PISTA.media, 0, fondoZ) + `"/>`;
+
+    /* ── Las franjas de los lados ────────────────────────────────
+       Rectas paralelas al eje de la pista, por fuera del asfalto,
+       alternando rojo y blanco. Van con la misma perspectiva que todo
+       lo demas, asi que convergen igual y se leen como parte del
+       suelo en vez de como una cenefa pegada encima. */
+    svg += `<g filter="url(#piNeon)" mask="url(#piMascara)">`;
+
+    const paso = (PISTA.franjaA - PISTA.franjaDe) / PISTA.franjas;
+    const grosor = paso * (1 - PISTA.franjaHueco);
 
     for (const lado of [-1, 1]) {
-        for (let i = 0; i < PISTA.tramos; i++) {
+        for (let i = 0; i < PISTA.franjas; i++) {
 
-            const z0 = fondoZ * (i / PISTA.tramos);
-            const z1 = fondoZ * ((i + 1) / PISTA.tramos);
+            const desdeX = PISTA.media + PISTA.franjaDe + i * paso;
 
-            const dentro = lado * PISTA.media;
-            const fuera  = lado * (PISTA.media + PISTA.cordon);
-
-            svg += `<polygon class="pi-piano ${i % 2 ? "blanco" : "rojo"}" `
-                 + `points="${pistaSuelo(dentro, fuera, z0, z1)}"/>`;
+            svg += `<polygon class="pi-franja ${i % 2 ? "blanca" : "roja"}" `
+                 + `points="${pistaSuelo(lado * desdeX,
+                                         lado * (desdeX + grosor),
+                                         0, fondoZ)}"/>`;
         }
     }
 
     svg += `</g>`;
 
-    /* Los bordes de la pista, por dentro del piano. */
+    /* Los bordes del asfalto. */
     for (const lado of [-1, 1]) {
         const cerca = pistaProyectar(lado * PISTA.media, 0);
         const lejos = pistaProyectar(lado * PISTA.media, fondoZ);
@@ -276,14 +318,13 @@ function pistaDibujar(){
        que esos dos son los de la pole sin escribirlo; en el resto de
        las parejas seria mentira, porque tienen filas por delante. */
     if (pagina === 0) {
-        svg += `<g filter="url(#piNeon)">`
-             + `<polygon class="pi-meta" points="`
+        svg += `<g filter="url(#piNeon)"><polygon class="pi-meta" points="`
              + pistaSuelo(-PISTA.media, PISTA.media,
                           PISTA.meta, PISTA.meta + .07) + `"/></g>`;
     }
 
-    /* De atras hacia delante: asi las de delante, que son mas grandes, se
-       pintan encima de las de atras y no al reves. */
+    /* De atras hacia delante: asi los de delante, que son mas grandes, se
+       pintan encima de los de atras y no al reves. */
     for (let fila = PISTA_FILAS - 1; fila >= 0; fila--) {
         for (let lado = 1; lado >= 0; lado--) {
 
@@ -312,15 +353,15 @@ function pistaDibujar(){
                              .trim().toUpperCase();
             if (!apellido) continue;
 
-            /* Por fuera de su sitio, hacia el borde de la pista: en medio
-               se montaria con el de al lado. */
-            const x = signo < 0 ? sitio.puntaIzq - 12 : sitio.puntaDer + 12;
-            const anclaje = signo < 0 ? "end" : "start";
-            const cuerpo = (34 * sitio.k).toFixed(1);
+            /* Dentro de su sitio y no a un lado: fuera se cruzaba con las
+               franjas de colores y el apellido se perdia contra ellas.
+               Va en la boca, que es donde el sitio queda abierto, asi que
+               no pisa ninguna de las tres lineas pintadas. */
+            const cuerpo = (31 * sitio.k).toFixed(1);
 
-            svg += `<text class="pi-nombre${suya}" x="${x}" y="${sitio.puntaY}" `
-                 + `text-anchor="${anclaje}" font-size="${cuerpo}">`
-                 + escapar(apellido) + `</text>`;
+            svg += `<text class="pi-nombre${suya}" x="${sitio.nombreX}" `
+                 + `y="${sitio.nombreY}" text-anchor="middle" `
+                 + `font-size="${cuerpo}">` + escapar(apellido) + `</text>`;
         }
     }
 

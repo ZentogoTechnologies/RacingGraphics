@@ -300,11 +300,24 @@
 }
 
 
-/* ── Los bordes de la pista ── */
+/* ── El asfalto ── */
+
+/* El carril del medio en gris para que se entienda que es pista y no un
+   hueco entre las dos caras. El degradado va en la plantilla, que es
+   quien conoce la perspectiva. */
+.pi-asfalto{
+
+    fill:url(#piAsfalto);
+
+    stroke:none;
+}
+
+
+/* ── Los bordes del asfalto ── */
 
 .pi-borde{
 
-    stroke:rgba(255,255,255,.20);
+    stroke:rgba(255,255,255,.30);
 
     stroke-width:2;
 
@@ -312,22 +325,15 @@
 }
 
 
-/* ── Los pianos ── */
+/* ── Las franjas de los lados ── */
 
-/* Rojo y blanco, los del borde de cualquier pista. Con el resplandor que
-   les pone el filtro quedan como el neon del ejemplo. */
-.pi-piano{
+/* Rectas paralelas al eje de la pista, alternando rojo y blanco. Adornan
+   el hueco que dejan las caras y encuadran el asfalto sin competir con
+   los apellidos, que ahora van por dentro. */
+.pi-franja{ stroke:none; }
 
-    stroke:none;
-
-    /* Un punto por debajo del blanco puro. Con el resplandor encima, a
-       plena intensidad los pianos brillaban mas que la fila de los dos
-       que se presentan, que es lo que tiene que mandar. */
-    opacity:.82;
-}
-
-.pi-piano.rojo  { fill:#FF1B2D; }
-.pi-piano.blanco{ fill:#FFFFFF; }
+.pi-franja.roja  { fill:#FF1B2D; }
+.pi-franja.blanca{ fill:#FFFFFF; }
 
 
 /* ── La linea de meta ── */
@@ -349,7 +355,7 @@
 
     fill:none;
 
-    stroke:rgba(255,255,255,.32);
+    stroke:rgba(255,255,255,.45);
 
     stroke-width:2;
 
@@ -369,7 +375,7 @@
    cerrar la caja. */
 .pi-suelo{
 
-    fill:rgba(255,255,255,.09);
+    fill:rgba(255,255,255,.10);
 
     stroke:none;
 }
@@ -377,9 +383,18 @@
 
 /* ── Los apellidos ── */
 
+/* Van dentro del sitio, centrados sobre su boca. Fuera se cruzaban con
+   las franjas de colores y el apellido se perdia contra ellas. La sombra
+   es lo que lo despega del asfalto cuando le cae encima. */
 .pi-nombre{
 
-    fill:rgba(255,255,255,.55);
+    fill:rgba(255,255,255,.72);
+
+    paint-order:stroke;
+
+    stroke:rgba(0,0,0,.55);
+    stroke-width:3;
+    stroke-linejoin:round;
 
     font-family:var(--fuente-graficos);
     font-weight:700;
