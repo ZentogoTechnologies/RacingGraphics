@@ -69,4 +69,35 @@ class Settings(BaseSettings):
     # se prefiere el último dato conocido antes que retrasar un gráfico.
     WEATHER_TIMEOUT: float = 6.0
 
+    # ── Licencia ─────────────────────────────────────────────
+    # Se valida offline contra la clave pública que lleva escrita
+    # license_services.py. La conexión hace falta para activar y para
+    # renovar, nunca para trabajar: en el autódromo la red se cae y el
+    # software no puede dejar de funcionar por eso.
+
+    # En falso, un equipo sin archivo de licencia arranca en modo
+    # desarrollo. El instalador lo pone en verdadero, y a partir de ahí
+    # la falta de licencia bloquea.
+    LICENSE_REQUIRED: bool = False
+
+    # Token emitido por Zentogo. Lo escribe el instalador al activar.
+    LICENSE_FILE: str = "licencia.lic"
+
+    # Marca de agua del reloj, para detectar que alguien atrasó la fecha
+    # del sistema para estirar una licencia vencida.
+    LICENSE_STATE_FILE: str = "licencia.estado.json"
+
+    # Días que el reloj puede aparecer por detrás de lo ya visto sin que
+    # se considere manipulación. Amplio a propósito: un equipo que perdió
+    # la pila de la placa arranca con fecha vieja sin que nadie mienta.
+    LICENSE_CLOCK_TOLERANCE_DAYS: int = 3
+
+    # Segundos que se reutiliza el estado antes de releer el disco. Corto
+    # para que el salto de ACTIVA a GRACIA se note en el mismo minuto.
+    LICENSE_CACHE_SECONDS: float = 30.0
+
+    # Servidor de licencias de Zentogo: activación, renovación y
+    # manifiestos de versión.
+    LICENSE_SERVER_URL: str = "https://licencias.zentogo.com"
+
 settings = Settings()

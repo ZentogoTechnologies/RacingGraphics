@@ -30,9 +30,13 @@ from src.routes.system_routes import system
 from src.routes.events_routes import events
 from src.routes.settings_routes import ajustes
 from src.routes.weather_routes import weather
+from src.routes.license_routes import license
 
 # Auth
 from src.services.auth_services import usuario_actual
+
+# Licencia
+from src.services.license_services import licencia_vigente
 
 # CasparCG
 from src.services.casparcg_client import casparcg
@@ -143,10 +147,24 @@ app.include_router(users, prefix="/api/v1/users", tags=["Users"])
 # Apagado del sistema. La guardia de rol va dentro del router.
 app.include_router(system, prefix="/api/v1/system", tags=["System"])
 
+# Licencia. La guardia de acceso va por ruta dentro del router: /salud
+# es abierta porque la consultan el servicio de vigilancia y la pantalla
+# de bloqueo, que corren fuera del panel y no tienen sesión.
+app.include_router(license, prefix="/api/v1/license", tags=["License"])
+
 app.include_router(categories, prefix="/api/v1/categories", tags=["Categories"], dependencies=PROTEGIDO)
 app.include_router(pilots, prefix="/api/v1/pilots", tags=["Pilots"], dependencies=PROTEGIDO)
 app.include_router(vehicles, prefix="/api/v1/vehicles", tags=["Vehicles"], dependencies=PROTEGIDO)
-app.include_router(graphics, prefix="/api/v1/graphics", tags=["Graphics"], dependencies=PROTEGIDO)
+# Gráficos exige además licencia vigente. Va solo aquí y no en el resto
+# de módulos a propósito: con la licencia vencida el cliente sigue
+# entrando al panel y viendo sus datos, pero no saca nada al aire. Así
+# conserva su información y puede renovar desde el propio software.
+app.include_router(
+    graphics,
+    prefix="/api/v1/graphics",
+    tags=["Graphics"],
+    dependencies=PROTEGIDO + [Depends(licencia_vigente)],
+)
 app.include_router(events, prefix="/api/v1/events", tags=["Events"], dependencies=PROTEGIDO)
 app.include_router(ajustes, prefix="/api/v1/settings", tags=["Settings"], dependencies=PROTEGIDO)
 app.include_router(weather, prefix="/api/v1/weather", tags=["Weather"], dependencies=PROTEGIDO)

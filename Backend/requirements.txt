@@ -5,6 +5,7 @@ bcrypt==5.0.0
 beanie==2.0.0
 click==8.4.2
 colorama==0.4.6
+cryptography==50.0.1
 dnspython==2.8.0
 dotenv==0.9.9
 et_xmlfile==2.0.0

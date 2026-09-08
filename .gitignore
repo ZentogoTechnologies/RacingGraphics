@@ -38,3 +38,14 @@ Casparcg/media/*.png
 logs/
 launcher/*.spec
 race-core-studio.exe
+
+# ── Licenciamiento ───────────────────────────────────────────
+# La clave privada firma licencias: quien la tenga puede emitirse uso
+# perpetuo del software. No entra a git bajo ninguna circunstancia.
+claves/
+*.pem
+
+# Licencia instalada en este equipo y su marca de reloj. Son de la
+# máquina, no del proyecto.
+*.lic
+licencia.estado.json
