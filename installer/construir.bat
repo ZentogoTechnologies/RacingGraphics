@@ -1,6 +1,6 @@
 @echo off
 REM ======================================================================
-REM  Construye RaceCoreStudio-Setup.exe a partir de instalar.py
+REM  Construye rcs-setup.exe a partir de instalar.py
 REM
 REM  Ejecutar desde cualquier sitio:   installer\construir.bat
 REM
@@ -35,7 +35,7 @@ REM relativa acaba duplicando la carpeta (installer\installer\...).
 echo  Empaquetando...
 Backend\venv\Scripts\python.exe -m PyInstaller ^
   --onefile --console --clean --noconfirm ^
-  --name RaceCoreStudio-Setup ^
+  --name rcs-setup ^
   --icon "%AQUI%..\launcher\race-core-studio.ico" ^
   --paths "Backend" ^
   --paths "tools\licencias" ^
@@ -61,7 +61,7 @@ if errorlevel 1 (
 )
 
 echo.
-echo  [OK] Listo:  installer\dist\RaceCoreStudio-Setup.exe
+echo  [OK] Listo:  installer\dist\rcs-setup.exe
 echo.
 echo  AVISO: el .exe NO va firmado. Windows SmartScreen lo va a marcar
 echo  como "editor desconocido" en cada equipo donde se ejecute. Para

@@ -20,7 +20,7 @@ Hoy el instalador es un script de Python, `installer/instalar.py`, que ya
 hace el flujo completo: pide la licencia, la ata al equipo, comprueba las
 piezas, escribe la configuración y abre el asistente web.
 
-Para convertirlo en `RaceCoreStudio-Setup.exe` hay un script listo, pero
+Para convertirlo en `rcs-setup.exe` hay un script listo, pero
 **tiene que ejecutarse en Windows**: PyInstaller genera un binario de la
 máquina donde corre, así que un `.exe` de Windows solo sale de un Windows.
 
@@ -28,7 +28,7 @@ máquina donde corre, así que un `.exe` de Windows solo sale de un Windows.
 installer\construir.bat
 ```
 
-Deja el ejecutable en `installer\dist\RaceCoreStudio-Setup.exe`. No se
+Deja el ejecutable en `installer\dist\rcs-setup.exe`. No se
 versiona: se reconstruye cuando hace falta.
 
 > **El `.exe` no irá firmado.** Sin un certificado Authenticode, SmartScreen
