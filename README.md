@@ -144,6 +144,10 @@ completar, y con él se cierra el asistente para siempre.
 | El panel no carga, solo el API | Falta compilar el frontend: `npm run build --prefix Frontend` |
 | La ruta del cronometraje no verifica | Es unidad mapeada (`W:\`). Usa la ruta UNC completa |
 
+> **¿Primera vez en un Windows nuevo?** La guía completa, desde instalar
+> Python hasta ver el panel, está en
+> **[docs/PRIMEROS-PASOS.md](docs/PRIMEROS-PASOS.md)**.
+
 ## Probar el vencimiento de la licencia
 
 Es lo que no se puede ensayar esperando un año, y lo que más conviene
