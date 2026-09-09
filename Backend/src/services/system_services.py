@@ -17,9 +17,13 @@ import subprocess
 
 # Puerto -> nombre legible. El orden importa: CasparCG primero para sacar
 # los gráficos del aire antes de que se caiga nada más.
+#
+# Aquí solo va CasparCG. El panel lo sirve el propio backend, así que no
+# hay un proceso de frontend aparte que matar —antes se buscaba uno en el
+# 5173, que era el servidor de desarrollo— y el backend se apaga solo al
+# final, después de haber respondido.
 OBJETIVOS = [
     (5250, "CasparCG"),
-    (5173, "Frontend"),
 ]
 
 # MongoDB (27017) nunca entra aquí.
@@ -32,13 +36,13 @@ _PATRON_NETSTAT = re.compile(
 def pids_escuchando(puerto: int) -> set[int]:
     """PIDs que tienen ese puerto en LISTENING.
 
-    Puede haber más de uno: Vite abre IPv4 e IPv6 por separado, y a veces
-    son entradas distintas del mismo proceso.
+    Puede haber más de uno: un servidor puede abrir IPv4 e IPv6 por
+    separado, y a veces son entradas distintas del mismo proceso.
     """
     try:
         # Sin "-p TCP" a propósito: ese filtro deja fuera lo que escucha
-        # en IPv6, y Vite se ata a [::1]. Con él, el frontend parecía
-        # apagado y el apagado lo daba por "no estaba corriendo".
+        # en IPv6, y un proceso atado a [::1] parecía apagado, de modo que
+        # el apagado lo daba por "no estaba corriendo".
         salida = subprocess.run(
             ["netstat", "-ano"],
             capture_output=True, text=True, timeout=10,
@@ -60,8 +64,8 @@ def pids_escuchando(puerto: int) -> set[int]:
 def matar(pid: int) -> bool:
     """Cierra el proceso y su descendencia.
 
-    /T arrastra a los hijos: npm lanza a Vite como proceso aparte, y matar
-    solo al padre deja el puerto ocupado y el servidor sirviendo.
+    /T arrastra a los hijos: matar solo al padre puede dejar el puerto
+    ocupado y el servidor sirviendo.
     """
     try:
         r = subprocess.run(

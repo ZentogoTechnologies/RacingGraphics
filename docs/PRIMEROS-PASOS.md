@@ -159,6 +159,21 @@ cd Casparcg
 casparcg.exe
 ```
 
+### O todo de una vez
+
+Si ya construiste el lanzador, hace estos dos pasos y abre el navegador
+solo:
+
+```bat
+race-core-studio.exe
+```
+
+Arranca CasparCG, verifica MongoDB, levanta el backend con el panel y abre
+`http://127.0.0.1:8080`. Para apagarlo todo: `race-core-studio.exe --detener`
+
+Comprueba antes que `casparcg.exe` no sea un puntero de LFS: el lanzador lo
+detecta y te lo dice, pero es mejor saberlo de entrada.
+
 ---
 
 ## 8 · Configurar desde el navegador

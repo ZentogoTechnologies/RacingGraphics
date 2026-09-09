@@ -85,6 +85,9 @@ ubicación del circuito.
 race-core-studio.exe
 ```
 
+Arranca CasparCG, verifica MongoDB, levanta el backend —que sirve también
+el panel— y abre el navegador. Cuatro pasos, un solo puerto.
+
 O a mano, si aún no se ha construido el lanzador:
 
 ```bat

@@ -5,20 +5,24 @@ Arranca el sistema completo en el orden en que se necesita:
     1. CasparCG        (el servidor de gráficos, con su ventana)
     2. Base de datos   (solo se verifica; MongoDB corre como servicio)
     3. Backend         (FastAPI en el 8080, abierto a la red)
-    4. Frontend        (Vite en el 5173)
-    5. Navegador       (abre el login)
+    4. Navegador       (abre el panel)
+
+Todo va por un solo puerto. El backend sirve el API y también el panel ya
+compilado que hay en Frontend/dist, así que aquí no se levanta ningún
+servidor de desarrollo: en la máquina de un cliente no hay —ni debe
+haber— Node instalado.
 
 Cada paso espera a que el anterior responda de verdad antes de seguir. No
-basta con lanzar el proceso: el backend tarda en levantar Beanie y el
-frontend en compilar, y abrir el navegador antes de tiempo muestra un
-error de conexión que parece un fallo del sistema.
+basta con lanzar el proceso: el backend tarda en levantar Beanie, y abrir
+el navegador antes de tiempo muestra un error de conexión que parece un
+fallo del sistema.
 
 Los procesos quedan sueltos a propósito: cerrar esta ventana no los mata.
 En medio de una transmisión, cerrar sin querer el lanzador no puede
 tumbar los gráficos que están al aire.
 
     race-core-studio.exe             arranca todo
-    race-core-studio.exe --detener   apaga backend y frontend
+    race-core-studio.exe --detener   apaga CasparCG y el backend
 """
 
 import json
@@ -80,8 +84,13 @@ def titulo(texto):
     print(f"\n{NEGRITA}{texto}{FIN}")
 
 
+# CasparCG, base de datos, backend y navegador. Se declara aquí para que
+# el contador no se quede desfasado si algún día se añade o quita un paso.
+TOTAL_PASOS = 4
+
+
 def paso(n, texto):
-    print(f"\n{NEGRITA}[{n}/5]{FIN} {texto}")
+    print(f"\n{NEGRITA}[{n}/{TOTAL_PASOS}]{FIN} {texto}")
 
 
 def ok(texto):
@@ -123,8 +132,12 @@ PIDS = LOGS / "procesos.json"
 
 PUERTO_CASPARCG = 5250
 PUERTO_BACKEND = 8080
-PUERTO_FRONTEND = 5173
-URL_LOGIN = f"http://localhost:{PUERTO_FRONTEND}/login"
+
+# El panel lo sirve el propio backend, así que la dirección es la suya.
+URL_PANEL = f"http://127.0.0.1:{PUERTO_BACKEND}/"
+
+# Lo que el backend sirve como panel. Sin esto solo respondería el API.
+FRONTEND_DIST = FRONTEND / "dist"
 
 
 # ─── Utilidades ──────────────────────────────────────────────
@@ -255,9 +268,34 @@ def paso_casparcg() -> bool:
         detalle(f"esperaba: {CASPARCG}")
         return False
 
+    # Un casparcg.exe de unos pocos cientos de bytes no es el programa: es
+    # el puntero que deja Git LFS cuando se clonó sin tenerlo instalado.
+    # Se comprueba antes de intentar ejecutarlo porque el error de Windows
+    # al lanzarlo no menciona LFS por ningún lado, y es el fallo más común
+    # en una instalación nueva.
+    tamano = CASPARCG.stat().st_size
+    if tamano < 100_000:
+        error(f"casparcg.exe pesa solo {tamano} bytes: no es el programa")
+        detalle("se clonó el repositorio sin Git LFS, así que en su lugar")
+        detalle("hay un puntero de texto. Para arreglarlo:")
+        detalle("   git lfs install")
+        detalle("   git lfs pull")
+        return False
+
     # cwd en la carpeta de CasparCG: lee casparcg.config y las plantillas
     # con rutas relativas, y desde otra carpeta arranca sin canales.
-    proceso = lanzar([str(CASPARCG)], CASPARCG.parent, None, nueva_consola=True)
+    try:
+        proceso = lanzar([str(CASPARCG)], CASPARCG.parent, None, nueva_consola=True)
+    except OSError as e:
+        # Windows no deja claro por qué no arranca un ejecutable. Las dos
+        # causas habituales son que falte el Visual C++ Redistributable o
+        # que el archivo esté a medias.
+        error("no se pudo ejecutar casparcg.exe")
+        detalle(f"{type(e).__name__}: {e}")
+        detalle("suele faltar el Visual C++ Redistributable 2015-2022:")
+        detalle("   winget install Microsoft.VCRedist.2015+.x64")
+        return False
+
     print("      arrancando", end="", flush=True)
 
     if not esperar(lambda: puerto_abierto(PUERTO_CASPARCG), 40):
@@ -309,11 +347,23 @@ def paso_base_de_datos() -> bool:
 
 
 def paso_backend() -> bool:
-    paso(3, "Backend (FastAPI)")
+    paso(3, "Backend y panel (FastAPI)")
 
     if puerto_abierto(PUERTO_BACKEND):
         ok(f"ya estaba corriendo en el puerto {PUERTO_BACKEND}")
         return True
+
+    # Sin el panel compilado el backend arranca igual, pero sirviendo solo
+    # el API: el navegador se abriría en una página que no existe. Vale más
+    # pararse aquí y decir qué falta que enseñar un error del navegador.
+    if not (FRONTEND_DIST / "index.html").is_file():
+        error("falta el panel compilado")
+        detalle(f"esperaba: {FRONTEND_DIST / 'index.html'}")
+        detalle("compílalo con:  npm install --prefix Frontend")
+        detalle("                npm run build --prefix Frontend")
+        return False
+
+    ok("panel compilado encontrado")
 
     if not PYTHON_VENV.exists():
         error("no encuentro el entorno virtual del backend")
@@ -349,51 +399,22 @@ def paso_backend() -> bool:
         detalle(f"mira el detalle en: {LOGS / 'backend.log'}")
         return False
 
-    ok(f"escuchando en http://127.0.0.1:{PUERTO_BACKEND} (PID {proceso.pid})")
+    ok(f"API y panel en http://127.0.0.1:{PUERTO_BACKEND} (PID {proceso.pid})")
     detalle(f"documentación del API: http://127.0.0.1:{PUERTO_BACKEND}/docs")
     guardar_pids({**leer_pids(), "backend": proceso.pid})
     return True
 
 
-def paso_frontend() -> bool:
-    paso(4, "Frontend (Vite)")
-
-    if puerto_abierto(PUERTO_FRONTEND):
-        ok(f"ya estaba corriendo en el puerto {PUERTO_FRONTEND}")
-        return True
-
-    if not (FRONTEND / "node_modules").exists():
-        error("faltan las dependencias del frontend")
-        detalle("instálalas con:  npm install --prefix Frontend")
-        return False
-
-    # npm es un .cmd: se invoca a través de cmd para que Windows lo resuelva.
-    proceso = lanzar(
-        ["cmd", "/c", "npm", "run", "dev"],
-        FRONTEND, "frontend.log",
-    )
-    print("      compilando", end="", flush=True)
-
-    if not esperar(lambda: puerto_abierto(PUERTO_FRONTEND), 60):
-        error("no respondió tras 60 segundos")
-        detalle(f"mira el detalle en: {LOGS / 'frontend.log'}")
-        return False
-
-    ok(f"sirviendo en http://localhost:{PUERTO_FRONTEND} (PID {proceso.pid})")
-    guardar_pids({**leer_pids(), "frontend": proceso.pid})
-    return True
-
-
 def paso_navegador() -> bool:
-    paso(5, "Abriendo el panel")
+    paso(4, "Abriendo el panel")
 
     try:
-        webbrowser.open(URL_LOGIN)
-        ok(URL_LOGIN)
+        webbrowser.open(URL_PANEL)
+        ok(URL_PANEL)
         return True
     except Exception as e:
         aviso("no pude abrir el navegador solo")
-        detalle(f"entra a mano: {URL_LOGIN}  ({type(e).__name__})")
+        detalle(f"entra a mano: {URL_PANEL}  ({type(e).__name__})")
         return True   # no es motivo para dar el arranque por fallido
 
 
@@ -435,12 +456,14 @@ def detener():
     # Se cierra también CasparCG, igual que el botón "Detener Race Core
     # Studio" del panel: tener dos formas de apagar con alcances distintos
     # solo genera dudas sobre qué quedó vivo. MongoDB nunca se toca.
-    for nombre in ("casparcg", "frontend", "backend"):
+    #
+    # Ya no hay proceso de frontend: el panel lo sirve el backend, así que
+    # se va con él.
+    for nombre in ("casparcg", "backend"):
         pid = pids.get(nombre)
         if not pid:
             continue
-        # /T arrastra a los hijos: npm lanza a Vite como proceso aparte y
-        # matar solo al padre deja el puerto 5173 ocupado.
+        # /T arrastra a los hijos por si el proceso dejó alguno colgando.
         r = subprocess.run(
             ["taskkill", "/PID", str(pid), "/T", "/F"],
             capture_output=True, text=True,
@@ -483,7 +506,6 @@ def main():
         ("CasparCG", paso_casparcg),
         ("base de datos", paso_base_de_datos),
         ("backend", paso_backend),
-        ("frontend", paso_frontend),
         ("navegador", paso_navegador),
     ]
 
@@ -498,7 +520,7 @@ def main():
 
     titulo(f"{VERDE}Todo listo{FIN}")
     print(f"""
-  Panel      {URL_LOGIN}
+  Panel      {URL_PANEL}
   API        http://127.0.0.1:{PUERTO_BACKEND}/docs
   Registros  {LOGS}
 
