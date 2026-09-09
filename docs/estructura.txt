@@ -20,8 +20,12 @@ Race-Core-Studio/
 │   │   │   └── vehicles_model.py
 │   │   ├── public/
 │   │   │   ├── categorias/  (4 archivos)
-│   │   │   ├── demo/  — current.xml de demostración
-│   │   │   │   ├── current.demo.xml
+│   │   │   ├── circuit-image/  — Imágenes de trazados
+│   │   │   │   ├── drag-3d.png
+│   │   │   │   ├── kartodromo-3d.png
+│   │   │   │   └── trazado-largo-3d.png
+│   │   │   ├── demo/  — current-demo.xml y su documentación
+│   │   │   │   ├── current-demo.xml
 │   │   │   │   └── LEEME.md
 │   │   │   ├── eventos/  (2 archivos)
 │   │   │   ├── marcas/  (23 archivos)
@@ -30,10 +34,7 @@ Race-Core-Studio/
 │   │   │   ├── __init__.py
 │   │   │   ├── current (1).xml
 │   │   │   ├── current (2).xml
-│   │   │   ├── LEEME.md
-│   │   │   ├── Plantilla de Pilotos GT Challenge.xlsx
-│   │   │   ├── Plantilla de Pilotos ST-GT.xlsx
-│   │   │   └── Plantilla de Pilotos TCR.xlsx
+│   │   │   └── LEEME.md
 │   │   ├── routes/  — Endpoints del API
 │   │   │   ├── __init__.py
 │   │   │   ├── categories_routes.py
@@ -86,7 +87,7 @@ Race-Core-Studio/
 │   │   ├── utils/
 │   │   │   └── __init__.py
 │   │   └── __init__.py
-│   ├── tests/  — 107 pruebas
+│   ├── tests/  — 113 pruebas
 │   │   ├── test_demo_timing.py
 │   │   ├── test_instalacion.py
 │   │   ├── test_licencia_local.py
@@ -172,7 +173,7 @@ Race-Core-Studio/
 │   │   │   ├── 70_results.html
 │   │   │   └── 80_drag_duelo.html
 │   │   ├── i18n/  (2 archivos)
-│   │   ├── img/  (263 archivos)
+│   │   ├── img/  (262 archivos)
 │   │   └── js/
 │   │       ├── entrada.js
 │   │       ├── flags.js
@@ -272,6 +273,8 @@ Race-Core-Studio/
 │   │   ├── manual-race-core-studio.html
 │   │   └── Manual-Race-Core-Studio.pdf
 │   ├── maquetas/  (13 archivos)
+│   ├── amcp_commands.txt
+│   ├── estructura.txt
 │   └── licenciamiento.md
 ├── Frontend/  — Panel React + Vite
 │   ├── public/  (5 archivos)
@@ -281,6 +284,7 @@ Race-Core-Studio/
 │   │   ├── api/  — Cliente del API
 │   │   │   ├── auth.js
 │   │   │   ├── graphics.js
+│   │   │   ├── instalacion.js
 │   │   │   └── registro.js
 │   │   ├── components/
 │   │   │   ├── auth/
@@ -295,6 +299,11 @@ Race-Core-Studio/
 │   │   │   │   ├── FormularioDuelo.jsx
 │   │   │   │   ├── SelectorCarrera.jsx
 │   │   │   │   └── SelectorPiloto.jsx
+│   │   │   ├── instalacion/  — El asistente de instalación
+│   │   │   │   ├── GuardaInstalacion.jsx
+│   │   │   │   ├── Pasos1a4.jsx
+│   │   │   │   ├── Pasos5a7.jsx
+│   │   │   │   └── Piezas.jsx
 │   │   │   ├── layout/
 │   │   │   │   └── NavItem.jsx
 │   │   │   ├── pilots/
@@ -329,6 +338,7 @@ Race-Core-Studio/
 │   │   │   ├── Eventos.jsx
 │   │   │   ├── Graficos.jsx
 │   │   │   ├── Home.jsx
+│   │   │   ├── Instalacion.jsx
 │   │   │   ├── Pilotos.jsx
 │   │   │   ├── Usuarios.jsx
 │   │   │   └── Vehiculos.jsx
@@ -348,6 +358,7 @@ Race-Core-Studio/
 │   ├── tailwind.config.js
 │   └── vite.config.js
 ├── installer/  — Instalador y licencia offline
+│   ├── construir.bat
 │   ├── instalar.py
 │   ├── LEEME.md
 │   └── licencia_local.py
@@ -365,13 +376,5 @@ Race-Core-Studio/
 │       └── manifiesto.py
 ├── .gitattributes
 ├── .gitignore
-├── amcp_commands
-├── circuit.jpg
-├── desktop.ini
-├── drag-3d.png
 ├── exponer-cloudflare.bat
-├── Icono.ico
-├── kartodromo-3d.png
-├── Logo.jpeg
-├── Pilotos Race Core Studio.xlsx
-└── trazado-largo-3d.png
+└── README.md
