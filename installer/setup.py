@@ -24,6 +24,7 @@ import argparse
 import ctypes
 import os
 import shutil
+import socket
 import subprocess
 import sys
 import time
@@ -93,6 +94,9 @@ def correr(comando, cwd=None, silencioso=True) -> bool:
         r = subprocess.run(
             comando, cwd=cwd, shell=isinstance(comando, str),
             capture_output=silencioso, text=True, timeout=3600,
+            # winget escribe en UTF-8 aunque la consola española esté en
+            # cp850. Sin decirlo, sus mensajes salen como «Se encontrÃ³».
+            encoding="utf-8", errors="replace",
         )
         if r.returncode != 0 and silencioso:
             _ULTIMO_ERROR = ((r.stderr or "") + (r.stdout or "")).strip()
@@ -264,13 +268,66 @@ REQUISITOS = [
 ]
 
 
+def mongod_instalado() -> Path | None:
+    """Busca mongod.exe donde lo deja su instalador.
+
+    MongoDB no se añade al PATH, así que `where mongod` no lo encuentra
+    aunque esté instalado y funcionando. Buscarlo solo ahí llevaba a
+    pedirle a winget que lo instalara otra vez, y winget contestaba —con
+    razón, y con código de error— que ya estaba puesto.
+    """
+    en_path = shutil.which("mongod")
+    if en_path:
+        return Path(en_path)
+
+    for base in {Path(os.environ.get("ProgramFiles", "C:/Program Files")),
+                 Path("C:/Program Files")}:
+        servidor = base / "MongoDB" / "Server"
+        if not servidor.is_dir():
+            continue
+        # Pueden convivir varias versiones; vale la más nueva.
+        for carpeta in sorted(servidor.iterdir(), reverse=True):
+            candidato = carpeta / "bin" / "mongod.exe"
+            if candidato.is_file():
+                return candidato
+
+    return None
+
+
+def hay_servicio(nombre: str) -> bool:
+    """Si Windows tiene registrado ese servicio, esté arrancado o no."""
+    return os.name == "nt" and correr(["sc", "query", nombre])
+
+
+def estado_mongodb() -> str | None:
+    """MongoDB sirve si responde, o si está puesto para poder arrancarlo."""
+    if mongo_responde():
+        return "MongoDB en marcha"
+
+    ruta = mongod_instalado()
+    if ruta is not None:
+        # Su carpeta al PATH, para que el resto lo tenga a mano.
+        os.environ["PATH"] = str(ruta.parent) + os.pathsep + os.environ.get("PATH", "")
+        return "MongoDB"
+
+    # Aunque no aparezca el ejecutable, con el servicio registrado basta:
+    # el paso 6 lo arranca con «net start», que es todo lo que hace falta.
+    if hay_servicio("MongoDB"):
+        return "MongoDB (servicio registrado)"
+
+    return None
+
+
 def estado_requisito(programa: str, nombre: str) -> str | None:
     """Lo que hay instalado y sirve, o None si hay que instalarlo.
 
-    De Python mira la versión, no el PATH. Casi cualquier Windows trae ya
-    alguno, y dar por bueno el que haya solo aplaza el fallo hasta el
-    paso 4, cuando ya se ha descargado todo.
+    Cada requisito se comprueba como toca, no todos con `which`: que un
+    nombre esté en el PATH no quiere decir que sirva, y que no esté no
+    quiere decir que falte.
     """
+    if programa == "mongod":
+        return estado_mongodb()
+
     if programa != "python":
         return nombre if hay(programa) else None
 
@@ -341,7 +398,9 @@ def paso_requisitos(saltar: bool) -> bool:
         if not instalado:
             mostrar_error(4)
         detalle(f"pruébalo a mano:  winget install --id {paquete}")
-        detalle("y vuelve a ejecutar este instalador")
+        detalle("si winget dice que ya estaba instalado, es que está en un")
+        detalle("sitio donde este instalador no lo encuentra: manda esta")
+        detalle("pantalla a soporte y lo añadimos a donde se busca")
         return False
 
     # Git LFS es aparte de Git y no se instala solo. Sin él, los binarios
@@ -385,29 +444,29 @@ def recargar_path() -> None:
         pass
 
 
+def mongo_responde() -> bool:
+    """Si hay algo escuchando en el puerto de MongoDB."""
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.settimeout(1.0)
+            return s.connect_ex(("127.0.0.1", 27017)) == 0
+    except OSError:
+        return False
+
+
 def arrancar_mongo() -> bool:
     """MongoDB tiene que estar vivo antes de instalar: el backend lo pide."""
-    import socket
-
-    def responde():
-        try:
-            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                s.settimeout(1.0)
-                return s.connect_ex(("127.0.0.1", 27017)) == 0
-        except OSError:
-            return False
-
-    if responde():
+    if mongo_responde():
         return True
 
     if os.name == "nt":
         correr(["net", "start", "MongoDB"])
         for _ in range(15):
-            if responde():
+            if mongo_responde():
                 return True
             time.sleep(1)
 
-    return responde()
+    return mongo_responde()
 
 
 # ─── 3 · Descarga ────────────────────────────────────────────
