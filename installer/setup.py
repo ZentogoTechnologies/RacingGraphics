@@ -9,7 +9,8 @@ comandos:
     3. Descarga         clona el repositorio con LFS
     4. Backend          entorno virtual y dependencias
     5. Panel            npm install y compilado
-    6. Configuración    se lo pasa a instalar.py, que ya sabe hacerlo
+    6. Lanzador         crea race-core-studio.exe
+    7. Configuración    se lo pasa a instalar.py, que ya sabe hacerlo
 
 La licencia va primero a propósito. Bajar medio giga y compilar durante
 quince minutos para después decirle a alguien que su clave no vale es la
@@ -39,7 +40,7 @@ RAMA = "test-production-1.0"
 DESTINO_POR_DEFECTO = Path("C:/Race-Core-Studio") if os.name == "nt" \
     else Path.home() / "Race-Core-Studio"
 
-TOTAL = 6
+TOTAL = 7
 
 ROJO, VERDE, AMARILLO, AZUL, GRIS, NEGRITA, FIN = (
     "\033[91m", "\033[92m", "\033[93m", "\033[94m", "\033[90m", "\033[1m", "\033[0m",
@@ -643,10 +644,82 @@ def paso_panel(raiz: Path) -> bool:
     return True
 
 
-# ─── 6 · Configuración ───────────────────────────────────────
+# ─── 6 · Lanzador ────────────────────────────────────────────
+
+def paso_lanzador(raiz: Path) -> bool:
+    """Crea race-core-studio.exe, que es con lo que se usa a diario.
+
+    El lanzador es un script de Python, y pedirle a nadie que arranque
+    su sistema tecleando la ruta de un intérprete no es una opción: lo
+    que tiene que haber en la carpeta es un icono que se abre con doble
+    clic. Se empaqueta aquí, en el equipo, contra la copia recién
+    descargada, así que siempre corresponde al código instalado.
+    """
+    paso(6, "Creando race-core-studio.exe")
+
+    if os.name != "nt":
+        aviso("fuera de Windows no hay .exe que crear")
+        return True
+
+    lanzador = raiz / "launcher"
+    fuente = lanzador / "race_core_studio.py"
+    destino = raiz / "race-core-studio.exe"
+
+    # Se rehace cuando el lanzador ha cambiado: si no, una actualización
+    # dejaría el .exe viejo arrancando código nuevo.
+    if destino.is_file() and destino.stat().st_mtime >= fuente.stat().st_mtime:
+        ok("ya estaba creado y al día")
+        return True
+
+    py = python_del_entorno(raiz)
+
+    print("      preparando el empaquetador…", flush=True)
+    if not correr([str(py), "-m", "pip", "install", "-q", "pyinstaller"]):
+        error("no se pudo instalar PyInstaller")
+        mostrar_error()
+        return False
+
+    print("      empaquetando el lanzador (un par de minutos)…", flush=True)
+    if not correr([
+        str(py), "-m", "PyInstaller",
+        "--onefile", "--console", "--clean", "--noconfirm",
+        "--name", "race-core-studio",
+        "--icon", str(lanzador / "race-core-studio.ico"),
+        "--hidden-import", "pymongo",
+        "--distpath", str(lanzador / "dist"),
+        "--workpath", str(lanzador / "build"),
+        "--specpath", str(lanzador),
+        str(fuente),
+    ], cwd=raiz):
+        error("falló el empaquetado del lanzador")
+        mostrar_error()
+        return False
+
+    recien = lanzador / "dist" / "race-core-studio.exe"
+    if not recien.is_file():
+        error("el empaquetado terminó pero no dejó el ejecutable")
+        return False
+
+    # Windows bloquea el archivo mientras el lanzador esté abierto.
+    correr(["taskkill", "/IM", "race-core-studio.exe", "/F"])
+
+    try:
+        shutil.copy2(recien, destino)
+    except OSError as e:
+        error("no se pudo dejar el ejecutable en su sitio")
+        detalle(f"{type(e).__name__}: {e}")
+        detalle("si Race Core Studio está abierto, ciérralo y repite")
+        return False
+
+    ok(f"race-core-studio.exe creado ({destino.stat().st_size / 1e6:.0f} MB)")
+    detalle(f"está en {destino}")
+    return True
+
+
+# ─── 7 · Configuración ───────────────────────────────────────
 
 def paso_configurar(raiz: Path, lic: dict, dias, abrir: bool) -> bool:
-    paso(6, "Configurando")
+    paso(7, "Configurando")
 
     if not arrancar_mongo():
         error("MongoDB no responde en el 27017")
@@ -706,6 +779,8 @@ def main() -> int:
         if not paso_backend(destino, args.con_recorte):
             raise SystemExit(1)
         if not paso_panel(destino):
+            raise SystemExit(1)
+        if not paso_lanzador(destino):
             raise SystemExit(1)
         if not paso_configurar(destino, lic, args.dias, not args.no_abrir):
             raise SystemExit(1)

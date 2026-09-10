@@ -294,7 +294,7 @@ Y repite desde el paso 6.
 
 ## Los dos ejecutables
 
-Cuando se empaqueten, serán dos, y hacen cosas distintas:
+Son dos, y hacen cosas distintas:
 
 | Ejecutable | Cuándo | Qué hace |
 |---|---|---|
@@ -304,16 +304,18 @@ Cuando se empaqueten, serán dos, y hacen cosas distintas:
 El instalador no es el programa: se usa una vez y se olvida. El lanzador
 es el que va al escritorio y el que se pulsa cada domingo.
 
-Se construyen así, **en Windows** —PyInstaller genera un binario de la
-máquina donde corre, así que un `.exe` solo sale de un Windows—:
+De los dos, solo hay que descargar el primero. El lanzador lo construye
+el propio instalador en su paso 6, en el equipo y contra la copia recién
+descargada, así que siempre corresponde al código instalado. Se rehace
+solo cuando una actualización toca el lanzador.
+
+Para reconstruirlo a mano —**en Windows**, porque PyInstaller genera un
+binario de la máquina donde corre—:
 
 ```bat
 installer\construir.bat     :: deja installer\dist\rcs-setup.exe
 launcher\construir.bat      :: deja race-core-studio.exe en la raíz
 ```
-
-Mientras no estén construidos, los pasos 6 y 7 de esta guía hacen lo
-mismo llamando a Python directamente.
 
 ## Probar el vencimiento de la licencia
 
