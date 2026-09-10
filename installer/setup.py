@@ -612,13 +612,46 @@ def paso_backend(raiz: Path, con_recorte: bool) -> bool:
 
 # ─── 5 · Panel ───────────────────────────────────────────────
 
+def fuentes_del_panel(frontend: Path):
+    """Los archivos de los que sale el panel compilado."""
+    yield from (frontend / "src").rglob("*")
+    for nombre in ("package.json", "vite.config.js", "index.html",
+                   "tailwind.config.js"):
+        archivo = frontend / nombre
+        if archivo.is_file():
+            yield archivo
+
+
+def mas_nuevo_que(archivos, referencia: Path) -> bool:
+    """Si algo de `archivos` se tocó después que `referencia`.
+
+    Es lo que distingue «ya está compilado» de «está compilado y sirve».
+    Sin esto, una actualización que cambie el panel no se recompilaba
+    nunca: el paso veía el dist/ de antes y se lo saltaba, así que el
+    cliente seguía viendo la versión vieja después de actualizar. git deja
+    los archivos que trae con la fecha del momento, así que basta con
+    comparar.
+    """
+    corte = referencia.stat().st_mtime
+
+    for archivo in archivos:
+        try:
+            if archivo.is_file() and archivo.stat().st_mtime > corte:
+                return True
+        except OSError:
+            continue
+
+    return False
+
+
 def paso_panel(raiz: Path) -> bool:
     paso(5, "Compilando el panel")
 
     frontend = raiz / "Frontend"
+    compilado = frontend / "dist" / "index.html"
 
-    if (frontend / "dist" / "index.html").is_file():
-        ok("ya estaba compilado")
+    if compilado.is_file() and not mas_nuevo_que(fuentes_del_panel(frontend), compilado):
+        ok("ya estaba compilado y al día")
         return True
 
     # npm es un .cmd en Windows: se invoca por cmd para que lo resuelva.

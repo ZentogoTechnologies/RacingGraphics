@@ -46,8 +46,13 @@ export default function Instalacion() {
           return
         }
         if (!api.leerToken()) {
-          setBloqueo('Falta el token de instalación. Abre el asistente desde el enlace '
-                   + 'que mostró el instalador, o vuelve a ejecutarlo.')
+          // Se dice dónde está: quien llega aquí ya perdió el enlace, y
+          // repetir «ábrelo desde el enlace» no le da forma de salir.
+          setBloqueo('Falta el token de instalación. Ábrelo desde el enlace que '
+                   + 'mostró el instalador. Si ya no lo tienes, el token está en '
+                   + 'Backend\\instalacion.token, dentro de la carpeta de '
+                   + 'instalación: añádelo a la dirección como '
+                   + '/instalacion?token=EL-TOKEN')
           return
         }
         // Se retoma donde lo dejó, no desde el principio: cerrar el
@@ -124,6 +129,10 @@ function Listo({ organizacion }) {
     setError(''); setCerrando(true)
     try {
       await api.completar()
+      // El token ya no vale para nada: el backend lo ha borrado. Se quita
+      // también de aquí para no dejarlo guardado en el navegador del
+      // cliente después de la instalación.
+      api.olvidarToken()
       // Recarga completa y no navigate: al completarse, el backend borra
       // el token y cierra el asistente, así que la app tiene que volver a
       // preguntar su estado desde cero para no quedarse con el viejo.

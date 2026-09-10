@@ -5,10 +5,14 @@
 // A cambio exigen el token de un solo uso que el instalador dejó en el
 // disco y puso en la dirección al abrir el navegador.
 //
-// El token se guarda en sessionStorage y no en localStorage a propósito:
-// sirve una sola vez, para esta instalación, y no tiene por qué sobrevivir
-// a cerrar el navegador. Si alguien vuelve más tarde, el backend ya habrá
-// cerrado el asistente de todas formas.
+// El token se guarda en localStorage, no en sessionStorage. La segunda
+// opción parecía la prudente —vale para una instalación, no tiene por qué
+// sobrevivir a cerrar el navegador— pero sessionStorage es de una sola
+// pestaña: abrir el asistente en otra, o duplicar la que hay, dejaba
+// fuera a quien estaba instalando, sin más salida que buscar el token en
+// el disco. Cambiarlo no abre nada: el token sigue siendo obligatorio,
+// sigue sin salir de este navegador, y el backend cierra el asistente al
+// terminar, que es lo que de verdad lo caduca.
 
 const BASE = import.meta.env.VITE_API_URL || '/api/v1'
 const CLAVE_TOKEN = 'rcs.setup-token'
@@ -25,7 +29,7 @@ export class SetupError extends Error {
 
 export function leerToken() {
   try {
-    return sessionStorage.getItem(CLAVE_TOKEN) || ''
+    return localStorage.getItem(CLAVE_TOKEN) || ''
   } catch {
     return ''
   }
@@ -33,8 +37,15 @@ export function leerToken() {
 
 export function guardarToken(token) {
   try {
-    if (token) sessionStorage.setItem(CLAVE_TOKEN, token)
+    if (token) localStorage.setItem(CLAVE_TOKEN, token)
   } catch { /* almacenamiento bloqueado: dura lo que la petición */ }
+}
+
+/** Al cerrar el asistente. Lo que ya no sirve, no se guarda. */
+export function olvidarToken() {
+  try {
+    localStorage.removeItem(CLAVE_TOKEN)
+  } catch { /* nada que hacer */ }
 }
 
 /**
