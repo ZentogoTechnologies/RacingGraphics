@@ -1,6 +1,6 @@
 @echo off
 REM ======================================================================
-REM  Construye rcs-setup.exe a partir de instalar.py
+REM  Construye rcs-setup.exe a partir de setup.py
 REM
 REM  Ejecutar desde cualquier sitio:   installer\construir.bat
 REM
@@ -45,9 +45,10 @@ Backend\venv\Scripts\python.exe -m PyInstaller ^
   --hidden-import cryptography ^
   --hidden-import licencia_local ^
   --hidden-import emitir ^
+  --add-data "%AQUI%instalar.py;." ^
   --collect-submodules cryptography ^
   --distpath "%AQUI%dist" --workpath "%AQUI%build" --specpath "%AQUI%." ^
-  "%AQUI%instalar.py"
+  "%AQUI%setup.py"
 
 if errorlevel 1 (
   echo.

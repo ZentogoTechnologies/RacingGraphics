@@ -94,10 +94,24 @@ def preguntar(etiqueta, por_defecto=""):
 
 # ─── 1. Licencia ─────────────────────────────────────────────
 
-def paso_licencia(dias_forzados=None) -> dict:
+def paso_licencia(dias_forzados=None, correo_dado=None, clave_dada=None) -> dict:
     paso(1, "Licencia")
 
     from licencia_local import validar
+
+    # Si vienen de fuera —del bootstrap, que ya las pidió antes de bajar
+    # nada— no se vuelven a preguntar. Hacer teclear la clave dos veces en
+    # la misma instalación no aporta nada.
+    if correo_dado and clave_dada:
+        resultado = validar(correo_dado, clave_dada)
+        if resultado["ok"]:
+            ok(f"licencia válida para {resultado['correo']}")
+            if dias_forzados is not None:
+                resultado["dias"] = dias_forzados
+                aviso(f"vigencia forzada a {dias_forzados} días (modo prueba)")
+            return resultado
+        error(resultado["error"])
+        raise SystemExit(1)
 
     # Tres intentos y no infinitos: si la clave no entra, el problema no
     # se arregla tecleando más veces, y dejar el instalador colgado en un
@@ -338,6 +352,8 @@ def main() -> int:
     p.add_argument("--dias", type=int, default=None,
                    help="Vigencia. Negativo para probar el vencimiento.")
     p.add_argument("--no-abrir", action="store_true")
+    p.add_argument("--correo", help="Salta la pregunta: la trae el bootstrap")
+    p.add_argument("--clave", help="Salta la pregunta: la trae el bootstrap")
     args = p.parse_args()
 
     print(f"\n{NEGRITA}  RACE CORE STUDIO · INSTALADOR{FIN}")
@@ -345,7 +361,7 @@ def main() -> int:
     print(f"{AMARILLO}  Versión de pruebas: la licencia no se valida contra el "
           f"servidor todavía.{FIN}")
 
-    lic = paso_licencia(args.dias)
+    lic = paso_licencia(args.dias, args.correo, args.clave)
     paso_emitir(lic)
 
     if not paso_comprobar(args.origen):

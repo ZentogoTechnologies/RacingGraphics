@@ -36,7 +36,7 @@ winget install MongoDB.Server
 
 | | Versión mínima | Por qué |
 |---|---|---|
-| Python | **3.10** | El código usa `str \| None`, que no existe antes |
+| Python | **3.12** | Lo exigen numpy 2.5 y pandas 3.0, fijados en `requirements.txt` |
 | Node | **20.19** o 22+ | Lo exige Vite 8 |
 | MongoDB | 6 o superior | La base del sistema |
 
