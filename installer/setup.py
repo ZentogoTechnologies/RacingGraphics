@@ -479,11 +479,8 @@ def paso_descarga(destino: Path, sin_casparcg=False) -> bool:
     if (destino / ".git").is_dir():
         ok("ya estaba descargado")
         print("      actualizando…", flush=True)
-        correr(["git", "fetch", "origin", RAMA], cwd=destino)
-        correr(["git", "checkout", RAMA], cwd=destino)
-        correr(["git", "pull", "origin", RAMA], cwd=destino)
-        correr(["git", "lfs", "pull"], cwd=destino)
-        ok("actualizado")
+        if not actualizar(destino):
+            return False
         return verificar_casparcg(destino, sin_casparcg)
 
     destino.parent.mkdir(parents=True, exist_ok=True)
@@ -497,6 +494,62 @@ def paso_descarga(destino: Path, sin_casparcg=False) -> bool:
     ok("descargado")
 
     return verificar_casparcg(destino, sin_casparcg)
+
+
+# Archivos que van en git y que la propia instalación reescribe. La clave
+# pública de este equipo se escribe DENTRO de license_services.py, así que
+# el archivo queda modificado en toda instalación, y una actualización que
+# lo tocara haría fracasar la traída de cambios. Se devuelven a su estado
+# original antes de actualizar: el paso 7 vuelve a escribir la clave, que
+# sale de claves-desarrollo y no de aquí.
+REESCRITOS_EN_LA_INSTALACION = ["Backend/src/services/license_services.py"]
+
+
+def actualizar(destino: Path) -> bool:
+    """Trae los cambios, y dice la verdad sobre si pudo.
+
+    Antes esto eran cuatro `correr()` sin mirar lo que devolvían y un «OK
+    actualizado» detrás. Cuando algo fallaba —sin red, un archivo local
+    estorbando— el instalador seguía adelante anunciando una actualización
+    que no había ocurrido, y el fallo aparecía mucho después y en otro
+    sitio.
+    """
+    if not correr(["git", "fetch", "origin", RAMA], cwd=destino):
+        error("no se pudo contactar con el repositorio")
+        mostrar_error(4)
+        detalle("comprueba la conexión y que sigas teniendo acceso")
+        return False
+
+    for archivo in REESCRITOS_EN_LA_INSTALACION:
+        correr(["git", "checkout", "--", archivo], cwd=destino)
+
+    if not correr(["git", "checkout", RAMA], cwd=destino):
+        error(f"no se pudo cambiar a la rama {RAMA}")
+        mostrar_error(4)
+        return False
+
+    # merge --ff-only en vez de pull: no inventa fusiones y falla claro si
+    # la copia local tiene commits propios, que es algo que hay que mirar
+    # a mano y no resolver a ciegas en un instalador.
+    if not correr(["git", "merge", "--ff-only", f"origin/{RAMA}"], cwd=destino):
+        error("no se pudieron aplicar los cambios")
+        mostrar_error(6)
+        detalle("")
+        detalle("hay algo local que estorba. Para ver qué:")
+        detalle(f"   cd {destino}")
+        detalle("   git status")
+        return False
+
+    ok("actualizado")
+
+    # LFS aparte: si falla, los binarios llegan como punteros. No se corta
+    # aquí porque verificar_casparcg() lo comprueba a continuación y sabe
+    # explicarlo mejor.
+    if not correr(["git", "lfs", "pull"], cwd=destino):
+        aviso("Git LFS no pudo traer los binarios")
+        mostrar_error(3)
+
+    return True
 
 
 def hay_git_lfs() -> bool:
