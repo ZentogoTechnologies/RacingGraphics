@@ -36,6 +36,7 @@ import argparse
 import os
 import secrets
 import socket
+import subprocess
 import sys
 import time
 import webbrowser
@@ -80,6 +81,40 @@ def ok(t):      print(f"      {VERDE}OK{FIN}    {t}")
 def aviso(t):   print(f"      {AMARILLO}··{FIN}    {t}")
 def error(t):   print(f"      {ROJO}FALLO{FIN} {t}")
 def detalle(t): print(f"            {GRIS}{t}{FIN}")
+
+
+def correr_herramienta(orden, que: str) -> bool:
+    """Ejecuta una herramienta del repositorio y, si falla, dice por qué.
+
+    La salida se captura para no ensuciar la pantalla, pero se enseña
+    entera cuando algo va mal: un instalador que muestra el traceback de
+    su propio `subprocess.run` no dice nada del error de verdad, que es
+    el que se quedó dentro de la tubería.
+
+    Y se le fija UTF-8 a la salida del hijo. Con la salida redirigida,
+    Python escribe en la página de códigos de Windows —cp1252 en un
+    equipo en español— y cualquier carácter que no quepa ahí lo mata con
+    un UnicodeEncodeError que no tiene nada que ver con su trabajo.
+    """
+    entorno = {**os.environ, "PYTHONIOENCODING": "utf-8"}
+
+    try:
+        r = subprocess.run(orden, capture_output=True, text=True,
+                           encoding="utf-8", errors="replace", env=entorno,
+                           timeout=300)
+    except (OSError, subprocess.SubprocessError) as e:
+        error(f"no se pudo {que}")
+        detalle(f"{type(e).__name__}: {e}")
+        return False
+
+    if r.returncode == 0:
+        return True
+
+    error(f"no se pudo {que}")
+    detalle(f"{Path(orden[1]).name} terminó con código {r.returncode}")
+    for linea in ((r.stderr or "") + (r.stdout or "")).strip().splitlines()[-8:]:
+        detalle(linea[:150])
+    return False
 
 
 def preguntar(etiqueta, por_defecto=""):
@@ -154,19 +189,26 @@ def paso_emitir(lic: dict) -> str:
 
     if not privada.is_file():
         aviso("no hay claves de desarrollo; generándolas")
-        import subprocess
-        subprocess.run(
+
+        if not correr_herramienta(
             [sys.executable, str(RAIZ / "tools" / "licencias" / "claves.py"),
              "--salida", str(claves), "--nombre", "licencias"],
-            check=True, capture_output=True,
-        )
-        # La pública tiene que quedar dentro del backend, que es de donde
-        # la lee para verificar.
-        subprocess.run(
-            [sys.executable, str(RAIZ / "tools" / "licencias" / "licencia_de_prueba.py"),
-             "--dias", "1"],
-            check=True, capture_output=True,
-        )
+            "generar el par de claves",
+        ):
+            raise SystemExit(1)
+
+    # La pública tiene que quedar dentro del backend, que es de donde la
+    # lee para verificar. Se hace siempre, no solo al generar las claves:
+    # tener la privada no demuestra que la copia llegara a hacerse, y si
+    # las dos no son pareja el backend rechaza una licencia legítima en
+    # un sistema por lo demás bien instalado. La herramienta ya sabe no
+    # repetir el trabajo cuando la clave puesta es la que toca.
+    if not correr_herramienta(
+        [sys.executable, str(RAIZ / "tools" / "licencias" / "licencia_de_prueba.py"),
+         "--dias", "1"],
+        "poner la clave pública en el backend",
+    ):
+        raise SystemExit(1)
 
     from emitir import emitir
 

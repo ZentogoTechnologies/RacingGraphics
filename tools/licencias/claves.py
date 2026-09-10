@@ -54,7 +54,10 @@ def generar(destino: Path, nombre: str) -> None:
     except OSError:
         pass
 
-    print(f"Privada : {archivo_privada}   ← NO se comparte, no va a git")
+    # Sin adornos fuera del ASCII: esto se ejecuta desde el instalador
+    # con la salida redirigida, y ahí Python escribe en la página de
+    # códigos de Windows, donde una flecha «←» no existe y revienta.
+    print(f"Privada : {archivo_privada}   (NO se comparte, no va a git)")
     print(f"Pública : {archivo_publica}")
     print()
     print("Copia esto dentro de license_services.py (CLAVE_PUBLICA_PEM):")
