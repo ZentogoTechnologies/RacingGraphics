@@ -114,6 +114,109 @@ def hay(programa: str) -> bool:
     return shutil.which(programa) is not None
 
 
+# ─── Buscar un Python que sirva ──────────────────────────────
+
+# numpy 2.5 y pandas 3.0, que están fijados en requirements.txt, exigen
+# 3.12. Se comprueba en el paso 2, con todo lo demás: si se dejara para
+# cuando toca instalar el backend, pip fallaría al final de varios
+# minutos de descarga con un error largo que no menciona la versión.
+PYTHON_MINIMO = (3, 12)
+
+
+def texto_version(version) -> str:
+    return ".".join(str(n) for n in version)
+
+
+MINIMO_TEXTO = texto_version(PYTHON_MINIMO)
+
+
+def _version_de(ejecutable) -> tuple | None:
+    """La versión de un Python, preguntándosela a él mismo.
+
+    Se ejecuta en vez de mirar el nombre del archivo porque en Windows
+    `python` suele ser el stub de la Microsoft Store: existe, está en el
+    PATH, y al llamarlo abre la tienda en vez de hacer nada. Solo cuenta
+    el que sabe decir su propia versión.
+    """
+    orden = ejecutable if isinstance(ejecutable, list) else [ejecutable]
+
+    try:
+        r = subprocess.run(
+            [*orden, "-c", "import sys; print('%d.%d.%d' % sys.version_info[:3])"],
+            capture_output=True, text=True, timeout=25,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+
+    if r.returncode != 0:
+        return None
+
+    try:
+        return tuple(int(n) for n in r.stdout.strip().split("."))
+    except ValueError:
+        return None
+
+
+def candidatos_python() -> list:
+    """Por dónde buscar, en orden de preferencia.
+
+    `py` es el lanzador oficial de Windows y el más fiable: sabe qué
+    versiones hay instaladas aunque ninguna esté en el PATH. Se pide 3.12
+    primero por ser la que instala este mismo instalador, y por tanto
+    contra la que están probadas las dependencias.
+    """
+    candidatos = []
+
+    # Sin congelar, el que está ejecutando esto es el candidato natural.
+    # Congelado no vale: el ejecutable lleva su Python dentro, recortado,
+    # y ese no sabe crear entornos virtuales.
+    if not getattr(sys, "frozen", False):
+        candidatos.append([sys.executable])
+
+    candidatos += [
+        ["py", "-3.12"], ["py", "-3.13"], ["py", "-3"],
+        ["python3"], ["python"],
+    ]
+
+    # Donde winget deja Python, por si el PATH de esta ventana no lo tiene.
+    # Son varios sitios porque depende de si instaló para este usuario o
+    # para todo el equipo, y eso cambia según se ejecute como
+    # administrador o no.
+    carpetas = [
+        Path(os.environ.get("LOCALAPPDATA", "")) / "Programs" / "Python",
+        Path(os.environ.get("ProgramFiles", "C:/Program Files")),
+        Path(os.environ.get("ProgramFiles(x86)", "C:/Program Files (x86)")),
+        Path("C:/"),
+    ]
+
+    for version in ("312", "313"):
+        for carpeta in carpetas:
+            candidatos.append([str(carpeta / f"Python{version}" / "python.exe")])
+
+    return candidatos
+
+
+def revisar_python() -> tuple:
+    """(intérprete que sirve, su versión). Si ninguno sirve, (None, la mejor).
+
+    Devuelve también la versión cuando no llega al mínimo, para poder
+    decir «tienes 3.11» en vez de «no tienes Python»: no es lo mismo, y
+    lo segundo manda a buscar donde no es.
+    """
+    mejor = None
+
+    for candidato in candidatos_python():
+        version = _version_de(candidato)
+        if version is None:
+            continue
+        if version >= PYTHON_MINIMO:
+            return candidato, version
+        if mejor is None or version > mejor:
+            mejor = version
+
+    return None, mejor
+
+
 # ─── 1 · Licencia ────────────────────────────────────────────
 
 def paso_licencia(correo=None, clave=None) -> dict:
@@ -155,10 +258,33 @@ def paso_licencia(correo=None, clave=None) -> dict:
 # Lo que hace falta y cómo instalarlo. winget viene de serie en Windows 11.
 REQUISITOS = [
     ("git",    "Git.Git",                "Git y Git LFS"),
-    ("python", "Python.Python.3.12",     "Python 3.12"),
+    ("python", "Python.Python.3.12",     f"Python {MINIMO_TEXTO} o superior"),
     ("node",   "OpenJS.NodeJS.LTS",      "Node.js LTS"),
     ("mongod", "MongoDB.Server",         "MongoDB"),
 ]
+
+
+def estado_requisito(programa: str, nombre: str) -> str | None:
+    """Lo que hay instalado y sirve, o None si hay que instalarlo.
+
+    De Python mira la versión, no el PATH. Casi cualquier Windows trae ya
+    alguno, y dar por bueno el que haya solo aplaza el fallo hasta el
+    paso 4, cuando ya se ha descargado todo.
+    """
+    if programa != "python":
+        return nombre if hay(programa) else None
+
+    interprete, version = revisar_python()
+    if interprete:
+        return f"Python {texto_version(version)}"
+
+    if version:
+        aviso(f"hay Python {texto_version(version)}, y hace falta "
+              f"{MINIMO_TEXTO} o superior")
+        detalle("lo exigen numpy y pandas, que van fijados en requirements.txt")
+        detalle("el 3.12 se instala al lado del que ya tienes, sin quitarlo")
+
+    return None
 
 
 def instalar_con_winget(paquete: str, nombre: str) -> bool:
@@ -178,8 +304,8 @@ def paso_requisitos(saltar: bool) -> bool:
 
     if os.name != "nt":
         aviso("fuera de Windows no se instala nada solo")
-        detalle("hacen falta: git+lfs, python 3.10+, node 20+, mongodb")
-        return all(hay(p) for p, _, _ in REQUISITOS)
+        detalle(f"hacen falta: git+lfs, python {MINIMO_TEXTO}+, node 20+, mongodb")
+        return all(estado_requisito(p, n) for p, _, n in REQUISITOS)
 
     if not hay("winget"):
         error("no encuentro winget")
@@ -189,24 +315,34 @@ def paso_requisitos(saltar: bool) -> bool:
 
     faltan = []
     for programa, paquete, nombre in REQUISITOS:
-        if hay(programa):
-            ok(nombre)
+        etiqueta = estado_requisito(programa, nombre)
+        if etiqueta:
+            ok(etiqueta)
         else:
             faltan.append((programa, paquete, nombre))
 
     for programa, paquete, nombre in faltan:
-        if instalar_con_winget(paquete, nombre):
-            ok(f"{nombre} instalado")
-        else:
-            error(f"no se pudo instalar {nombre}")
-            detalle(f"pruébalo a mano:  winget install --id {paquete}")
-            return False
+        instalado = instalar_con_winget(paquete, nombre)
 
-    if faltan:
         # winget mete los programas nuevos en el PATH del sistema, pero
         # esta ventana ya tenía el suyo cargado desde antes: los comandos
         # nuevos no aparecen hasta abrir otra. Se recarga a mano.
         recargar_path()
+
+        # Manda lo que se encuentra, no lo que diga winget: unas veces
+        # sale con error porque «ya estaba instalado», y otras sale bien
+        # sin dejar nada que se pueda usar.
+        etiqueta = estado_requisito(programa, nombre)
+        if etiqueta:
+            ok(f"{etiqueta} · instalado")
+            continue
+
+        error(f"no se pudo instalar {nombre}")
+        if not instalado:
+            mostrar_error(4)
+        detalle(f"pruébalo a mano:  winget install --id {paquete}")
+        detalle("y vuelve a ejecutar este instalador")
+        return False
 
     # Git LFS es aparte de Git y no se instala solo. Sin él, los binarios
     # de CasparCG llegan como punteros de texto de 132 bytes.
@@ -359,87 +495,21 @@ def python_del_entorno(raiz: Path) -> Path:
     return raiz / "Backend" / "venv" / sub / exe
 
 
-# numpy 2.5 y pandas 3.0, que están fijados en requirements.txt, exigen
-# 3.12. Se comprueba antes de crear el entorno: si no, pip falla al final
-# de varios minutos con un error largo que no dice que el problema sea la
-# versión de Python.
-PYTHON_MINIMO = (3, 12)
-
-
-def _version_de(ejecutable) -> tuple | None:
-    """La versión de un Python, preguntándosela a él mismo.
-
-    Se ejecuta en vez de mirar el nombre del archivo porque en Windows
-    `python` suele ser el stub de la Microsoft Store: existe, está en el
-    PATH, y al llamarlo abre la tienda en vez de hacer nada. Solo cuenta
-    el que sabe decir su propia versión.
-    """
-    orden = ejecutable if isinstance(ejecutable, list) else [ejecutable]
-
-    try:
-        r = subprocess.run(
-            [*orden, "-c", "import sys; print('%d.%d.%d' % sys.version_info[:3])"],
-            capture_output=True, text=True, timeout=25,
-        )
-    except (OSError, subprocess.SubprocessError):
-        return None
-
-    if r.returncode != 0:
-        return None
-
-    try:
-        return tuple(int(n) for n in r.stdout.strip().split("."))
-    except ValueError:
-        return None
-
-
-def python_del_sistema() -> list | None:
-    """Un Python del sistema que sirva para crear el entorno virtual.
-
-    Sin congelar es el que está ejecutando esto. Congelado no hay ninguno
-    —el ejecutable lleva el suyo dentro y no sabe crear entornos— así que
-    hay que encontrar el que instaló winget.
-
-    Se prueban varios candidatos por orden. `py` es el lanzador oficial de
-    Windows y es el más fiable: sabe qué versiones hay instaladas aunque
-    ninguna esté en el PATH.
-    """
-    if not getattr(sys, "frozen", False):
-        return [sys.executable]
-
-    candidatos = [
-        ["py", "-3.13"], ["py", "-3.12"], ["py", "-3"],
-        ["python3"], ["python"],
-    ]
-
-    # Donde winget deja Python, por si el PATH de esta ventana no lo tiene.
-    for version in ("313", "312"):
-        candidatos.append([str(Path(os.environ.get("LOCALAPPDATA", "")) /
-                               "Programs" / "Python" / f"Python{version}" / "python.exe")])
-        candidatos.append([f"C:/Python{version}/python.exe"])
-
-    for candidato in candidatos:
-        version = _version_de(candidato)
-        if version and version >= PYTHON_MINIMO:
-            return candidato
-
-    return None
-
-
 def paso_backend(raiz: Path, con_recorte: bool) -> bool:
     paso(4, "Instalando el backend")
 
-    minimo = ".".join(str(n) for n in PYTHON_MINIMO)
-    base = python_del_sistema()
+    base, version = revisar_python()
 
     if base is None:
-        error(f"no encuentro un Python {minimo} o superior")
+        # No debería llegarse aquí: el paso 2 lo instala. Si pasa, es que
+        # winget lo dejó donde esta ventana no lo ve, y abrir otra basta.
+        error(f"no encuentro un Python {MINIMO_TEXTO} o superior")
         detalle("lo exigen numpy y pandas, que van fijados en requirements.txt")
         detalle("instálalo con:  winget install Python.Python.3.12")
         detalle("y vuelve a ejecutar este instalador")
         return False
 
-    ok(f"Python {'.'.join(str(n) for n in _version_de(base))}")
+    ok(f"Python {texto_version(version)}")
 
     venv = raiz / "Backend" / "venv"
     py = python_del_entorno(raiz)

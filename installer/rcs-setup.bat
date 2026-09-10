@@ -33,12 +33,23 @@ if errorlevel 1 (
     exit /b
 )
 
-REM ── Python ────────────────────────────────────────────────
+REM -- Python ------------------------------------------------
 REM  El instalador esta escrito en Python, asi que es lo unico que hay
-REM  que resolver aqui: el resto lo instala el propio setup.py.
-where python >nul 2>&1
-if errorlevel 1 (
-    echo   [1/2] Python no esta instalado. Instalandolo...
+REM  que resolver aqui: el resto lo instala el propio setup.py, que se
+REM  busca por su cuenta un 3.12 para el backend.
+REM
+REM  No basta con "where python": casi cualquier Windows trae ya algo
+REM  llamado python, y a menudo es el atajo de la Microsoft Store, que
+REM  esta en el PATH y al llamarlo abre la tienda en vez de ejecutar
+REM  nada. Solo vale el que sepa decir su propia version.
+set "PY="
+call :probar py -3.12
+call :probar py -3
+call :probar python
+call :probar python3
+
+if not defined PY (
+    echo   [1/2] No hay un Python utilizable. Instalandolo...
     echo.
 
     where winget >nul 2>&1
@@ -62,8 +73,11 @@ if errorlevel 1 (
     for /f "tokens=2,*" %%a in ('reg query "HKCU\Environment" /v Path 2^>nul ^| find "Path"') do set "RUTA_USR=%%b"
     set "PATH=!RUTA_SIS!;!RUTA_USR!;!PATH!"
 
-    where python >nul 2>&1
-    if errorlevel 1 (
+    call :probar py -3.12
+    call :probar py -3
+    call :probar python
+
+    if not defined PY (
         echo.
         echo   [!] Python se instalo, pero esta ventana no lo ve todavia.
         echo.
@@ -82,7 +96,7 @@ REM ── El instalador de verdad ───────────────
 echo   [2/2] Arrancando el instalador...
 echo.
 
-python "%~dp0setup.py" %*
+%PY% "%~dp0setup.py" %*
 
 if errorlevel 1 (
     echo.
@@ -92,3 +106,14 @@ if errorlevel 1 (
 )
 
 endlocal
+exit /b 0
+
+
+REM -- Sirve este Python? -------------------------------------
+REM  Se le pregunta a el, ejecutandolo. 3.10 es lo que necesita setup.py
+REM  para arrancar; del 3.12 que exige el backend ya se ocupa el.
+:probar
+if defined PY goto :eof
+%* -c "import sys; sys.exit(0 if sys.version_info >= (3, 10) else 1)" >nul 2>&1
+if not errorlevel 1 set "PY=%*"
+goto :eof
