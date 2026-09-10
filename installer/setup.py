@@ -366,27 +366,89 @@ def python_del_entorno(raiz: Path) -> Path:
 PYTHON_MINIMO = (3, 12)
 
 
+def _version_de(ejecutable) -> tuple | None:
+    """La versión de un Python, preguntándosela a él mismo.
+
+    Se ejecuta en vez de mirar el nombre del archivo porque en Windows
+    `python` suele ser el stub de la Microsoft Store: existe, está en el
+    PATH, y al llamarlo abre la tienda en vez de hacer nada. Solo cuenta
+    el que sabe decir su propia versión.
+    """
+    orden = ejecutable if isinstance(ejecutable, list) else [ejecutable]
+
+    try:
+        r = subprocess.run(
+            [*orden, "-c", "import sys; print('%d.%d.%d' % sys.version_info[:3])"],
+            capture_output=True, text=True, timeout=25,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+
+    if r.returncode != 0:
+        return None
+
+    try:
+        return tuple(int(n) for n in r.stdout.strip().split("."))
+    except ValueError:
+        return None
+
+
+def python_del_sistema() -> list | None:
+    """Un Python del sistema que sirva para crear el entorno virtual.
+
+    Sin congelar es el que está ejecutando esto. Congelado no hay ninguno
+    —el ejecutable lleva el suyo dentro y no sabe crear entornos— así que
+    hay que encontrar el que instaló winget.
+
+    Se prueban varios candidatos por orden. `py` es el lanzador oficial de
+    Windows y es el más fiable: sabe qué versiones hay instaladas aunque
+    ninguna esté en el PATH.
+    """
+    if not getattr(sys, "frozen", False):
+        return [sys.executable]
+
+    candidatos = [
+        ["py", "-3.13"], ["py", "-3.12"], ["py", "-3"],
+        ["python3"], ["python"],
+    ]
+
+    # Donde winget deja Python, por si el PATH de esta ventana no lo tiene.
+    for version in ("313", "312"):
+        candidatos.append([str(Path(os.environ.get("LOCALAPPDATA", "")) /
+                               "Programs" / "Python" / f"Python{version}" / "python.exe")])
+        candidatos.append([f"C:/Python{version}/python.exe"])
+
+    for candidato in candidatos:
+        version = _version_de(candidato)
+        if version and version >= PYTHON_MINIMO:
+            return candidato
+
+    return None
+
+
 def paso_backend(raiz: Path, con_recorte: bool) -> bool:
     paso(4, "Instalando el backend")
 
-    if sys.version_info < PYTHON_MINIMO:
-        actual = ".".join(str(n) for n in sys.version_info[:3])
-        minimo = ".".join(str(n) for n in PYTHON_MINIMO)
-        error(f"hace falta Python {minimo} o superior, y este es {actual}")
+    minimo = ".".join(str(n) for n in PYTHON_MINIMO)
+    base = python_del_sistema()
+
+    if base is None:
+        error(f"no encuentro un Python {minimo} o superior")
         detalle("lo exigen numpy y pandas, que van fijados en requirements.txt")
         detalle("instálalo con:  winget install Python.Python.3.12")
+        detalle("y vuelve a ejecutar este instalador")
         return False
 
-    ok(f"Python {'.'.join(str(n) for n in sys.version_info[:3])}")
+    ok(f"Python {'.'.join(str(n) for n in _version_de(base))}")
 
     venv = raiz / "Backend" / "venv"
     py = python_del_entorno(raiz)
 
     if not py.exists():
         print("      creando el entorno virtual…", flush=True)
-        if not correr([sys.executable if not getattr(sys, "frozen", False) else "python",
-                       "-m", "venv", str(venv)]):
+        if not correr([*base, "-m", "venv", str(venv)]):
             error("no se pudo crear el entorno virtual")
+            mostrar_error()
             return False
     ok("entorno virtual listo")
 

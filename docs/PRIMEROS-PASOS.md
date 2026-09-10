@@ -7,8 +7,14 @@ minutos, casi todos de descargas.
 
 ## La forma corta
 
-Descarga el repositorio o solo la carpeta `installer\`, y haz **doble clic
-en `rcs-setup.bat`**.
+Baja **`rcs-setup.exe`** de la
+[página de releases](../../releases/tag/instalador-pruebas) y ejecútalo.
+
+Un solo archivo. No hace falta clonar nada antes: el propio instalador se
+encarga.
+
+Si prefieres no bajar un ejecutable, clona el repositorio y haz doble clic
+en `installer\rcs-setup.bat`, que hace exactamente lo mismo.
 
 Eso es todo. Pide la licencia y se encarga del resto: instala Python,
 Node, Git LFS y MongoDB si faltan, descarga el software, lo compila y

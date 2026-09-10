@@ -153,11 +153,23 @@ completar, y con él se cierra el asistente para siempre.
 
 ## La forma corta de instalarlo
 
-Doble clic en **`installer\rcs-setup.bat`**. Pide la licencia y hace el
-resto: instala Python, Node, Git LFS y MongoDB si faltan, descarga el
-software, lo compila y abre el asistente.
+Baja **`rcs-setup.exe`** de la
+[página de releases](../../releases/tag/instalador-pruebas) y ejecútalo.
 
-Es lo mismo que hará `rcs-setup.exe` cuando esté empaquetado.
+Pide la licencia y hace el resto: instala Python, Node, Git LFS y MongoDB
+si faltan, descarga el software, lo compila y abre el asistente en el
+navegador. Un solo archivo, sin clonar nada antes.
+
+Lo construye GitHub en una máquina Windows cada vez que cambia el
+instalador, así que siempre está al día.
+
+> **Windows lo marcará como «editor desconocido».** El ejecutable no va
+> firmado todavía: hace falta un certificado Authenticode, que es un
+> trámite de semanas. Se pasa con *Más información → Ejecutar de todas
+> formas*.
+
+Si prefieres no bajar un ejecutable, `installer\rcs-setup.bat` hace
+exactamente lo mismo desde el repositorio clonado.
 
 ## Probar el vencimiento de la licencia
 

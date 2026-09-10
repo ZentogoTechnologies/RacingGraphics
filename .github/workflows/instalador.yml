@@ -1,0 +1,96 @@
+# Construye rcs-setup.exe en una máquina Windows de GitHub y lo publica
+# para descargar.
+#
+# PyInstaller genera un binario de la plataforma donde corre, así que un
+# .exe de Windows solo sale de un Windows. Esto evita tener que montar uno
+# a mano cada vez: se compila aquí y se baja ya hecho.
+
+name: Instalador de Windows
+
+on:
+  push:
+    branches: [test-production-1.0, main]
+    paths:
+      - 'installer/**'
+      - '.github/workflows/instalador.yml'
+  workflow_dispatch:        # también a mano, desde la pestaña Actions
+
+permissions:
+  contents: write           # hace falta para publicar la release
+
+jobs:
+  construir:
+    runs-on: windows-latest
+
+    steps:
+      - name: Traer el código
+        uses: actions/checkout@v4
+        with:
+          # Sin LFS: para compilar el instalador no hacen falta los
+          # binarios de CasparCG, y son 82 MB que no vale la pena bajar.
+          lfs: false
+
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Instalar lo que necesita el empaquetado
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pyinstaller pyjwt cryptography
+
+      - name: Construir rcs-setup.exe
+        run: |
+          pyinstaller --onefile --console --clean --noconfirm `
+            --name rcs-setup `
+            --icon launcher/race-core-studio.ico `
+            --paths installer `
+            --paths tools/licencias `
+            --hidden-import licencia_local `
+            --hidden-import emitir `
+            --hidden-import jwt `
+            --hidden-import cryptography `
+            --collect-submodules cryptography `
+            --add-data "installer/instalar.py;." `
+            --add-data "installer/licencia_local.py;." `
+            --distpath dist `
+            installer/setup.py
+
+      - name: Comprobar que arranca
+        run: |
+          # --help no instala nada, pero obliga al ejecutable a cargar
+          # todos sus módulos. Si a PyInstaller le faltó alguno, revienta
+          # aquí y no en la máquina de un cliente.
+          ./dist/rcs-setup.exe --help
+
+      - name: Guardar el ejecutable
+        uses: actions/upload-artifact@v4
+        with:
+          name: rcs-setup
+          path: dist/rcs-setup.exe
+          retention-days: 90
+
+      - name: Publicar la descarga
+        # Solo desde la rama de producción: una release por cada rama de
+        # trabajo llenaría la lista de versiones que nadie debe instalar.
+        if: github.ref == 'refs/heads/test-production-1.0'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: instalador-pruebas
+          name: Instalador de pruebas
+          body: |
+            **rcs-setup.exe** — instalador de Race Core Studio.
+
+            Descárgalo y ejecútalo. Pide la licencia y hace el resto:
+            instala Python, Node, Git LFS y MongoDB si faltan, descarga el
+            software, lo compila y abre el asistente en el navegador.
+
+            Windows lo marcará como «editor desconocido»: el ejecutable no
+            va firmado todavía. Se pasa con *Más información → Ejecutar de
+            todas formas*.
+
+            Compilado desde `${{ github.sha }}`.
+          files: dist/rcs-setup.exe
+          prerelease: true
+          make_latest: false
