@@ -34,9 +34,10 @@ REM --icon contra --specpath, no contra el directorio actual, y una ruta
 REM relativa acaba duplicando la carpeta (installer\installer\...).
 echo  Empaquetando...
 Backend\venv\Scripts\python.exe -m PyInstaller ^
-  --onefile --console --clean --noconfirm ^
+  --onefile --console --clean --noconfirm --noupx ^
   --name rcs-setup ^
   --icon "%AQUI%..\launcher\race-core-studio.ico" ^
+  --version-file "%AQUI%version-info.txt" ^
   --paths "Backend" ^
   --paths "tools\licencias" ^
   --paths "installer" ^

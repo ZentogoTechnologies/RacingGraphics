@@ -42,9 +42,10 @@ jobs:
 
       - name: Construir rcs-setup.exe
         run: |
-          pyinstaller --onefile --console --clean --noconfirm `
+          pyinstaller --onefile --console --clean --noconfirm --noupx `
             --name rcs-setup `
             --icon launcher/race-core-studio.ico `
+            --version-file installer/version-info.txt `
             --paths installer `
             --paths tools/licencias `
             --hidden-import licencia_local `
@@ -71,6 +72,13 @@ jobs:
           path: dist/rcs-setup.exe
           retention-days: 90
 
+      - name: Huella del ejecutable
+        id: huella
+        run: |
+          $h = (Get-FileHash dist/rcs-setup.exe -Algorithm SHA256).Hash.ToLower()
+          "sha256=$h" >> $env:GITHUB_OUTPUT
+          Write-Host "SHA-256: $h"
+
       - name: Publicar la descarga
         # Solo desde la rama de producción: una release por cada rama de
         # trabajo llenaría la lista de versiones que nadie debe instalar.
@@ -86,9 +94,30 @@ jobs:
             instala Python, Node, Git LFS y MongoDB si faltan, descarga el
             software, lo compila y abre el asistente en el navegador.
 
-            Windows lo marcará como «editor desconocido»: el ejecutable no
-            va firmado todavía. Se pasa con *Más información → Ejecutar de
-            todas formas*.
+            ### Antivirus
+
+            El ejecutable **no va firmado** todavía, así que Windows lo
+            marcará como «editor desconocido», y Defender puede llegar a
+            borrarlo con un aviso de `Trojan:Win32/Wacatac.B!ml`. El
+            sufijo `!ml` quiere decir que no coincide con ningún malware
+            conocido: es el modelo heurístico puntuando un binario sin
+            firma que se descomprime solo. Es un falso positivo habitual
+            de PyInstaller, y se arregla de verdad con un certificado
+            Authenticode.
+
+            Mientras tanto, esto se compila en un runner limpio de GitHub
+            a partir del código de este repositorio, y su huella es
+            comprobable:
+
+            ```
+            SHA-256  ${{ steps.huella.outputs.sha256 }}
+            ```
+
+            Para verificar lo descargado:
+
+            ```powershell
+            Get-FileHash rcs-setup.exe -Algorithm SHA256
+            ```
 
             Compilado desde `${{ github.sha }}`.
           files: dist/rcs-setup.exe

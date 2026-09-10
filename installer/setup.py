@@ -682,9 +682,13 @@ def paso_lanzador(raiz: Path) -> bool:
     print("      empaquetando el lanzador (un par de minutos)…", flush=True)
     if not correr([
         str(py), "-m", "PyInstaller",
-        "--onefile", "--console", "--clean", "--noconfirm",
+        # --noupx: si UPX está en el equipo, PyInstaller comprime con él
+        # sin preguntar, y un binario empaquetado con UPX es de lo que
+        # más dispara a los antivirus.
+        "--onefile", "--console", "--clean", "--noconfirm", "--noupx",
         "--name", "race-core-studio",
         "--icon", str(lanzador / "race-core-studio.ico"),
+        "--version-file", str(lanzador / "version-info.txt"),
         "--hidden-import", "pymongo",
         "--distpath", str(lanzador / "dist"),
         "--workpath", str(lanzador / "build"),

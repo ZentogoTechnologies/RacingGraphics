@@ -1,0 +1,36 @@
+# Identidad del ejecutable, tal como la lee Windows en Propiedades →
+# Detalles. PyInstaller la incrusta con --version-file.
+#
+# No es decoración. Un .exe sin estos campos no tiene autor, ni producto,
+# ni versión: para Windows es un binario anónimo que se descomprime solo
+# y lanza procesos, que es exactamente el perfil que el modelo de
+# Defender puntúa como Wacatac. Rellenarlo no lo firma —eso pide un
+# certificado Authenticode— pero deja de ser un archivo sin identidad.
+
+VSVersionInfo(
+  ffi=FixedFileInfo(
+    filevers=(1, 0, 0, 0),
+    prodvers=(1, 0, 0, 0),
+    mask=0x3f,
+    flags=0x0,
+    OS=0x40004,
+    fileType=0x1,
+    subtype=0x0,
+    date=(0, 0),
+  ),
+  kids=[
+    StringFileInfo([
+      StringTable('040a04b0', [
+        StringStruct('CompanyName', 'Zentogo Technologies'),
+        StringStruct('FileDescription', 'Race Core Studio'),
+        StringStruct('FileVersion', '1.0.0.0'),
+        StringStruct('InternalName', 'race-core-studio'),
+        StringStruct('LegalCopyright', 'Copyright (c) 2026 Zentogo Technologies'),
+        StringStruct('OriginalFilename', 'race-core-studio.exe'),
+        StringStruct('ProductName', 'Race Core Studio'),
+        StringStruct('ProductVersion', '1.0.0.0'),
+      ]),
+    ]),
+    VarFileInfo([VarStruct('Translation', [0x040a, 1200])]),
+  ],
+)
