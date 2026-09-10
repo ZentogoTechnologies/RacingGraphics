@@ -340,10 +340,43 @@ def paso_base_de_datos() -> bool:
     detalle(" · ".join(f"{n}: {v}" for n, v in conteos.items()))
 
     if conteos["users"] == 0:
-        aviso("no hay usuarios: nadie podrá entrar")
-        detalle("crea el dueño con:  Backend\\venv\\Scripts\\python.exe Backend\\seed_admin.py")
+        avisar_sin_usuarios()
 
     return True
+
+
+def avisar_sin_usuarios() -> None:
+    """Sin cuentas nadie entra, pero el remedio depende de dónde se quedó.
+
+    Si el asistente sigue abierto —lo dice su token, que el backend borra
+    al completarlo— lo que falta es terminarlo: ahí es donde se crean las
+    tres cuentas. Mandar a nadie a seed_admin.py en ese punto es mandarlo
+    por un camino que no es, y encima se lo salta.
+
+    El enlace va con el token puesto. Es lo que el instalador enseñó una
+    vez, y quien cierre esa pestaña no tiene de dónde sacarlo.
+    """
+    token = RAIZ / "Backend" / "instalacion.token"
+
+    if token.is_file():
+        try:
+            clave = token.read_text(encoding="utf-8").strip()
+        except OSError:
+            clave = ""
+
+        aviso("la instalación no se ha terminado todavía")
+        detalle("las tres cuentas —dueño, administrador y estándar— se crean")
+        detalle("en el asistente web, no a mano. Termínalo aquí:")
+        detalle("")
+        if clave:
+            detalle(f"   http://127.0.0.1:{PUERTO_BACKEND}/instalacion?token={clave}")
+        else:
+            detalle(f"   no pude leer {token}")
+        return
+
+    aviso("no hay usuarios: nadie podrá entrar")
+    detalle("el asistente ya se cerró, así que el dueño se crea a mano:")
+    detalle("   Backend\\venv\\Scripts\\python.exe Backend\\seed_admin.py")
 
 
 def paso_backend() -> bool:
