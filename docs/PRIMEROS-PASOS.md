@@ -5,6 +5,41 @@ minutos, casi todos de descargas.
 
 ---
 
+## La forma corta
+
+Descarga el repositorio o solo la carpeta `installer\`, y haz **doble clic
+en `rcs-setup.bat`**.
+
+Eso es todo. Pide la licencia y se encarga del resto: instala Python,
+Node, Git LFS y MongoDB si faltan, descarga el software, lo compila y
+abre el asistente en el navegador.
+
+```
+Correo:  zentogotech@gmail.com
+Clave:   RCS1-XEA8-EXXK-EUNH-8M63
+```
+
+Tarda entre 20 y 40 minutos, casi todo descargas. Pide permisos de
+administrador porque instala programas y registra servicios.
+
+Cuando `rcs-setup.exe` esté empaquetado será el mismo proceso con un solo
+archivo, sin necesidad de clonar nada primero.
+
+### Opciones
+
+```bat
+rcs-setup.bat --destino D:\RaceCore     :: otra carpeta
+rcs-setup.bat --con-recorte             :: incluye rembg (+200 MB)
+rcs-setup.bat --sin-casparcg            :: sin gráficos, solo el panel
+```
+
+---
+
+El resto de esta guía es **la forma larga**: los mismos pasos a mano, por
+si algo falla o quieres entender qué hace cada uno.
+
+---
+
 ## Antes de nada: Git LFS
 
 **Este es el paso que rompe la instalación si se salta**, y no da un error

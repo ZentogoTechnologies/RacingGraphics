@@ -151,6 +151,14 @@ completar, y con él se cierra el asistente para siempre.
 > Python hasta ver el panel, está en
 > **[docs/PRIMEROS-PASOS.md](docs/PRIMEROS-PASOS.md)**.
 
+## La forma corta de instalarlo
+
+Doble clic en **`installer\rcs-setup.bat`**. Pide la licencia y hace el
+resto: instala Python, Node, Git LFS y MongoDB si faltan, descarga el
+software, lo compila y abre el asistente.
+
+Es lo mismo que hará `rcs-setup.exe` cuando esté empaquetado.
+
 ## Probar el vencimiento de la licencia
 
 Es lo que no se puede ensayar esperando un año, y lo que más conviene
